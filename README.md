@@ -1,1 +1,1 @@
-# WebGL Skinning
+# glTF WebGL Viewer
