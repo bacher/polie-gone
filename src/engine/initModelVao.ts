@@ -46,6 +46,8 @@ export function initModelVao(
   let normalBuffer: WebGLBuffer | undefined;
 
   if (attributeLocations.normal && normal) {
+    console.log('ADD NORMALS');
+
     normalBuffer = glCreateBuffer(gl);
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, normal.dataArray, gl.STATIC_DRAW);
@@ -53,8 +55,8 @@ export function initModelVao(
     gl.enableVertexAttribArray(attributeLocations.normal);
     gl.vertexAttribPointer(
       attributeLocations.normal,
-      position.componentDimension,
-      position.componentType,
+      normal.componentDimension,
+      normal.componentType,
       false /* normalize */,
       0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
       0 /* offset */,

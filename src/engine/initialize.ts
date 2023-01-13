@@ -1,10 +1,12 @@
-import type { LoadedModel } from '../types/model';
-import { initShaderProgram } from './initShaderProgram';
+import { mat4, vec3 } from 'gl-matrix';
 
+import type { LoadedModel } from '../types/model';
 import vertexSource from '../shaders/simple.vertex.glsl?raw';
 import { init as initVertex } from '../shaders/simple.vertex';
 import fragmentSource from '../shaders/simple.fragment.glsl?raw';
 import { init as initFragment } from '../shaders/simple.fragment';
+
+import { initShaderProgram } from './initShaderProgram';
 import { initModelVao } from './initModelVao';
 
 type Params = {
@@ -37,13 +39,35 @@ export function initialize(
 
   const model = initModelVao(
     gl,
-    { position: program.getAttributeLocation('position') },
+    {
+      position: program.getAttributeLocation('position'),
+      normal: program.getAttributeLocation('normal'),
+    },
     modelData,
   );
 
   console.log('Program init');
 
+  const cameraMat = mat4.perspective(
+    mat4.create(),
+    Math.PI / 2,
+    600 / 400,
+    0.1,
+    1000,
+  );
+
+  const modelMat = mat4.fromTranslation(mat4.create(), [0, 0, -3]);
+
+  const lightDirection = vec3.fromValues(-5, 10, 4);
+  console.log('lightDirection =', lightDirection);
+
+  gl.enable(gl.CULL_FACE);
+
   gl.useProgram(program.glProgram);
+  program.uniforms.projection(cameraMat);
+  program.uniforms.model(modelMat);
+  program.uniforms.lightDirection(lightDirection);
+
   gl.bindVertexArray(model.glVao);
   model.draw();
 }

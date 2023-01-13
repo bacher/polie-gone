@@ -83,6 +83,7 @@ export async function loadGltf(modelUri: string): Promise<LoadedModel> {
 
   console.log('indicesAccessor', indicesAccessor);
   console.log('positionAccessor', positionAccessor);
+  console.log('normalAccessor', normalAccessor);
 
   const access = (bufferView: number | undefined): Promise<Uint8Array> => {
     if (bufferView === undefined) {

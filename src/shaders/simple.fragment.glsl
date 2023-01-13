@@ -7,6 +7,7 @@ in vec3 v_normal;
 out vec4 outColor;
 
 void main() {
-  float light = dot(normalize(v_normal), u_lightDirection);
-  outColor = vec4(0.01 * light, 0.0, 0.0, 1);
+  float light = clamp(dot(normalize(v_normal), u_lightDirection), 0.0, 1.0);
+
+  outColor = vec4(vec3(0.4 + (light * 0.4)), 1.0);
 }
