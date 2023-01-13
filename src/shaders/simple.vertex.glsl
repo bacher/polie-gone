@@ -8,5 +8,6 @@ out vec3 v_normal;
 
 void main() {
   v_normal = a_normal;
-  gl_Position = u_projection * u_model * a_position;
+  // gl_Position = u_projection * u_model * a_position;
+  gl_Position = a_position;
 }

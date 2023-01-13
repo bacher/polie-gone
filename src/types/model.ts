@@ -5,6 +5,8 @@ export const enum ComponentType {
 
 export type BufferInfo = {
   componentType: ComponentType;
+  componentDimension: number;
+  elementsCount: number;
   dataArray: Uint8Array;
 };
 
@@ -13,6 +15,7 @@ export type LoadedModel = {
   buffers: {
     indices: BufferInfo;
     position: BufferInfo;
-    normal: BufferInfo;
+    normal?: BufferInfo;
+    uv?: BufferInfo;
   };
 };

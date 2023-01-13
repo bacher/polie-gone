@@ -1,4 +1,4 @@
-import type { UniformInitFunc } from './types';
+import type { VertexShaderInitFunc, FragmentShaderInitFunc } from './types';
 
 export type ShaderInstance = {
   glShader: WebGLShader;
@@ -40,6 +40,7 @@ export type ShaderProgramInitialInstance = {
 
 export type ShaderProgramInstance<Uniforms> = ShaderProgramInitialInstance & {
   uniforms: Uniforms;
+  getAttributeLocation: (attributeName: string) => number;
 };
 
 function createProgram(
@@ -71,20 +72,25 @@ function createProgram(
   };
 }
 
-type ShaderInitParams = {
+type VertexShaderInitParams = {
   source: string;
-  init: UniformInitFunc;
+  init: VertexShaderInitFunc;
+};
+
+type FragmentShaderInitParams = {
+  source: string;
+  init: FragmentShaderInitFunc;
 };
 
 export function initShaderProgram<
-  VertexInit extends UniformInitFunc,
-  FragmentInit extends UniformInitFunc,
+  VertexInit extends VertexShaderInitFunc,
+  FragmentInit extends FragmentShaderInitFunc,
 >(
   gl: WebGL2RenderingContext,
   {
     vertex,
     fragment,
-  }: { vertex: ShaderInitParams; fragment: ShaderInitParams },
+  }: { vertex: VertexShaderInitParams; fragment: FragmentShaderInitParams },
 ): ShaderProgramInstance<
   ReturnType<VertexInit>['uniforms'] & ReturnType<FragmentInit>['uniforms']
 > {
@@ -92,14 +98,23 @@ export function initShaderProgram<
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment.source);
   const program = createProgram(gl, vertexShader, fragmentShader);
 
-  const vertexUniforms = vertex.init(gl, program.glProgram);
-  const fragmentUniforms = fragment.init(gl, program.glProgram);
+  const vertexInit = vertex.init(gl, program.glProgram);
+  const fragmentInit = fragment.init(gl, program.glProgram);
 
   return {
     glProgram: program.glProgram,
     uniforms: {
-      ...vertexUniforms.uniforms,
-      ...fragmentUniforms.uniforms,
+      ...vertexInit.uniforms,
+      ...fragmentInit.uniforms,
+    },
+    getAttributeLocation: (attributeName: string) => {
+      const location = vertexInit.attributeLocations[attributeName];
+
+      if (location == null) {
+        throw new Error(`No attribute with name ${attributeName}`);
+      }
+
+      return location;
     },
     dispose: () => {
       program.dispose();

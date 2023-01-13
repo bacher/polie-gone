@@ -18,7 +18,7 @@ export function App() {
       throw new Error('No canvas');
     }
 
-    initialize(canvasRef.current, { model });
+    initialize(canvasRef.current, { modelData: model });
   });
 
   return (

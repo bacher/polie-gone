@@ -5,14 +5,15 @@ import vertexSource from '../shaders/simple.vertex.glsl?raw';
 import { init as initVertex } from '../shaders/simple.vertex';
 import fragmentSource from '../shaders/simple.fragment.glsl?raw';
 import { init as initFragment } from '../shaders/simple.fragment';
+import { initModelVao } from './initModelVao';
 
 type Params = {
-  model: LoadedModel;
+  modelData: LoadedModel;
 };
 
 export function initialize(
   canvasElement: HTMLCanvasElement,
-  { model }: Params,
+  { modelData }: Params,
 ) {
   const gl = canvasElement.getContext('webgl2');
 
@@ -34,5 +35,15 @@ export function initialize(
     },
   );
 
+  const model = initModelVao(
+    gl,
+    { position: program.getAttributeLocation('position') },
+    modelData,
+  );
+
   console.log('Program init');
+
+  gl.useProgram(program.glProgram);
+  gl.bindVertexArray(model.glVao);
+  model.draw();
 }

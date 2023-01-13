@@ -8,5 +8,5 @@ out vec4 outColor;
 
 void main() {
   float light = dot(normalize(v_normal), u_lightDirection);
-  outColor = vec4(light, 0, 0, 1);
+  outColor = vec4(0.01 * light, 0.0, 0.0, 1);
 }
