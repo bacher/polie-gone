@@ -1,4 +1,6 @@
 import type { AttributeLocation } from '../types/webgl';
+import { ShaderProgram } from './programs';
+import { ShaderProgramInitial } from './initShaderProgram';
 
 export const enum ShaderProgramType {
   SIMPLE = 'SIMPLE',
@@ -19,7 +21,7 @@ type VertexShaderInitResults = {
 
 export type VertexShaderInitFunc = (
   gl: WebGL2RenderingContext,
-  program: WebGLProgram,
+  program: ShaderProgramInitial,
 ) => VertexShaderInitResults;
 
 type FragmentShaderInitResults = {
@@ -28,7 +30,7 @@ type FragmentShaderInitResults = {
 
 export type FragmentShaderInitFunc = (
   gl: WebGL2RenderingContext,
-  program: WebGLProgram,
+  program: ShaderProgramInitial,
 ) => FragmentShaderInitResults;
 
 export type VertexShaderInitParams = {
@@ -50,5 +52,6 @@ export type ProgramInit<
   glProgram: WebGLProgram;
   uniforms: ReturnType<V>['uniforms'] & ReturnType<F>['uniforms'];
   attributeLocations: ReturnType<V>['attributeLocations'];
+  use: () => void;
   dispose: () => void;
 };

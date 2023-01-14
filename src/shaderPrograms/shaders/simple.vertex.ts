@@ -1,11 +1,12 @@
 import { makeUniformMat4Setter } from '../../engine/shaderUtils';
 import { extractAttributes } from '../shaderUtils';
+import type { ShaderProgramInitial } from '../initShaderProgram';
 
 export { default as vertexSource } from './simple.vertex.glsl?raw';
 
 export function initVertex(
   gl: WebGL2RenderingContext,
-  glProgram: WebGLProgram,
+  { glProgram }: ShaderProgramInitial,
 ) {
   return {
     uniforms: {

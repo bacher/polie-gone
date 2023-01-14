@@ -6,7 +6,7 @@ export function renderScene(
   program: ShaderProgram,
   scene: Scene,
 ) {
-  gl.useProgram(program.glProgram);
+  program.use();
   program.uniforms.projection(scene.cameraMat);
   program.uniforms.lightDirection(scene.lightDirection);
 

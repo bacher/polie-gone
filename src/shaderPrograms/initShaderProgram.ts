@@ -35,8 +35,9 @@ function createShader(
   };
 }
 
-export type ShaderProgramInitialInstance = {
+export type ShaderProgramInitial = {
   glProgram: WebGLProgram;
+  use: () => void;
   dispose: () => void;
 };
 
@@ -44,27 +45,30 @@ function createProgram(
   gl: WebGL2RenderingContext,
   vertexShader: ShaderInstance,
   fragmentShader: ShaderInstance,
-): ShaderProgramInitialInstance {
-  const program = gl.createProgram();
+): ShaderProgramInitial {
+  const glProgram = gl.createProgram();
 
-  if (!program) {
+  if (!glProgram) {
     throw new Error();
   }
 
-  gl.attachShader(program, vertexShader.glShader);
-  gl.attachShader(program, fragmentShader.glShader);
-  gl.linkProgram(program);
+  gl.attachShader(glProgram, vertexShader.glShader);
+  gl.attachShader(glProgram, fragmentShader.glShader);
+  gl.linkProgram(glProgram);
 
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(gl.getProgramInfoLog(program));
-    gl.deleteProgram(program);
+  if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
+    console.error(gl.getProgramInfoLog(glProgram));
+    gl.deleteProgram(glProgram);
     throw new Error();
   }
 
   return {
-    glProgram: program,
+    glProgram: glProgram,
+    use: () => {
+      gl.useProgram(glProgram);
+    },
     dispose: () => {
-      gl.deleteProgram(program);
+      gl.deleteProgram(glProgram);
     },
   };
 }
@@ -80,7 +84,7 @@ export function initShaderProgram(
     vertex: VertexShaderInitParams;
     fragment: FragmentShaderInitParams;
   },
-): ShaderProgramInitialInstance & {
+): ShaderProgramInitial & {
   type: ShaderProgramType;
   uniforms: UniformsCollection;
   attributeLocations: AttributeLocationsCollection;
@@ -89,12 +93,13 @@ export function initShaderProgram(
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment.source);
   const program = createProgram(gl, vertexShader, fragmentShader);
 
-  const vertexInit = vertex.init(gl, program.glProgram);
-  const fragmentInit = fragment.init(gl, program.glProgram);
+  const vertexInit = vertex.init(gl, program);
+  const fragmentInit = fragment.init(gl, program);
 
   return {
     type,
     glProgram: program.glProgram,
+    use: program.use,
     uniforms: {
       ...vertexInit.uniforms,
       ...fragmentInit.uniforms,
