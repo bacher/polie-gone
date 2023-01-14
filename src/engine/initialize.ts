@@ -4,6 +4,7 @@ import type { ShaderProgram } from '../shaderPrograms/programs';
 
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
+import { mat4 } from 'gl-matrix';
 
 type Params = {
   modelData: LoadedModel;
@@ -36,6 +37,27 @@ export function initialize(
 
   gl.clearColor(1, 1, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  const count = 20;
+
+  const jointMatricesArray = new Float32Array(16 * count);
+  const identityMat = mat4.create();
+
+  for (let i = 0; i < count; i += 1) {
+    let mat = identityMat;
+
+    if (i === 8) {
+      // mat = mat4.fromYRotation(mat4.create(), 0.3 * Math.PI);
+      mat = mat4.fromTranslation(mat4.create(), [-1, -0.5, 0]);
+    }
+
+    jointMatricesArray.set(mat, i * 16);
+  }
+
+  console.log('jointMatricesArray', jointMatricesArray);
+
+  program.use();
+  program.uniforms.jointMatrices(jointMatricesArray);
 
   console.log('Program init complete');
 

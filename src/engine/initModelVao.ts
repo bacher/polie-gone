@@ -1,4 +1,5 @@
-import type { LoadedModel } from '../types/model';
+import type { BufferInfo, LoadedModel } from '../types/model';
+import { ModelType } from '../types/model';
 import type { AttributeLocation } from '../types/webgl';
 
 export type ModelVao = {
@@ -13,6 +14,8 @@ export function initModelVao(
     position: AttributeLocation;
     normal?: AttributeLocation;
     uv?: AttributeLocation;
+    joints?: AttributeLocation;
+    weights?: AttributeLocation;
   },
   model: LoadedModel,
 ): ModelVao {
@@ -30,53 +33,41 @@ export function initModelVao(
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.dataArray, gl.STATIC_DRAW);
 
-  const positionBuffer = glCreateBuffer(gl);
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, position.dataArray, gl.STATIC_DRAW);
-
-  gl.enableVertexAttribArray(attributeLocations.position.get());
-  gl.vertexAttribPointer(
-    attributeLocations.position.get(),
-    position.componentDimension,
-    position.componentType,
-    false /* normalize */,
-    0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
-    0 /* offset */,
+  const positionBuffer = createAndLoadBuffer(
+    gl,
+    position,
+    attributeLocations.position,
   );
 
   let normalBuffer: WebGLBuffer | undefined;
 
   if (attributeLocations.normal && normal) {
-    normalBuffer = glCreateBuffer(gl);
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, normal.dataArray, gl.STATIC_DRAW);
-
-    gl.enableVertexAttribArray(attributeLocations.normal.get());
-    gl.vertexAttribPointer(
-      attributeLocations.normal.get(),
-      normal.componentDimension,
-      normal.componentType,
-      false /* normalize */,
-      0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
-      0 /* offset */,
-    );
+    normalBuffer = createAndLoadBuffer(gl, normal, attributeLocations.normal);
   }
 
   let uvBuffer: WebGLBuffer | undefined;
 
   if (attributeLocations.uv && uv) {
-    uvBuffer = glCreateBuffer(gl);
-    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, uv.dataArray, gl.STATIC_DRAW);
+    uvBuffer = createAndLoadBuffer(gl, uv, attributeLocations.uv);
+  }
 
-    gl.enableVertexAttribArray(attributeLocations.uv.get());
-    gl.vertexAttribPointer(
-      attributeLocations.uv.get(),
-      uv.componentDimension,
-      uv.componentType,
-      false /* normalize */,
-      0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
-      0 /* offset */,
+  let jointsBuffer: WebGLBuffer | undefined;
+  let weightsBuffer: WebGLBuffer | undefined;
+
+  if (model.type === ModelType.SKINNED) {
+    const { joints, weights } = model.buffers;
+
+    console.log('attributeLocations =', attributeLocations);
+
+    if (!attributeLocations.joints || !attributeLocations.weights) {
+      throw new Error('Shader without bones');
+    }
+
+    jointsBuffer = createAndLoadBuffer(gl, joints, attributeLocations.joints);
+    weightsBuffer = createAndLoadBuffer(
+      gl,
+      weights,
+      attributeLocations.weights,
     );
   }
 
@@ -103,6 +94,14 @@ export function initModelVao(
       if (uvBuffer) {
         gl.deleteBuffer(uvBuffer);
       }
+
+      if (jointsBuffer) {
+        gl.deleteBuffer(jointsBuffer);
+      }
+
+      if (weightsBuffer) {
+        gl.deleteBuffer(weightsBuffer);
+      }
     },
   };
 }
@@ -115,4 +114,26 @@ function glCreateBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
   }
 
   return buffer;
+}
+
+function createAndLoadBuffer(
+  gl: WebGL2RenderingContext,
+  bufferInfo: BufferInfo,
+  attributeLocation: AttributeLocation,
+) {
+  const glBuffer = glCreateBuffer(gl);
+  gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, bufferInfo.dataArray, gl.STATIC_DRAW);
+
+  gl.enableVertexAttribArray(attributeLocation.get());
+  gl.vertexAttribPointer(
+    attributeLocation.get(),
+    bufferInfo.componentDimension,
+    bufferInfo.componentType,
+    false /* normalize */,
+    0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
+    0 /* offset */,
+  );
+
+  return glBuffer;
 }

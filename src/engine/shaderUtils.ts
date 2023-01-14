@@ -47,3 +47,24 @@ export function makeUniformMat4Setter(
     gl.uniformMatrix4fv(uniformLocation, false, value);
   };
 }
+
+export function makeUniformMat4ArraySetter(
+  gl: WebGL2RenderingContext,
+  program: WebGLUniformLocation,
+  uniformName: string,
+  length: number,
+) {
+  const uniformLocation = gl.getUniformLocation(program, uniformName);
+
+  if (!uniformLocation) {
+    console.warn(`Uniform ${uniformName} is not using`);
+  }
+
+  return (value: Float32Array) => {
+    if (value.length !== length * 16) {
+      throw new Error('Invalid array length');
+    }
+
+    gl.uniformMatrix4fv(uniformLocation, false, value);
+  };
+}
