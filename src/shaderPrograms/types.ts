@@ -3,7 +3,7 @@ export const enum ShaderProgramType {
   MODERN = 'MODERN',
 }
 
-type UniformsCollection = Record<string, (data: any) => void>;
+export type UniformsCollection = Record<string, (data: any) => void>;
 
 type VertexShaderInitResults = {
   uniforms: UniformsCollection;

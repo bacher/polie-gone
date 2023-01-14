@@ -1,5 +1,6 @@
 import type { FragmentShaderInitParams, VertexShaderInitParams } from './types';
 import type { ShaderProgram } from './programs';
+import { ShaderProgramType, UniformsCollection } from './types';
 
 export type ShaderInstance = {
   glShader: WebGLShader;
@@ -68,18 +69,22 @@ function createProgram(
   };
 }
 
-export function initShaderProgram<T extends ShaderProgram>(
+export function initShaderProgram(
   gl: WebGL2RenderingContext,
   {
     type,
     vertex,
     fragment,
   }: {
-    type: T['type'];
+    type: ShaderProgramType;
     vertex: VertexShaderInitParams;
     fragment: FragmentShaderInitParams;
   },
-): ShaderProgramInitialInstance & T {
+): ShaderProgramInitialInstance & {
+  type: ShaderProgramType;
+  uniforms: UniformsCollection;
+  getAttributeLocation: (attributeName: string) => number;
+} {
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex.source);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment.source);
   const program = createProgram(gl, vertexShader, fragmentShader);
@@ -108,5 +113,5 @@ export function initShaderProgram<T extends ShaderProgram>(
       fragmentShader.dispose();
       vertexShader.dispose();
     },
-  } as any;
+  };
 }

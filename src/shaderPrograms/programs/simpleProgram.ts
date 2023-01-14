@@ -11,7 +11,7 @@ export type SimpleProgram = ProgramInit<
 >;
 
 export function initSimpleProgram(gl: WebGL2RenderingContext): SimpleProgram {
-  return initShaderProgram<SimpleProgram>(gl, {
+  return initShaderProgram(gl, {
     type: ShaderProgramType.SIMPLE,
     vertex: {
       source: vertexSource,
@@ -21,5 +21,5 @@ export function initSimpleProgram(gl: WebGL2RenderingContext): SimpleProgram {
       source: fragmentSource,
       init: initFragment,
     },
-  });
+  }) as SimpleProgram;
 }

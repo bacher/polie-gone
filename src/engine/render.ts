@@ -1,7 +1,7 @@
 import type { Scene } from './scene';
 import type { ShaderProgram } from '../shaderPrograms/programs';
 
-export function render(
+export function renderScene(
   gl: WebGL2RenderingContext,
   program: ShaderProgram,
   scene: Scene,

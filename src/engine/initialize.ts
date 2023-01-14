@@ -9,7 +9,7 @@ type Params = {
   modelData: LoadedModel;
 };
 
-type InitResults = {
+export type InitResults = {
   gl: WebGL2RenderingContext;
   program: ShaderProgram;
   scene: Scene;
