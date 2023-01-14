@@ -1,7 +1,17 @@
-import { GltfLoader, gltf } from 'gltf-loader-ts';
+import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
-import type { LoadedModel } from '../types/model';
+import { LoadedModel, ModelType } from '../types/model';
 import { BufferInfo } from '../types/model';
+
+const enum BufferType {
+  INDICES = 'INDICES',
+  POSITION = 'POSITION',
+  NORMAL = 'NORMAL',
+  UV = 'UV',
+  JOINTS = 'JOINTS',
+  WEIGHTS = 'WEIGHTS',
+  INVERSE_JOINTS = 'INVERSE_JOINTS',
+}
 
 // "type": "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4" | string;
 
@@ -48,7 +58,23 @@ function checkValidityOfGltfModel(
   }
 }
 
-export async function loadGltf(modelUri: string): Promise<LoadedModel> {
+type LoadGltfOptions = {
+  loadSkin?: boolean;
+};
+
+type LoadBuffer = {
+  type: BufferType;
+  accessor: gltf.Accessor;
+};
+
+type LoadedBuffer = LoadBuffer & {
+  buffer: Uint8Array;
+};
+
+export async function loadGltf(
+  modelUri: string,
+  { loadSkin }: LoadGltfOptions = {},
+): Promise<LoadedModel> {
   const loader = new GltfLoader();
   const asset = await loader.load(modelUri);
 
@@ -59,6 +85,14 @@ export async function loadGltf(modelUri: string): Promise<LoadedModel> {
   checkValidityOfGltfModel(gltfData);
 
   const meshNodes = gltfData.nodes.filter((node) => node.mesh !== undefined);
+
+  if (meshNodes.length === 0) {
+    throw new Error('No meshes in model');
+  }
+
+  if (meshNodes.length >= 2) {
+    console.warn(`Model ${modelUri} contains more than one mesh`);
+  }
 
   const meshNode = meshNodes[0];
 
@@ -88,50 +122,134 @@ export async function loadGltf(modelUri: string): Promise<LoadedModel> {
   const positionAccessor = gltfData.accessors[primitives.attributes.POSITION];
   const normalAccessor = gltfData.accessors[primitives.attributes.NORMAL];
 
-  const access = (bufferViewIndex: number | undefined): Promise<Uint8Array> => {
-    if (bufferViewIndex === undefined) {
-      throw new Error('Model without some data');
-    }
-
-    const bufferView = gltfData.bufferViews[bufferViewIndex];
-
-    if (!bufferView) {
-      throw new Error('No BufferView');
-    }
-
-    if (bufferView.byteStride) {
-      throw new Error('Buffers with byteStride is not supported yet');
-    }
-
-    return asset.accessorData(bufferViewIndex);
-  };
-
   if (indicesAccessor.type !== 'SCALAR') {
     throw new Error('Indices is not scalar array');
   }
 
-  const [indicesArray, positionArray, normalArray] = await Promise.all([
-    access(indicesAccessor.bufferView),
-    access(positionAccessor.bufferView),
-    access(normalAccessor.bufferView),
-  ]);
+  const loadingBuffers: LoadBuffer[] = [
+    {
+      type: BufferType.INDICES,
+      accessor: indicesAccessor,
+    },
+    {
+      type: BufferType.POSITION,
+      accessor: positionAccessor,
+    },
+    {
+      type: BufferType.NORMAL,
+      accessor: normalAccessor,
+    },
+  ];
+
+  //  Skin processing
+  if (loadSkin) {
+    assertNumber(meshNode.skin);
+
+    const skin = gltfData.skins![meshNode.skin];
+
+    console.log('Skin:', skin);
+
+    assertNumber(primitives.attributes.JOINTS_0);
+    assertNumber(primitives.attributes.WEIGHTS_0);
+    assertNumber(skin.inverseBindMatrices);
+
+    loadingBuffers.push(
+      {
+        type: BufferType.JOINTS,
+        accessor: gltfData.accessors[primitives.attributes.JOINTS_0],
+      },
+      {
+        type: BufferType.WEIGHTS,
+        accessor: gltfData.accessors[primitives.attributes.WEIGHTS_0],
+      },
+      {
+        type: BufferType.INVERSE_JOINTS,
+        accessor: gltfData.accessors[skin.inverseBindMatrices],
+      },
+    );
+  }
+
+  const loadedBuffers: LoadedBuffer[] = await Promise.all(
+    loadingBuffers.map(async ({ type, accessor }: LoadBuffer) => ({
+      type,
+      accessor,
+      buffer: await accessBuffer(asset, accessor.bufferView),
+    })),
+  );
 
   console.groupCollapsed(`Model ${modelUri} loaded.`);
   console.info(`Model contains ${meshNodes.length} nodes with mesh`);
-  console.info(`INX size: ${indicesArray.byteLength} bytes
-POS size: ${positionArray.byteLength} bytes
-NOR size: ${normalArray.byteLength} bytes`);
-
+  console.info(
+    loadedBuffers
+      .map(({ type, buffer }) => `${type} size: ${buffer.byteLength} bytes`)
+      .join('\n'),
+  );
   console.groupEnd();
 
-  return {
-    modelName: meshNode.name ?? 'unknown mesh',
-    buffers: {
-      indices: makeBufferInfo(indicesAccessor, indicesArray),
-      position: makeBufferInfo(positionAccessor, positionArray),
-      normal: makeBufferInfo(normalAccessor, normalArray),
+  const modelName = meshNode.name ?? 'unknown mesh';
+
+  const namedBuffers = loadedBuffers.reduce(
+    (acc, { type, accessor, buffer }) => {
+      acc[type] = makeBufferInfo(accessor, buffer);
+      return acc;
     },
+    {} as Record<BufferType, BufferInfo>,
+  );
+
+  function getBufferByName(bufferType: BufferType): BufferInfo {
+    const buffer = namedBuffers[bufferType];
+
+    if (!buffer) {
+      throw new Error();
+    }
+
+    return buffer;
+  }
+
+  const baseBuffers = {
+    indices: getBufferByName(BufferType.INDICES),
+    position: getBufferByName(BufferType.POSITION),
+    normal: getBufferByName(BufferType.NORMAL),
   };
+
+  if (loadSkin) {
+    return {
+      type: ModelType.SKINNED,
+      modelName,
+      buffers: {
+        ...baseBuffers,
+        joints: getBufferByName(BufferType.JOINTS),
+        weights: getBufferByName(BufferType.WEIGHTS),
+      },
+    };
+  }
+
+  return {
+    type: ModelType.REGULAR,
+    modelName,
+    buffers: baseBuffers,
+  };
+}
+
+function accessBuffer(
+  asset: GltfAsset,
+  bufferViewIndex: number | undefined,
+): Promise<Uint8Array> {
+  if (bufferViewIndex === undefined) {
+    throw new Error('Model without some data');
+  }
+
+  const bufferView = asset.gltf.bufferViews![bufferViewIndex];
+
+  if (!bufferView) {
+    throw new Error('No BufferView');
+  }
+
+  if (bufferView.byteStride) {
+    throw new Error('Buffers with byteStride is not supported yet');
+  }
+
+  return asset.accessorData(bufferViewIndex);
 }
 
 function makeBufferInfo(
@@ -144,4 +262,10 @@ function makeBufferInfo(
     elementsCount: accessor.count,
     dataArray,
   };
+}
+
+function assertNumber(x: number | undefined): asserts x is number {
+  if (x === undefined || x == null) {
+    throw new Error('Number expected');
+  }
 }

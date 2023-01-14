@@ -23,7 +23,7 @@ export function App() {
   );
 
   useOnlyOnce(async () => {
-    const model = await loadGltf('/models/man.gltf');
+    const model = await loadGltf('/models/man.gltf', { loadSkin: true });
 
     if (!canvasRef.current) {
       throw new Error('No canvas');

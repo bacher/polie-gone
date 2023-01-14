@@ -3,6 +3,11 @@ export const enum ComponentType {
   FLOAT = 5126,
 }
 
+export const enum ModelType {
+  REGULAR = 'REGULAR',
+  SKINNED = 'SKINNED',
+}
+
 export type BufferInfo = {
   componentType: ComponentType;
   componentDimension: number;
@@ -10,12 +15,26 @@ export type BufferInfo = {
   dataArray: Uint8Array;
 };
 
-export type LoadedModel = {
-  modelName: string;
-  buffers: {
-    indices: BufferInfo;
-    position: BufferInfo;
-    normal?: BufferInfo;
-    uv?: BufferInfo;
-  };
-};
+export type LoadedModel =
+  | {
+      type: ModelType.REGULAR;
+      modelName: string;
+      buffers: {
+        indices: BufferInfo;
+        position: BufferInfo;
+        normal?: BufferInfo;
+        uv?: BufferInfo;
+      };
+    }
+  | {
+      type: ModelType.SKINNED;
+      modelName: string;
+      buffers: {
+        indices: BufferInfo;
+        position: BufferInfo;
+        normal?: BufferInfo;
+        uv?: BufferInfo;
+        joints: BufferInfo;
+        weights: BufferInfo;
+      };
+    };

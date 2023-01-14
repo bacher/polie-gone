@@ -19,7 +19,10 @@ export function initialize(
   canvasElement: HTMLCanvasElement,
   { modelData }: Params,
 ): InitResults {
-  const gl = canvasElement.getContext('webgl2');
+  const gl = canvasElement.getContext('webgl2', {
+    alpha: false,
+    // preserveDrawingBuffer: true,
+  });
 
   if (!gl) {
     throw new Error('No WebGL 2');
@@ -30,6 +33,9 @@ export function initialize(
   const modelVao = initModelVao(gl, program.attributeLocations, modelData);
 
   const scene = setupScene({ modelVao });
+
+  gl.clearColor(1, 1, 1, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
 
   console.log('Program init complete');
 
