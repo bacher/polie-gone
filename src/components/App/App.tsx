@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { loadGltf } from '../../utils/loadGltf';
 import { useOnlyOnce } from '../../hooks/useOnlyOnce';
 import { initialize } from '../../engine/initialize';
+import { render } from '../../engine/render';
 
 import styles from './App.module.css';
 
@@ -16,7 +17,11 @@ export function App() {
       throw new Error('No canvas');
     }
 
-    initialize(canvasRef.current, { modelData: model });
+    const { gl, program, scene } = initialize(canvasRef.current, {
+      modelData: model,
+    });
+
+    render(gl, program, scene);
   });
 
   return (
