@@ -25,18 +25,14 @@ function lookupComponentDimension(type: string): number {
   return dimension;
 }
 
-export async function loadGltf(modelUri: string): Promise<LoadedModel> {
-  const loader = new GltfLoader();
-  const asset = await loader.load(modelUri);
+type RequiredFields = 'nodes' | 'meshes' | 'accessors' | 'bufferViews';
 
-  const gltfData = asset.gltf;
-  console.log(gltfData);
-  (window as any).asset = asset;
+type GlTfValidated = Exclude<gltf.GlTf, RequiredFields> &
+  Required<Pick<gltf.GlTf, RequiredFields>>;
 
-  // const JOINTS_0 = gltfData.meshes?.[0].primitives[0].attributes['JOINTS_0'];
-  // console.log('JOINTS_0:', JOINTS_0);
-  // await asset.preFetchAll();
-
+function checkValidityOfGltfModel(
+  gltfData: gltf.GlTf,
+): asserts gltfData is GlTfValidated {
   if (
     !gltfData ||
     !gltfData.nodes ||
@@ -44,16 +40,25 @@ export async function loadGltf(modelUri: string): Promise<LoadedModel> {
     !gltfData.meshes ||
     gltfData.meshes.length === 0 ||
     !gltfData.accessors ||
-    gltfData.accessors.length === 0
+    gltfData.accessors.length === 0 ||
+    !gltfData.bufferViews ||
+    gltfData.bufferViews.length === 0
   ) {
     throw new Error('Invalid model file');
   }
+}
+
+export async function loadGltf(modelUri: string): Promise<LoadedModel> {
+  const loader = new GltfLoader();
+  const asset = await loader.load(modelUri);
+
+  // TODO: For debugging
+  (window as any).asset = asset;
+
+  const gltfData = asset.gltf;
+  checkValidityOfGltfModel(gltfData);
 
   const meshNodes = gltfData.nodes.filter((node) => node.mesh !== undefined);
-
-  console.info(
-    `Model ${modelUri} contains ${meshNodes.length} nodes with mesh`,
-  );
 
   const meshNode = meshNodes[0];
 
@@ -75,21 +80,30 @@ export async function loadGltf(modelUri: string): Promise<LoadedModel> {
     throw new Error('No indices');
   }
 
-  console.log('primitives', primitives);
+  if (primitives.targets) {
+    console.warn(`Model ${modelUri} contains targets`);
+  }
 
   const indicesAccessor = gltfData.accessors[primitives.indices];
   const positionAccessor = gltfData.accessors[primitives.attributes.POSITION];
   const normalAccessor = gltfData.accessors[primitives.attributes.NORMAL];
 
-  console.log('indicesAccessor', indicesAccessor);
-  console.log('positionAccessor', positionAccessor);
-  console.log('normalAccessor', normalAccessor);
-
-  const access = (bufferView: number | undefined): Promise<Uint8Array> => {
-    if (bufferView === undefined) {
+  const access = (bufferViewIndex: number | undefined): Promise<Uint8Array> => {
+    if (bufferViewIndex === undefined) {
       throw new Error('Model without some data');
     }
-    return asset.accessorData(bufferView);
+
+    const bufferView = gltfData.bufferViews[bufferViewIndex];
+
+    if (!bufferView) {
+      throw new Error('No BufferView');
+    }
+
+    if (bufferView.byteStride) {
+      throw new Error('Buffers with byteStride is not supported yet');
+    }
+
+    return asset.accessorData(bufferViewIndex);
   };
 
   if (indicesAccessor.type !== 'SCALAR') {
@@ -103,7 +117,7 @@ export async function loadGltf(modelUri: string): Promise<LoadedModel> {
   ]);
 
   console.groupCollapsed(`Model ${modelUri} loaded.`);
-
+  console.info(`Model contains ${meshNodes.length} nodes with mesh`);
   console.info(`INX size: ${indicesArray.byteLength} bytes
 POS size: ${positionArray.byteLength} bytes
 NOR size: ${normalArray.byteLength} bytes`);

@@ -12,8 +12,6 @@ export function App() {
   useOnlyOnce(async () => {
     const model = await loadGltf('/models/man.gltf');
 
-    console.log('model =', model);
-
     if (!canvasRef.current) {
       throw new Error('No canvas');
     }

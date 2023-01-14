@@ -46,8 +46,6 @@ export function initModelVao(
   let normalBuffer: WebGLBuffer | undefined;
 
   if (attributeLocations.normal && normal) {
-    console.log('ADD NORMALS');
-
     normalBuffer = glCreateBuffer(gl);
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, normal.dataArray, gl.STATIC_DRAW);
