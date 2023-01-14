@@ -1,4 +1,4 @@
-import { makeUniformMat4Setter } from '../engine/shaderUtils';
+import { makeUniformMat4Setter } from '../../engine/shaderUtils';
 
 export { default as vertexSource } from './simple.vertex.glsl?raw';
 

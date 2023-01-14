@@ -1,9 +1,9 @@
 import type { Scene } from './scene';
-import type { ShaderProgramInstance } from './initShaderProgram';
+import type { ShaderProgram } from '../shaderPrograms/programs';
 
 export function render(
   gl: WebGL2RenderingContext,
-  program: ShaderProgramInstance<any>,
+  program: ShaderProgram,
   scene: Scene,
 ) {
   gl.useProgram(program.glProgram);

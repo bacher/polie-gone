@@ -1,5 +1,5 @@
+import { makeUniformVec3Setter } from '../../engine/shaderUtils';
 export { default as fragmentSource } from './simple.fragment.glsl?raw';
-import { makeUniformVec3Setter } from '../engine/shaderUtils';
 
 export function initFragment(
   gl: WebGL2RenderingContext,

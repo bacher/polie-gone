@@ -1,8 +1,7 @@
 import type { LoadedModel } from '../types/model';
-import { initVertex, vertexSource } from '../shaders/simple.vertex';
-import { initFragment, fragmentSource } from '../shaders/simple.fragment';
+import { initSimpleProgram } from '../shaderPrograms/programs/simpleProgram';
+import type { ShaderProgram } from '../shaderPrograms/programs';
 
-import { initShaderProgram, ShaderProgramInstance } from './initShaderProgram';
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
 
@@ -12,7 +11,7 @@ type Params = {
 
 type InitResults = {
   gl: WebGL2RenderingContext;
-  program: ShaderProgramInstance<any>;
+  program: ShaderProgram;
   scene: Scene;
 };
 
@@ -26,19 +25,7 @@ export function initialize(
     throw new Error('No WebGL 2');
   }
 
-  const program = initShaderProgram<typeof initVertex, typeof initFragment>(
-    gl,
-    {
-      vertex: {
-        source: vertexSource,
-        init: initVertex,
-      },
-      fragment: {
-        source: fragmentSource,
-        init: initFragment,
-      },
-    },
-  );
+  const program = initSimpleProgram(gl);
 
   const modelVao = initModelVao(
     gl,

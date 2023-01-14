@@ -1,4 +1,5 @@
-import type { VertexShaderInitFunc, FragmentShaderInitFunc } from './types';
+import type { FragmentShaderInitParams, VertexShaderInitParams } from './types';
+import type { ShaderProgram } from './programs';
 
 export type ShaderInstance = {
   glShader: WebGLShader;
@@ -38,11 +39,6 @@ export type ShaderProgramInitialInstance = {
   dispose: () => void;
 };
 
-export type ShaderProgramInstance<Uniforms> = ShaderProgramInitialInstance & {
-  uniforms: Uniforms;
-  getAttributeLocation: (attributeName: string) => number;
-};
-
 function createProgram(
   gl: WebGL2RenderingContext,
   vertexShader: ShaderInstance,
@@ -72,28 +68,18 @@ function createProgram(
   };
 }
 
-type VertexShaderInitParams = {
-  source: string;
-  init: VertexShaderInitFunc;
-};
-
-type FragmentShaderInitParams = {
-  source: string;
-  init: FragmentShaderInitFunc;
-};
-
-export function initShaderProgram<
-  VertexInit extends VertexShaderInitFunc,
-  FragmentInit extends FragmentShaderInitFunc,
->(
+export function initShaderProgram<T extends ShaderProgram>(
   gl: WebGL2RenderingContext,
   {
+    type,
     vertex,
     fragment,
-  }: { vertex: VertexShaderInitParams; fragment: FragmentShaderInitParams },
-): ShaderProgramInstance<
-  ReturnType<VertexInit>['uniforms'] & ReturnType<FragmentInit>['uniforms']
-> {
+  }: {
+    type: T['type'];
+    vertex: VertexShaderInitParams;
+    fragment: FragmentShaderInitParams;
+  },
+): ShaderProgramInitialInstance & T {
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex.source);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment.source);
   const program = createProgram(gl, vertexShader, fragmentShader);
@@ -102,15 +88,16 @@ export function initShaderProgram<
   const fragmentInit = fragment.init(gl, program.glProgram);
 
   return {
+    type,
     glProgram: program.glProgram,
     uniforms: {
       ...vertexInit.uniforms,
       ...fragmentInit.uniforms,
     },
-    getAttributeLocation: (attributeName: string) => {
+    getAttributeLocation: (attributeName: string): number => {
       const location = vertexInit.attributeLocations[attributeName];
 
-      if (location == null) {
+      if (location === undefined || location === null) {
         throw new Error(`No attribute with name ${attributeName}`);
       }
 
@@ -121,5 +108,5 @@ export function initShaderProgram<
       fragmentShader.dispose();
       vertexShader.dispose();
     },
-  };
+  } as any;
 }
