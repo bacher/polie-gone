@@ -1,1 +1,1 @@
-# glTF WebGL Viewer
+# WebGL Game
