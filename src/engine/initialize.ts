@@ -1,10 +1,8 @@
 import { mat4, vec3 } from 'gl-matrix';
 
 import type { LoadedModel } from '../types/model';
-import vertexSource from '../shaders/simple.vertex.glsl?raw';
-import { init as initVertex } from '../shaders/simple.vertex';
-import fragmentSource from '../shaders/simple.fragment.glsl?raw';
-import { init as initFragment } from '../shaders/simple.fragment';
+import { initVertex, vertexSource } from '../shaders/simple.vertex';
+import { initFragment, fragmentSource } from '../shaders/simple.fragment';
 
 import { initShaderProgram } from './initShaderProgram';
 import { initModelVao } from './initModelVao';
