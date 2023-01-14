@@ -27,14 +27,7 @@ export function initialize(
 
   const program = initSimpleProgram(gl);
 
-  const modelVao = initModelVao(
-    gl,
-    {
-      position: program.getAttributeLocation('position'),
-      normal: program.getAttributeLocation('normal'),
-    },
-    modelData,
-  );
+  const modelVao = initModelVao(gl, program.attributeLocations, modelData);
 
   const scene = setupScene({ modelVao });
 

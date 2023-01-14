@@ -1,4 +1,5 @@
 import type { LoadedModel } from '../types/model';
+import type { AttributeLocation } from '../types/webgl';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -9,9 +10,9 @@ export type ModelVao = {
 export function initModelVao(
   gl: WebGL2RenderingContext,
   attributeLocations: {
-    position: number;
-    normal?: number;
-    uv?: number;
+    position: AttributeLocation;
+    normal?: AttributeLocation;
+    uv?: AttributeLocation;
   },
   model: LoadedModel,
 ): ModelVao {
@@ -33,9 +34,9 @@ export function initModelVao(
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, position.dataArray, gl.STATIC_DRAW);
 
-  gl.enableVertexAttribArray(attributeLocations.position);
+  gl.enableVertexAttribArray(attributeLocations.position.get());
   gl.vertexAttribPointer(
-    attributeLocations.position,
+    attributeLocations.position.get(),
     position.componentDimension,
     position.componentType,
     false /* normalize */,
@@ -50,9 +51,9 @@ export function initModelVao(
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, normal.dataArray, gl.STATIC_DRAW);
 
-    gl.enableVertexAttribArray(attributeLocations.normal);
+    gl.enableVertexAttribArray(attributeLocations.normal.get());
     gl.vertexAttribPointer(
-      attributeLocations.normal,
+      attributeLocations.normal.get(),
       normal.componentDimension,
       normal.componentType,
       false /* normalize */,
@@ -68,9 +69,9 @@ export function initModelVao(
     gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, uv.dataArray, gl.STATIC_DRAW);
 
-    gl.enableVertexAttribArray(attributeLocations.uv);
+    gl.enableVertexAttribArray(attributeLocations.uv.get());
     gl.vertexAttribPointer(
-      attributeLocations.uv,
+      attributeLocations.uv.get(),
       uv.componentDimension,
       uv.componentType,
       false /* normalize */,

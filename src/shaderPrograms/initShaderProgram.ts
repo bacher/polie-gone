@@ -1,6 +1,6 @@
 import type { FragmentShaderInitParams, VertexShaderInitParams } from './types';
-import type { ShaderProgram } from './programs';
-import { ShaderProgramType, UniformsCollection } from './types';
+import type { ShaderProgramType, UniformsCollection } from './types';
+import type { AttributeLocationsCollection } from './types';
 
 export type ShaderInstance = {
   glShader: WebGLShader;
@@ -83,7 +83,7 @@ export function initShaderProgram(
 ): ShaderProgramInitialInstance & {
   type: ShaderProgramType;
   uniforms: UniformsCollection;
-  getAttributeLocation: (attributeName: string) => number;
+  attributeLocations: AttributeLocationsCollection;
 } {
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex.source);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment.source);
@@ -99,15 +99,7 @@ export function initShaderProgram(
       ...vertexInit.uniforms,
       ...fragmentInit.uniforms,
     },
-    getAttributeLocation: (attributeName: string): number => {
-      const location = vertexInit.attributeLocations[attributeName];
-
-      if (location === undefined || location === null) {
-        throw new Error(`No attribute with name ${attributeName}`);
-      }
-
-      return location;
-    },
+    attributeLocations: vertexInit.attributeLocations,
     dispose: () => {
       program.dispose();
       fragmentShader.dispose();

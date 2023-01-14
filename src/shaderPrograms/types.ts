@@ -1,3 +1,5 @@
+import type { AttributeLocation } from '../types/webgl';
+
 export const enum ShaderProgramType {
   SIMPLE = 'SIMPLE',
   MODERN = 'MODERN',
@@ -5,9 +7,14 @@ export const enum ShaderProgramType {
 
 export type UniformsCollection = Record<string, (data: any) => void>;
 
+export type AttributeLocationsCollection = Record<
+  string,
+  AttributeLocation | undefined
+>;
+
 type VertexShaderInitResults = {
   uniforms: UniformsCollection;
-  attributeLocations: Record<string, number | null | undefined>;
+  attributeLocations: AttributeLocationsCollection;
 };
 
 export type VertexShaderInitFunc = (
@@ -42,6 +49,6 @@ export type ProgramInit<
   type: T;
   glProgram: WebGLProgram;
   uniforms: ReturnType<V>['uniforms'] & ReturnType<F>['uniforms'];
-  getAttributeLocation: (attributeName: string) => number;
+  attributeLocations: ReturnType<V>['attributeLocations'];
   dispose: () => void;
 };
