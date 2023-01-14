@@ -1,3 +1,5 @@
+import { mat4 } from 'gl-matrix';
+
 export const enum ComponentType {
   UNSIGNED_SHORT = 5123,
   FLOAT = 5126,
@@ -37,4 +39,5 @@ export type LoadedModel =
         joints: BufferInfo;
         weights: BufferInfo;
       };
+      inverseJoints: mat4[];
     };

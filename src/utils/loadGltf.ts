@@ -1,7 +1,6 @@
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
-import { LoadedModel, ModelType } from '../types/model';
-import { BufferInfo } from '../types/model';
+import { LoadedModel, ModelType, BufferInfo } from '../types/model';
 
 const enum BufferType {
   INDICES = 'INDICES',
@@ -141,11 +140,13 @@ export async function loadGltf(
     },
   ];
 
+  let skin: gltf.Skin | undefined;
+
   //  Skin processing
   if (loadSkin) {
     assertNumber(meshNode.skin);
 
-    const skin = gltfData.skins![meshNode.skin];
+    skin = gltfData.skins![meshNode.skin];
 
     console.log('Skin:', skin);
 
@@ -213,6 +214,17 @@ export async function loadGltf(
   };
 
   if (loadSkin) {
+    const { dataArray } = getBufferByName(BufferType.INVERSE_JOINTS);
+    const inverseJointsFloatList = convertUint8ListToFloat32List(dataArray);
+
+    const inverseJoints = [];
+
+    for (let i = 0; i < skin!.joints.length; i += 1) {
+      const offset = i * 16;
+      // Split by 16 floats (mat 4x4)
+      inverseJoints.push(inverseJointsFloatList.slice(offset, offset + 16));
+    }
+
     return {
       type: ModelType.SKINNED,
       modelName,
@@ -221,6 +233,7 @@ export async function loadGltf(
         joints: getBufferByName(BufferType.JOINTS),
         weights: getBufferByName(BufferType.WEIGHTS),
       },
+      inverseJoints,
     };
   }
 
@@ -265,7 +278,16 @@ function makeBufferInfo(
 }
 
 function assertNumber(x: number | undefined): asserts x is number {
-  if (x === undefined || x == null) {
+  if (x === undefined || x === null) {
     throw new Error('Number expected');
   }
+}
+
+function convertUint8ListToFloat32List(uint8Array: Uint8Array): Float32Array {
+  return new Float32Array(
+    uint8Array.buffer.slice(
+      uint8Array.byteOffset,
+      uint8Array.byteOffset + uint8Array.byteLength,
+    ),
+  );
 }
