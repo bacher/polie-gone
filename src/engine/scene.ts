@@ -26,7 +26,7 @@ export function setupScene({ modelVao }: SceneSetupParams): Scene {
     1000,
   );
 
-  const modelMat = mat4.fromTranslation(mat4.create(), [0, 0, -3]);
+  const modelMat = mat4.fromTranslation(mat4.create(), [0, -0.23, -3]);
 
   const lightDirection = vec3.fromValues(-5, 10, 4);
 
