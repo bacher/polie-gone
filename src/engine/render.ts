@@ -3,11 +3,7 @@ import { glBindVertexArray } from '../utils/webgl';
 
 import type { Scene } from './scene';
 
-export function renderScene(
-  gl: WebGL2RenderingContext,
-  program: ShaderProgram,
-  scene: Scene,
-) {
+export function renderScene(gl: GL, program: ShaderProgram, scene: Scene) {
   program.use();
   program.uniforms.projection(scene.cameraMat);
   program.uniforms.lightDirection(scene.lightDirection);

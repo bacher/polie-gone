@@ -1,6 +1,6 @@
+import type { AttributeLocation } from '../types/webgl';
 import type { DataBuffer, LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
-import type { AttributeLocation } from '../types/webgl';
 import type {
   VertexBufferObject,
   VertexBufferObjectCollection,
@@ -22,7 +22,7 @@ export type Attributes = {
 };
 
 export function initModelVao(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   attributeLocations: Attributes,
   buffers: VertexBufferObjectCollection,
   gltfModel: LoadedModel,
@@ -112,7 +112,7 @@ export function initModelVao(
 }
 
 function bindBufferVertexArrayPointer(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   bufferInfo: DataBuffer,
   bufferInstance: VertexBufferObject,
   attributeLocation: AttributeLocation,

@@ -1,7 +1,5 @@
 import type { Branded } from '../utils/typeHelpers';
 
-export type GL = WebGL2RenderingContext;
-
 export const enum ComponentType {
   UNSIGNED_SHORT = 5123,
   FLOAT = 5126,

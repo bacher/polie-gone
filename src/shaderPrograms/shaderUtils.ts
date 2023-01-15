@@ -1,7 +1,7 @@
 import type { AttributeLocation } from '../types/webgl';
 
 export function extractAttributes<T extends string>(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   glProgram: WebGLProgram,
   attributesList: Array<T>,
 ) {

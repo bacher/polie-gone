@@ -16,7 +16,7 @@ export type VertexBufferObjectCollection = {
 };
 
 export function initVertexBufferObjects(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   model: LoadedModel,
 ): VertexBufferObjectCollection {
   const { indices, position, uv, normal } = model.dataBuffers;
@@ -38,7 +38,7 @@ export function initVertexBufferObjects(
 }
 
 export function createBuffer(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   bufferInfo: DataBuffer,
 ): VertexBufferObject {
   const glBuffer = glCreateBuffer(gl);
@@ -53,7 +53,7 @@ export function createBuffer(
   return bufferInstance;
 }
 
-function glCreateBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
+function glCreateBuffer(gl: GL): WebGLBuffer {
   const buffer = gl.createBuffer();
 
   if (!buffer) {

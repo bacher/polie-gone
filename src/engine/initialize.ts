@@ -1,10 +1,11 @@
+import { mat4 } from 'gl-matrix';
+
 import type { LoadedModel } from '../types/model';
 import { initSimpleProgram } from '../shaderPrograms/programs/simpleProgram';
 import type { ShaderProgram } from '../shaderPrograms/programs';
 
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
-import { mat4 } from 'gl-matrix';
 import { initVertexBufferObjects } from './buffers';
 
 type Params = {
@@ -12,7 +13,7 @@ type Params = {
 };
 
 export type InitResults = {
-  gl: WebGL2RenderingContext;
+  gl: GL;
   program: ShaderProgram;
   scene: Scene;
 };

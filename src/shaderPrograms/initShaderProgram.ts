@@ -1,17 +1,17 @@
-import type { FragmentShaderInitParams, VertexShaderInitParams } from './types';
-import type { ShaderProgramType, UniformsCollection } from './types';
-import type { AttributeLocationsCollection } from './types';
+import type {
+  FragmentShaderInitParams,
+  VertexShaderInitParams,
+  ShaderProgramType,
+  UniformsCollection,
+  AttributeLocationsCollection,
+} from './types';
 
 export type ShaderInstance = {
   glShader: WebGLShader;
   dispose: () => void;
 };
 
-function createShader(
-  gl: WebGL2RenderingContext,
-  type: GLenum,
-  source: string,
-): ShaderInstance {
+function createShader(gl: GL, type: GLenum, source: string): ShaderInstance {
   const shader = gl.createShader(type);
 
   if (!shader) {
@@ -42,7 +42,7 @@ export type ShaderProgramInitial = {
 };
 
 function createProgram(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   vertexShader: ShaderInstance,
   fragmentShader: ShaderInstance,
 ): ShaderProgramInitial {
@@ -74,7 +74,7 @@ function createProgram(
 }
 
 export function initShaderProgram(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   {
     type,
     vertex,

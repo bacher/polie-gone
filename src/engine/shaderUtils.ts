@@ -1,7 +1,7 @@
 import type { mat4, vec3, vec4 } from 'gl-matrix';
 
 export function makeUniformVec3Setter(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   program: WebGLUniformLocation,
   uniformName: string,
 ) {
@@ -17,7 +17,7 @@ export function makeUniformVec3Setter(
 }
 
 export function makeUniformVec4Setter(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   program: WebGLUniformLocation,
   uniformName: string,
 ) {
@@ -33,7 +33,7 @@ export function makeUniformVec4Setter(
 }
 
 export function makeUniformMat4Setter(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   program: WebGLUniformLocation,
   uniformName: string,
 ) {
@@ -49,7 +49,7 @@ export function makeUniformMat4Setter(
 }
 
 export function makeUniformMat4ArraySetter(
-  gl: WebGL2RenderingContext,
+  gl: GL,
   program: WebGLUniformLocation,
   uniformName: string,
   length: number,

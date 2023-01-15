@@ -7,10 +7,7 @@ import type { ShaderProgramInitial } from '../initShaderProgram';
 
 export { default as vertexSource } from './simple.vertex.glsl?raw';
 
-export function initVertex(
-  gl: WebGL2RenderingContext,
-  { glProgram }: ShaderProgramInitial,
-) {
+export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
   return {
     uniforms: {
       projection: makeUniformMat4Setter(gl, glProgram, 'u_projection'),
