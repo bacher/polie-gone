@@ -151,8 +151,6 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     throw new Error('Indices is not scalar array');
   }
 
-  console.log('indicesAccessor', indicesAccessor);
-
   const loadingBuffers: LoadBuffer[] = [
     {
       type: BufferType.INDICES,

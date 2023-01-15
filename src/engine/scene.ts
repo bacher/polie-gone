@@ -26,10 +26,10 @@ export function setupScene({ modelVao }: SceneSetupParams): Scene {
     1000,
   );
 
-  mat4.translate(cameraMat, cameraMat, [0, -0.23, -3]);
+  mat4.translate(cameraMat, cameraMat, [0, 0, -2]);
 
-  // const modelMat = mat4.fromTranslation(mat4.create(), [0, -0.23, -3]);
-  const modelMat = mat4.create();
+  const modelMat = mat4.fromTranslation(mat4.create(), [0, -0.23, -1]);
+  // const modelMat = mat4.create();
 
   const lightDirection = vec3.fromValues(-5, 10, 4);
 

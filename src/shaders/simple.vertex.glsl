@@ -18,6 +18,9 @@ void main() {
   a_weights.z * u_jointMatrices[int(a_joints.z)] +
   a_weights.w * u_jointMatrices[int(a_joints.w)];
 
+  // Disable skin
+  // skinMatrix = mat4(1);
+
   v_normal = a_normal;
 
   gl_Position = u_projection * u_model * skinMatrix * a_position;

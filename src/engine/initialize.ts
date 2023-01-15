@@ -71,6 +71,16 @@ export function initialize(
       const mat = mat4.create();
 
       mat4.multiply(mat, mat, jointGlobal);
+      // Bend arm
+      if (true) {
+        if (i === 7) {
+          mat4.rotateX(mat, mat, 0.2 * Math.PI);
+        }
+        if (i === 8) {
+          mat4.translate(mat, mat, [0, -0.2, 0.4]);
+          mat4.rotateX(mat, mat, 0.2 * Math.PI);
+        }
+      }
       mat4.multiply(mat, mat, jointInfo.inverseMat);
 
       jointMatricesArray.set(mat, i * 16);
