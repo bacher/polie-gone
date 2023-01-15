@@ -1,5 +1,5 @@
 import type { BufferTarget } from '../types/webgl';
-import type { VertexBufferObject } from '../engine/buffers';
+import type { VertexBufferObject } from '../engine/initVertextBuffer';
 import { ModelVao } from '../engine/initModelVao';
 
 export function glBindBuffer(

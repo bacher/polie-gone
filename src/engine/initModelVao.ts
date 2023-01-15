@@ -4,7 +4,7 @@ import { ModelType } from '../types/model';
 import type {
   VertexBufferObject,
   VertexBufferObjectCollection,
-} from './buffers';
+} from './initVertextBuffer';
 import { glBindBuffer, glBindVertexArray } from '../utils/webgl';
 
 export type ModelVao = {
@@ -24,7 +24,7 @@ export type Attributes = {
 export function initModelVao(
   gl: GL,
   attributeLocations: Attributes,
-  buffers: VertexBufferObjectCollection,
+  vertexBuffers: VertexBufferObjectCollection,
   gltfModel: LoadedModel,
 ): ModelVao {
   const glVao = gl.createVertexArray();
@@ -35,31 +35,31 @@ export function initModelVao(
 
   gl.bindVertexArray(glVao);
 
-  glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, buffers.index);
+  glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, vertexBuffers.index);
 
   bindBufferVertexArrayPointer(
     gl,
     gltfModel.dataBuffers.position,
-    buffers.position,
+    vertexBuffers.position,
     attributeLocations.position,
   );
 
   if (attributeLocations.normal && gltfModel.dataBuffers.normal) {
-    assertExistence(buffers.normal);
+    assertExistence(vertexBuffers.normal);
     bindBufferVertexArrayPointer(
       gl,
       gltfModel.dataBuffers.normal,
-      buffers.normal,
+      vertexBuffers.normal,
       attributeLocations.normal,
     );
   }
 
   if (attributeLocations.uv && gltfModel.dataBuffers.uv) {
-    assertExistence(buffers.uv);
+    assertExistence(vertexBuffers.uv);
     bindBufferVertexArrayPointer(
       gl,
       gltfModel.dataBuffers.uv,
-      buffers.uv,
+      vertexBuffers.uv,
       attributeLocations.uv,
     );
   }
@@ -73,18 +73,18 @@ export function initModelVao(
       throw new Error('Shader without bones');
     }
 
-    assertExistence(buffers.joints);
-    assertExistence(buffers.weights);
+    assertExistence(vertexBuffers.joints);
+    assertExistence(vertexBuffers.weights);
     bindBufferVertexArrayPointer(
       gl,
       joints,
-      buffers.joints,
+      vertexBuffers.joints,
       attributeLocations.joints,
     );
     bindBufferVertexArrayPointer(
       gl,
       weights,
-      buffers.weights,
+      vertexBuffers.weights,
       attributeLocations.weights,
     );
   }

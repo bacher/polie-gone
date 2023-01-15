@@ -6,7 +6,7 @@ import type { ShaderProgram } from '../shaderPrograms/types';
 
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
-import { initVertexBufferObjects } from './buffers';
+import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 
 type Params = {
@@ -39,12 +39,12 @@ export function initialize(
   // After creation of all shader programs we can clear shader cache
   shaderManager.disposeAll();
 
-  const buffers = initVertexBufferObjects(gl, modelData);
+  const vertexBuffers = initVertexBufferObjects(gl, modelData);
 
   const modelVao = initModelVao(
     gl,
     program.attributeLocations,
-    buffers,
+    vertexBuffers,
     modelData,
   );
 
