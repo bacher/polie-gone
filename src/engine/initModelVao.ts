@@ -116,14 +116,34 @@ function bindBufferVertexArrayPointer(
 ): void {
   glBindBuffer(gl, gl.ARRAY_BUFFER, bufferInstance);
   gl.enableVertexAttribArray(attributeLocation.get());
-  gl.vertexAttribPointer(
-    attributeLocation.get(),
-    bufferInfo.componentDimension,
-    bufferInfo.componentType,
-    false /* normalize */,
-    0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
-    0 /* offset */,
-  );
+
+  let isFloat = true;
+
+  switch (bufferInfo.componentType) {
+    case gl.UNSIGNED_BYTE:
+    case gl.UNSIGNED_SHORT:
+    case gl.UNSIGNED_INT:
+      isFloat = false;
+  }
+
+  if (isFloat) {
+    gl.vertexAttribPointer(
+      attributeLocation.get(),
+      bufferInfo.componentDimension,
+      bufferInfo.componentType,
+      false /* normalize */,
+      0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
+      0 /* offset */,
+    );
+  } else {
+    gl.vertexAttribIPointer(
+      attributeLocation.get(),
+      bufferInfo.componentDimension,
+      bufferInfo.componentType,
+      0,
+      0,
+    );
+  }
 }
 
 function assertExistence<T>(value: unknown): asserts value is NonNullable<T> {

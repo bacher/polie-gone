@@ -6,22 +6,23 @@ uniform mat4 u_jointMatrices[20];
 in vec4 a_position;
 in vec3 a_normal;
 in vec3 a_uv;
-in vec4 a_joints;
+in uvec4 a_joints;
 in vec4 a_weights;
 
 out vec3 v_normal;
 
 void main() {
   mat4 skinMatrix =
-  a_weights.x * u_jointMatrices[int(a_joints.x)] +
-  a_weights.y * u_jointMatrices[int(a_joints.y)] +
-  a_weights.z * u_jointMatrices[int(a_joints.z)] +
-  a_weights.w * u_jointMatrices[int(a_joints.w)];
+  a_weights.x * u_jointMatrices[a_joints.x] +
+  a_weights.y * u_jointMatrices[a_joints.y] +
+  a_weights.z * u_jointMatrices[a_joints.z] +
+  a_weights.w * u_jointMatrices[a_joints.w];
 
   // Disable skin
   // skinMatrix = mat4(1);
 
-  v_normal = a_normal;
+  mat4 model = u_model * skinMatrix;
 
-  gl_Position = u_projection * u_model * skinMatrix * a_position;
+  v_normal = (model * vec4(a_normal, 0.0)).xyz;
+  gl_Position = u_projection * model * a_position;
 }
