@@ -7,6 +7,7 @@ import type { ShaderProgram } from '../shaderPrograms/programs';
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
 import { initVertexBufferObjects } from './buffers';
+import { createShadersManager } from '../shaderPrograms/shaderManager';
 
 type Params = {
   modelData: LoadedModel;
@@ -31,7 +32,12 @@ export function initialize(
     throw new Error('No WebGL 2');
   }
 
-  const program = initSimpleProgram(gl);
+  const shaderManager = createShadersManager(gl);
+
+  const program = initSimpleProgram(gl, shaderManager);
+
+  // After creation of all shader programs we can clear shader cache
+  shaderManager.disposeAll();
 
   const buffers = initVertexBufferObjects(gl, modelData);
 

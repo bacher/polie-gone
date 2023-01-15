@@ -5,35 +5,7 @@ import type {
   UniformsCollection,
   AttributeLocationsCollection,
 } from './types';
-
-export type ShaderInstance = {
-  glShader: WebGLShader;
-  dispose: () => void;
-};
-
-function createShader(gl: GL, type: GLenum, source: string): ShaderInstance {
-  const shader = gl.createShader(type);
-
-  if (!shader) {
-    throw new Error();
-  }
-
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    throw new Error();
-  }
-
-  return {
-    glShader: shader,
-    dispose: () => {
-      gl.deleteShader(shader);
-    },
-  };
-}
+import type { ShaderInstance, ShadersManager } from './shaderManager';
 
 export type ShaderProgramInitial = {
   glProgram: WebGLProgram;
@@ -75,6 +47,7 @@ function createProgram(
 
 export function initShaderProgram(
   gl: GL,
+  shadersManager: ShadersManager,
   {
     type,
     vertex,
@@ -89,8 +62,9 @@ export function initShaderProgram(
   uniforms: UniformsCollection;
   attributeLocations: AttributeLocationsCollection;
 } {
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex.source);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment.source);
+  const vertexShader = shadersManager.getVertexShader(vertex);
+  const fragmentShader = shadersManager.getFragmentShader(fragment);
+
   const program = createProgram(gl, vertexShader, fragmentShader);
 
   const vertexInit = vertex.init(gl, program);
@@ -107,8 +81,6 @@ export function initShaderProgram(
     attributeLocations: vertexInit.attributeLocations,
     dispose: () => {
       program.dispose();
-      fragmentShader.dispose();
-      vertexShader.dispose();
     },
   };
 }
