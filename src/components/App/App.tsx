@@ -9,20 +9,19 @@ import { mat4, vec3, vec4, quat } from 'gl-matrix';
 import { loadGltf } from '../../utils/loadGltf';
 import { useOnlyOnce } from '../../hooks/useOnlyOnce';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
-import { initialize, InitResults } from '../../engine/initialize';
-import { renderScene } from '../../engine/render';
+import { initialize } from '../../engine/initialize';
+import { renderScene, startRenderLoop } from '../../engine/render';
+import type { Scene } from '../../engine/scene';
 
 import styles from './App.module.css';
 
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const engineRef = useRef<InitResults | undefined>();
   const forceUpdate = useForceUpdate();
-  const sceneState = useMemo(
+  const sceneState = useMemo<{ scene: Scene | undefined; isRotating: boolean }>(
     () => ({
-      timestamp: undefined as number | undefined,
+      scene: undefined,
       isRotating: false,
-      isPlaying: false,
     }),
     [],
   );
@@ -34,53 +33,36 @@ export function App() {
       throw new Error('No canvas');
     }
 
-    engineRef.current = initialize(canvasRef.current, {
+    const { scene } = initialize(canvasRef.current, {
       modelData: model,
     });
 
-    render();
+    sceneState.scene = scene;
+
+    renderScene(scene);
   });
 
-  function tick(timestamp: number) {
-    const prevTimestamp = sceneState.timestamp;
-    sceneState.timestamp = timestamp;
-
-    if (!prevTimestamp) {
-      return;
-    }
-
-    const delta = timestamp - prevTimestamp;
-
-    if (sceneState.isRotating) {
-      const modelMat = engineRef.current!.scene.models[0].modelMat;
-
-      mat4.rotateY(modelMat, modelMat, delta * 0.001);
-    }
-  }
-
-  function render() {
-    if (!engineRef.current) {
-      console.error('Try render without engine');
-      return;
-    }
-
-    const { gl, program, scene } = engineRef.current;
-    renderScene(gl, program, scene);
-  }
-
-  function startLoop() {
-    function processFrame(timestamp: number) {
-      tick(timestamp);
-      render();
-
-      requestAnimationFrame(processFrame);
-    }
-
-    requestAnimationFrame(processFrame);
-  }
-
   return (
-    <div className={styles.wrapper}>
+    <div
+      className={styles.wrapper}
+      onClick={() => {
+        if (sceneState.scene!.isRenderLoop) {
+          return;
+        }
+
+        startRenderLoop({
+          scene: sceneState.scene!,
+          // fps: 5,
+          onTick: ({ delta, timestamp }) => {
+            if (sceneState.isRotating) {
+              const modelMat = sceneState.scene!.models[0].modelMat;
+
+              mat4.rotateY(modelMat, modelMat, delta * 0.001);
+            }
+          },
+        });
+      }}
+    >
       <canvas ref={canvasRef} width={600} height={400} />
       <div className={styles.controls}>
         <h2>Controls</h2>
@@ -90,12 +72,6 @@ export function App() {
             checked={sceneState.isRotating}
             onChange={(event) => {
               sceneState.isRotating = event.target.checked;
-
-              if (!sceneState.isPlaying) {
-                sceneState.isPlaying = true;
-                startLoop();
-              }
-
               forceUpdate();
             }}
           />{' '}

@@ -3,7 +3,6 @@ import { mat4 } from 'gl-matrix';
 import type { LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
 import { initSimpleProgram } from '../shaderPrograms/simpleProgram';
-import type { ShaderProgram } from '../shaderPrograms/types';
 
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
@@ -16,8 +15,6 @@ type Params = {
 };
 
 export type InitResults = {
-  gl: GL;
-  program: ShaderProgram;
   scene: Scene;
 };
 
@@ -50,7 +47,11 @@ export function initialize(
     modelData,
   );
 
-  const scene = setupScene({ modelVao });
+  const scene = setupScene({
+    gl,
+    shaderProgram: program,
+    modelVao,
+  });
 
   gl.clearColor(1, 1, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -93,8 +94,6 @@ export function initialize(
   console.log('Program init complete');
 
   return {
-    gl,
-    program,
     scene,
   };
 }

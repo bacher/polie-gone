@@ -1,23 +1,33 @@
 import { mat4, vec3 } from 'gl-matrix';
 
+import type { ShaderProgram } from '../shaderPrograms/types';
 import type { ModelVao } from './initModelVao';
 
 export type ModelInstance = {
+  shaderProgram: ShaderProgram;
   modelMat: mat4;
   modelVao: ModelVao;
 };
 
 export type Scene = {
+  gl: GL;
+  isRenderLoop: boolean;
   cameraMat: mat4;
   lightDirection: vec3;
   models: ModelInstance[];
 };
 
 type SceneSetupParams = {
+  gl: GL;
+  shaderProgram: ShaderProgram;
   modelVao: ModelVao;
 };
 
-export function setupScene({ modelVao }: SceneSetupParams): Scene {
+export function setupScene({
+  gl,
+  shaderProgram,
+  modelVao,
+}: SceneSetupParams): Scene {
   const cameraMat = mat4.perspective(
     mat4.create(),
     Math.PI / 2,
@@ -34,10 +44,13 @@ export function setupScene({ modelVao }: SceneSetupParams): Scene {
   const lightDirection = vec3.fromValues(-5, 10, 4);
 
   return {
+    gl,
+    isRenderLoop: false,
     cameraMat,
     lightDirection,
     models: [
       {
+        shaderProgram,
         modelMat,
         modelVao,
       },
