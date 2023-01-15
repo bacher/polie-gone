@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import type { mat4 } from 'gl-matrix';
 
 import type { BufferTarget, ComponentType } from './webgl';
 
@@ -7,7 +7,7 @@ export const enum ModelType {
   SKINNED = 'SKINNED',
 }
 
-export type BufferInfo = {
+export type DataBuffer = {
   bufferTarget: BufferTarget;
   componentType: ComponentType;
   componentDimension: number;
@@ -19,23 +19,23 @@ export type LoadedModel =
   | {
       type: ModelType.REGULAR;
       modelName: string;
-      buffers: {
-        indices: BufferInfo;
-        position: BufferInfo;
-        normal?: BufferInfo;
-        uv?: BufferInfo;
+      dataBuffers: {
+        indices: DataBuffer;
+        position: DataBuffer;
+        normal?: DataBuffer;
+        uv?: DataBuffer;
       };
     }
   | {
       type: ModelType.SKINNED;
       modelName: string;
-      buffers: {
-        indices: BufferInfo;
-        position: BufferInfo;
-        normal?: BufferInfo;
-        uv?: BufferInfo;
-        joints: BufferInfo;
-        weights: BufferInfo;
+      dataBuffers: {
+        indices: DataBuffer;
+        position: DataBuffer;
+        normal?: DataBuffer;
+        uv?: DataBuffer;
+        joints: DataBuffer;
+        weights: DataBuffer;
       };
       inverseJoints: mat4[];
     };

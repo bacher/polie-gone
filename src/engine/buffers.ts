@@ -1,4 +1,4 @@
-import type { BufferInfo } from '../types/model';
+import type { DataBuffer } from '../types/model';
 import { LoadedModel, ModelType } from '../types/model';
 import { glBindBuffer } from '../utils/webgl';
 
@@ -17,14 +17,14 @@ export type VertexBufferObjectCollection = {
 
 export function initVertexBufferObjects(
   gl: WebGL2RenderingContext,
-  gltfModel: LoadedModel,
+  model: LoadedModel,
 ): VertexBufferObjectCollection {
-  const { indices, position, uv, normal } = gltfModel.buffers;
-  let joints: BufferInfo | undefined;
-  let weights: BufferInfo | undefined;
+  const { indices, position, uv, normal } = model.dataBuffers;
+  let joints: DataBuffer | undefined;
+  let weights: DataBuffer | undefined;
 
-  if (gltfModel.type === ModelType.SKINNED) {
-    ({ joints, weights } = gltfModel.buffers);
+  if (model.type === ModelType.SKINNED) {
+    ({ joints, weights } = model.dataBuffers);
   }
 
   return {
@@ -39,7 +39,7 @@ export function initVertexBufferObjects(
 
 export function createBuffer(
   gl: WebGL2RenderingContext,
-  bufferInfo: BufferInfo,
+  bufferInfo: DataBuffer,
 ): VertexBufferObject {
   const glBuffer = glCreateBuffer(gl);
 

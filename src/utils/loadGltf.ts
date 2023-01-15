@@ -1,6 +1,6 @@
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
-import { LoadedModel, ModelType, BufferInfo } from '../types/model';
+import { LoadedModel, ModelType, DataBuffer } from '../types/model';
 import { BufferTarget } from '../types/webgl';
 
 const enum BufferType {
@@ -217,10 +217,10 @@ export async function loadGltf(
       acc[type] = makeBufferInfo(accessor, bufferTarget, dataArray);
       return acc;
     },
-    {} as Record<BufferType, BufferInfo>,
+    {} as Record<BufferType, DataBuffer>,
   );
 
-  function getBufferByName(bufferType: BufferType): BufferInfo {
+  function getBufferByName(bufferType: BufferType): DataBuffer {
     const buffer = namedBuffers[bufferType];
 
     if (!buffer) {
@@ -251,7 +251,7 @@ export async function loadGltf(
     return {
       type: ModelType.SKINNED,
       modelName,
-      buffers: {
+      dataBuffers: {
         ...baseBuffers,
         joints: getBufferByName(BufferType.JOINTS),
         weights: getBufferByName(BufferType.WEIGHTS),
@@ -263,7 +263,7 @@ export async function loadGltf(
   return {
     type: ModelType.REGULAR,
     modelName,
-    buffers: baseBuffers,
+    dataBuffers: baseBuffers,
   };
 }
 
@@ -292,7 +292,7 @@ function makeBufferInfo(
   accessor: gltf.Accessor,
   bufferTarget: BufferTarget,
   dataArray: Uint8Array,
-): BufferInfo {
+): DataBuffer {
   return {
     bufferTarget,
     componentType: accessor.componentType,

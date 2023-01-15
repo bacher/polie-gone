@@ -1,7 +1,10 @@
-import type { BufferInfo, LoadedModel } from '../types/model';
+import type { DataBuffer, LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
 import type { AttributeLocation } from '../types/webgl';
-import type { VertexBufferObject, VertexBufferObjectCollection } from './buffers';
+import type {
+  VertexBufferObject,
+  VertexBufferObjectCollection,
+} from './buffers';
 import { glBindBuffer, glBindVertexArray } from '../utils/webgl';
 
 export type ModelVao = {
@@ -36,33 +39,33 @@ export function initModelVao(
 
   bindBufferVertexArrayPointer(
     gl,
-    gltfModel.buffers.position,
+    gltfModel.dataBuffers.position,
     buffers.position,
     attributeLocations.position,
   );
 
-  if (attributeLocations.normal && gltfModel.buffers.normal) {
+  if (attributeLocations.normal && gltfModel.dataBuffers.normal) {
     assertExistence(buffers.normal);
     bindBufferVertexArrayPointer(
       gl,
-      gltfModel.buffers.normal,
+      gltfModel.dataBuffers.normal,
       buffers.normal,
       attributeLocations.normal,
     );
   }
 
-  if (attributeLocations.uv && gltfModel.buffers.uv) {
+  if (attributeLocations.uv && gltfModel.dataBuffers.uv) {
     assertExistence(buffers.uv);
     bindBufferVertexArrayPointer(
       gl,
-      gltfModel.buffers.uv,
+      gltfModel.dataBuffers.uv,
       buffers.uv,
       attributeLocations.uv,
     );
   }
 
   if (gltfModel.type === ModelType.SKINNED) {
-    const { joints, weights } = gltfModel.buffers;
+    const { joints, weights } = gltfModel.dataBuffers;
 
     console.log('attributeLocations =', attributeLocations);
 
@@ -90,7 +93,7 @@ export function initModelVao(
   glBindBuffer(gl, gl.ARRAY_BUFFER, null);
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, null);
 
-  const { elementsCount, componentType } = gltfModel.buffers.indices;
+  const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
 
   return {
     glVao,
@@ -110,7 +113,7 @@ export function initModelVao(
 
 function bindBufferVertexArrayPointer(
   gl: WebGL2RenderingContext,
-  bufferInfo: BufferInfo,
+  bufferInfo: DataBuffer,
   bufferInstance: VertexBufferObject,
   attributeLocation: AttributeLocation,
 ): void {
