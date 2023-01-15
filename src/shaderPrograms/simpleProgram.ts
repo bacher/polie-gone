@@ -1,9 +1,9 @@
-import { initShaderProgram } from '../initShaderProgram';
-
-import { ProgramInit, ShaderProgramType } from '../types';
+import type { ShadersManager } from '../engine/shaders/shaderManager';
+import { initShaderProgram } from '../engine/shaders/initShaderProgram';
 import { initVertex, vertexSource } from '../shaders/simple.vertex';
 import { initFragment, fragmentSource } from '../shaders/simple.fragment';
-import { ShadersManager } from '../shaderManager';
+
+import { ProgramInit, ShaderProgramType } from './types';
 
 export type SimpleProgram = ProgramInit<
   ShaderProgramType.SIMPLE,

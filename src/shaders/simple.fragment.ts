@@ -1,5 +1,5 @@
-import { makeUniformVec3Setter } from '../../engine/shaderUtils';
-import type { ShaderProgramInitial } from '../initShaderProgram';
+import type { ShaderProgramInitial } from '../engine/shaders/initShaderProgram';
+import { makeUniformVec3Setter } from '../engine/shaders/utils';
 
 export { default as fragmentSource } from './simple.fragment.glsl?raw';
 

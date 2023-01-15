@@ -1,13 +1,13 @@
 import { mat4 } from 'gl-matrix';
 
 import type { LoadedModel } from '../types/model';
-import { initSimpleProgram } from '../shaderPrograms/programs/simpleProgram';
-import type { ShaderProgram } from '../shaderPrograms/programs';
+import { initSimpleProgram } from '../shaderPrograms/simpleProgram';
+import type { ShaderProgram } from '../shaderPrograms/types';
 
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
 import { initVertexBufferObjects } from './buffers';
-import { createShadersManager } from '../shaderPrograms/shaderManager';
+import { createShadersManager } from './shaders/shaderManager';
 
 type Params = {
   modelData: LoadedModel;

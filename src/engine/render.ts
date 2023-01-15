@@ -1,4 +1,4 @@
-import type { ShaderProgram } from '../shaderPrograms/programs';
+import type { ShaderProgram } from '../shaderPrograms/types';
 import { glBindVertexArray } from '../utils/webgl';
 
 import type { Scene } from './scene';

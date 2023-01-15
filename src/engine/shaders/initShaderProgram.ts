@@ -1,7 +1,9 @@
+// TODO: Remove
+import type { ShaderProgramType } from '../../shaderPrograms/types';
+
 import type {
   FragmentShaderInitParams,
   VertexShaderInitParams,
-  ShaderProgramType,
   UniformsCollection,
   AttributeLocationsCollection,
 } from './types';

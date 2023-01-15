@@ -1,46 +1,17 @@
-import type { AttributeLocation } from '../types/webgl';
-import { ShaderProgramInitial } from './initShaderProgram';
+import type {
+  FragmentShaderInitFunc,
+  VertexShaderInitFunc,
+} from '../engine/shaders/types';
+import type { SimpleProgram } from './simpleProgram';
 
 export const enum ShaderProgramType {
   SIMPLE = 'SIMPLE',
   MODERN = 'MODERN',
 }
 
-export type UniformsCollection = Record<string, (data: any) => void>;
-
-export type AttributeLocationsCollection = Record<
-  string,
-  AttributeLocation | undefined
->;
-
-type VertexShaderInitResults = {
-  uniforms: UniformsCollection;
-  attributeLocations: AttributeLocationsCollection;
-};
-
-export type VertexShaderInitFunc = (
-  gl: GL,
-  program: ShaderProgramInitial,
-) => VertexShaderInitResults;
-
-type FragmentShaderInitResults = {
-  uniforms: UniformsCollection;
-};
-
-export type FragmentShaderInitFunc = (
-  gl: GL,
-  program: ShaderProgramInitial,
-) => FragmentShaderInitResults;
-
-export type VertexShaderInitParams = {
-  source: string;
-  init: VertexShaderInitFunc;
-};
-
-export type FragmentShaderInitParams = {
-  source: string;
-  init: FragmentShaderInitFunc;
-};
+export type ShaderProgram =
+  | SimpleProgram
+  | (Omit<SimpleProgram, 'type'> & { type: ShaderProgramType.MODERN });
 
 export type ProgramInit<
   T extends ShaderProgramType,
