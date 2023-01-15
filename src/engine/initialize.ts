@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix';
 
 import type { LoadedModel } from '../types/model';
+import { ModelType } from '../types/model';
 import { initSimpleProgram } from '../shaderPrograms/simpleProgram';
 import type { ShaderProgram } from '../shaderPrograms/types';
 
@@ -8,6 +9,7 @@ import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
 import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
+import { calculateGlobalJoinsMatrices } from './utils';
 
 type Params = {
   modelData: LoadedModel;
@@ -53,26 +55,30 @@ export function initialize(
   gl.clearColor(1, 1, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  const count = 20;
+  if (modelData.type === ModelType.SKINNED) {
+    const jointsCount = modelData.joints.length;
 
-  const jointMatricesArray = new Float32Array(16 * count);
-  const identityMat = mat4.create();
+    const jointMatricesArray = new Float32Array(16 * jointsCount);
 
-  for (let i = 0; i < count; i += 1) {
-    let mat = identityMat;
+    const alreadyCalculatedMatrices = calculateGlobalJoinsMatrices(
+      modelData.joints,
+    );
 
-    if (i === 8) {
-      // mat = mat4.fromYRotation(mat4.create(), 0.3 * Math.PI);
-      mat = mat4.fromTranslation(mat4.create(), [-1, -0.5, 0]);
+    for (let i = 0; i < jointsCount; i += 1) {
+      const jointInfo = modelData.joints[i];
+      const jointGlobal = alreadyCalculatedMatrices[i];
+
+      const mat = mat4.create();
+
+      mat4.multiply(mat, mat, jointGlobal);
+      mat4.multiply(mat, mat, jointInfo.inverseMat);
+
+      jointMatricesArray.set(mat, i * 16);
     }
 
-    jointMatricesArray.set(mat, i * 16);
+    program.use();
+    program.uniforms.jointMatrices(jointMatricesArray);
   }
-
-  console.log('jointMatricesArray', jointMatricesArray);
-
-  program.use();
-  program.uniforms.jointMatrices(jointMatricesArray);
 
   console.log('Program init complete');
 

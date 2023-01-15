@@ -9,7 +9,8 @@ export function renderScene(gl: GL, program: ShaderProgram, scene: Scene) {
   program.uniforms.lightDirection(scene.lightDirection);
 
   gl.enable(gl.CULL_FACE);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   for (const model of scene.models) {
     program.uniforms.model(model.modelMat);

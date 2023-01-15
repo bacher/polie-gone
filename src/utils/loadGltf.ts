@@ -1,13 +1,14 @@
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
 import {
-  LoadedModel,
   ModelType,
   DataBuffer,
-  SkinnedLoadedModel,
   RegularLoadedModel,
+  SkinnedLoadedModel,
+  JointInfo,
 } from '../types/model';
 import { BufferTarget } from '../types/webgl';
+import { MAX_JOINTS } from '../engine/constants';
 
 const enum BufferType {
   INDICES = 'INDICES',
@@ -175,6 +176,10 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
 
     skin = gltfData.skins![meshNode.skin];
 
+    if (skin.joints.length > MAX_JOINTS) {
+      throw new Error('Too many joints');
+    }
+
     assertNumber(primitives.attributes.JOINTS_0);
     assertNumber(primitives.attributes.WEIGHTS_0);
     assertNumber(skin.inverseBindMatrices);
@@ -206,18 +211,6 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     })),
   );
 
-  console.groupCollapsed(`Model ${modelUri} loaded.`);
-  console.info(`Model contains ${meshNodes.length} nodes with mesh`);
-  console.info(
-    loadedBuffers
-      .map(
-        ({ type, dataArray }) =>
-          `${type} size: ${(dataArray.byteLength / 1000).toPrecision(1)} kB`,
-      )
-      .join('\n'),
-  );
-  console.groupEnd();
-
   const modelName = meshNode.name ?? 'unknown mesh';
 
   const namedBuffers = loadedBuffers.reduce(
@@ -244,16 +237,52 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     normal: getBufferByName(BufferType.NORMAL),
   };
 
+  function reportEnd() {
+    console.groupCollapsed(`Model ${modelUri} loaded.`);
+    console.info(`Model contains ${meshNodes.length} nodes with mesh`);
+    console.info(
+      loadedBuffers
+        .map(
+          ({ type, dataArray }) =>
+            `${type} size: ${(dataArray.byteLength / 1000).toPrecision(1)} kB`,
+        )
+        .join('\n'),
+    );
+    console.groupEnd();
+  }
+
   if (loadSkin) {
     const { dataArray } = getBufferByName(BufferType.INVERSE_JOINTS);
     const inverseJointsFloatList = convertUint8ListToFloat32List(dataArray);
 
-    const inverseJoints = [];
+    const joints: JointInfo[] = [];
 
     for (let i = 0; i < skin!.joints.length; i += 1) {
+      const joinNodeIndex = skin!.joints[i];
+      const jointInfo = gltfData.nodes[joinNodeIndex];
+
+      let children: number[] | undefined;
+
+      if (jointInfo.children && jointInfo.children.length) {
+        children = jointInfo.children.map((nodeId) =>
+          skin!.joints.indexOf(nodeId),
+        );
+      }
+
       const offset = i * 16;
       // Split by 16 floats (mat 4x4)
-      inverseJoints.push(inverseJointsFloatList.slice(offset, offset + 16));
+      const inverseMat = inverseJointsFloatList.slice(offset, offset + 16);
+
+      joints.push({
+        nodeIndex: joinNodeIndex,
+        children,
+        transforms: {
+          rotation: Float32Array.from(jointInfo.rotation ?? [0, 0, 0, 1]),
+          scale: Float32Array.from(jointInfo.scale ?? [1, 1, 1]),
+          translate: Float32Array.from(jointInfo.translation ?? [0, 0, 0]),
+        },
+        inverseMat,
+      });
     }
 
     const model: SkinnedLoadedModel = {
@@ -264,8 +293,10 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
         joints: getBufferByName(BufferType.JOINTS),
         weights: getBufferByName(BufferType.WEIGHTS),
       },
-      inverseJoints,
+      joints,
     };
+
+    reportEnd();
 
     return model as any;
   }
@@ -275,6 +306,8 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     modelName,
     dataBuffers: baseBuffers,
   };
+
+  reportEnd();
 
   return model as any;
 }

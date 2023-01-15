@@ -1,4 +1,4 @@
-import type { mat4 } from 'gl-matrix';
+import type { mat4, quat, vec3 } from 'gl-matrix';
 
 import type { BufferTarget, ComponentType } from './webgl';
 
@@ -26,6 +26,19 @@ export type RegularLoadedModel = {
   };
 };
 
+export type Transforms = {
+  rotation: quat;
+  translate: vec3;
+  scale: vec3;
+};
+
+export type JointInfo = {
+  nodeIndex: number;
+  children: number[] | undefined;
+  transforms: Transforms;
+  inverseMat: mat4;
+};
+
 export type SkinnedLoadedModel = {
   type: ModelType.SKINNED;
   modelName: string;
@@ -37,7 +50,7 @@ export type SkinnedLoadedModel = {
     joints: DataBuffer;
     weights: DataBuffer;
   };
-  inverseJoints: mat4[];
+  joints: JointInfo[];
 };
 
 export type LoadedModel = RegularLoadedModel | SkinnedLoadedModel;

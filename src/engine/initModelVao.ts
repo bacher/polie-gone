@@ -65,25 +65,22 @@ export function initModelVao(
   }
 
   if (gltfModel.type === ModelType.SKINNED) {
-    const { joints, weights } = gltfModel.dataBuffers;
-
-    console.log('attributeLocations =', attributeLocations);
-
     if (!attributeLocations.joints || !attributeLocations.weights) {
       throw new Error('Shader without bones');
     }
 
     assertExistence(vertexBuffers.joints);
     assertExistence(vertexBuffers.weights);
+
     bindBufferVertexArrayPointer(
       gl,
-      joints,
+      gltfModel.dataBuffers.joints,
       vertexBuffers.joints,
       attributeLocations.joints,
     );
     bindBufferVertexArrayPointer(
       gl,
-      weights,
+      gltfModel.dataBuffers.weights,
       vertexBuffers.weights,
       attributeLocations.weights,
     );
