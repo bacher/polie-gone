@@ -1,6 +1,8 @@
 import type { BufferInfo, LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
 import type { AttributeLocation } from '../types/webgl';
+import type { VertexBufferObject, VertexBufferObjectCollection } from './buffers';
+import { glBindBuffer, glBindVertexArray } from '../utils/webgl';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -8,16 +10,19 @@ export type ModelVao = {
   dispose: () => void;
 };
 
+export type Attributes = {
+  position: AttributeLocation;
+  normal?: AttributeLocation;
+  uv?: AttributeLocation;
+  joints?: AttributeLocation;
+  weights?: AttributeLocation;
+};
+
 export function initModelVao(
   gl: WebGL2RenderingContext,
-  attributeLocations: {
-    position: AttributeLocation;
-    normal?: AttributeLocation;
-    uv?: AttributeLocation;
-    joints?: AttributeLocation;
-    weights?: AttributeLocation;
-  },
-  model: LoadedModel,
+  attributeLocations: Attributes,
+  buffers: VertexBufferObjectCollection,
+  gltfModel: LoadedModel,
 ): ModelVao {
   const glVao = gl.createVertexArray();
 
@@ -27,35 +32,37 @@ export function initModelVao(
 
   gl.bindVertexArray(glVao);
 
-  const { indices, position, normal, uv } = model.buffers;
+  glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, buffers.index);
 
-  const indicesBuffer = glCreateBuffer(gl);
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.dataArray, gl.STATIC_DRAW);
-
-  const positionBuffer = createAndLoadBuffer(
+  bindBufferVertexArrayPointer(
     gl,
-    position,
+    gltfModel.buffers.position,
+    buffers.position,
     attributeLocations.position,
   );
 
-  let normalBuffer: WebGLBuffer | undefined;
-
-  if (attributeLocations.normal && normal) {
-    normalBuffer = createAndLoadBuffer(gl, normal, attributeLocations.normal);
+  if (attributeLocations.normal && gltfModel.buffers.normal) {
+    assertExistence(buffers.normal);
+    bindBufferVertexArrayPointer(
+      gl,
+      gltfModel.buffers.normal,
+      buffers.normal,
+      attributeLocations.normal,
+    );
   }
 
-  let uvBuffer: WebGLBuffer | undefined;
-
-  if (attributeLocations.uv && uv) {
-    uvBuffer = createAndLoadBuffer(gl, uv, attributeLocations.uv);
+  if (attributeLocations.uv && gltfModel.buffers.uv) {
+    assertExistence(buffers.uv);
+    bindBufferVertexArrayPointer(
+      gl,
+      gltfModel.buffers.uv,
+      buffers.uv,
+      attributeLocations.uv,
+    );
   }
 
-  let jointsBuffer: WebGLBuffer | undefined;
-  let weightsBuffer: WebGLBuffer | undefined;
-
-  if (model.type === ModelType.SKINNED) {
-    const { joints, weights } = model.buffers;
+  if (gltfModel.type === ModelType.SKINNED) {
+    const { joints, weights } = gltfModel.buffers;
 
     console.log('attributeLocations =', attributeLocations);
 
@@ -63,68 +70,51 @@ export function initModelVao(
       throw new Error('Shader without bones');
     }
 
-    jointsBuffer = createAndLoadBuffer(gl, joints, attributeLocations.joints);
-    weightsBuffer = createAndLoadBuffer(
+    assertExistence(buffers.joints);
+    assertExistence(buffers.weights);
+    bindBufferVertexArrayPointer(
+      gl,
+      joints,
+      buffers.joints,
+      attributeLocations.joints,
+    );
+    bindBufferVertexArrayPointer(
       gl,
       weights,
+      buffers.weights,
       attributeLocations.weights,
     );
   }
 
-  gl.bindVertexArray(null);
+  glBindVertexArray(gl, null);
+  glBindBuffer(gl, gl.ARRAY_BUFFER, null);
+  glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, null);
+
+  const { elementsCount, componentType } = gltfModel.buffers.indices;
 
   return {
     glVao,
     draw: () => {
       gl.drawElements(
         gl.TRIANGLES,
-        indices.elementsCount,
-        indices.componentType,
+        elementsCount,
+        componentType,
         0 /* offset */,
       );
     },
     dispose: () => {
-      gl.deleteBuffer(indicesBuffer);
-      gl.deleteBuffer(positionBuffer);
-
-      if (normalBuffer) {
-        gl.deleteBuffer(normalBuffer);
-      }
-
-      if (uvBuffer) {
-        gl.deleteBuffer(uvBuffer);
-      }
-
-      if (jointsBuffer) {
-        gl.deleteBuffer(jointsBuffer);
-      }
-
-      if (weightsBuffer) {
-        gl.deleteBuffer(weightsBuffer);
-      }
+      gl.deleteVertexArray(glVao);
     },
   };
 }
 
-function glCreateBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
-  const buffer = gl.createBuffer();
-
-  if (!buffer) {
-    throw new Error("Can't create buffer");
-  }
-
-  return buffer;
-}
-
-function createAndLoadBuffer(
+function bindBufferVertexArrayPointer(
   gl: WebGL2RenderingContext,
   bufferInfo: BufferInfo,
+  bufferInstance: VertexBufferObject,
   attributeLocation: AttributeLocation,
-) {
-  const glBuffer = glCreateBuffer(gl);
-  gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, bufferInfo.dataArray, gl.STATIC_DRAW);
-
+): void {
+  glBindBuffer(gl, gl.ARRAY_BUFFER, bufferInstance);
   gl.enableVertexAttribArray(attributeLocation.get());
   gl.vertexAttribPointer(
     attributeLocation.get(),
@@ -134,6 +124,10 @@ function createAndLoadBuffer(
     0 /* stride, 0 = move forward size * sizeof(type) each iteration to get the next position */,
     0 /* offset */,
   );
+}
 
-  return glBuffer;
+function assertExistence<T>(value: unknown): asserts value is NonNullable<T> {
+  if (value === undefined || value === null) {
+    throw new Error();
+  }
 }

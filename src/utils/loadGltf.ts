@@ -1,6 +1,7 @@
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
 import { LoadedModel, ModelType, BufferInfo } from '../types/model';
+import { BufferTarget } from '../types/webgl';
 
 const enum BufferType {
   INDICES = 'INDICES',
@@ -66,8 +67,24 @@ type LoadBuffer = {
   accessor: gltf.Accessor;
 };
 
+function ensureBufferTarget(value: number | undefined): BufferTarget {
+  if (!value) {
+    return BufferTarget.ARRAY_BUFFER;
+  }
+
+  if (
+    value == BufferTarget.ARRAY_BUFFER ||
+    value === BufferTarget.ELEMENT_ARRAY_BUFFER
+  ) {
+    return value;
+  }
+
+  throw new Error('Unknown buffer target');
+}
+
 type LoadedBuffer = LoadBuffer & {
-  buffer: Uint8Array;
+  dataArray: Uint8Array;
+  bufferTarget: BufferTarget;
 };
 
 export async function loadGltf(
@@ -125,6 +142,8 @@ export async function loadGltf(
     throw new Error('Indices is not scalar array');
   }
 
+  console.log('indicesAccessor', indicesAccessor);
+
   const loadingBuffers: LoadBuffer[] = [
     {
       type: BufferType.INDICES,
@@ -147,8 +166,6 @@ export async function loadGltf(
     assertNumber(meshNode.skin);
 
     skin = gltfData.skins![meshNode.skin];
-
-    console.log('Skin:', skin);
 
     assertNumber(primitives.attributes.JOINTS_0);
     assertNumber(primitives.attributes.WEIGHTS_0);
@@ -173,8 +190,11 @@ export async function loadGltf(
   const loadedBuffers: LoadedBuffer[] = await Promise.all(
     loadingBuffers.map(async ({ type, accessor }: LoadBuffer) => ({
       type,
+      bufferTarget: ensureBufferTarget(
+        gltfData.bufferViews[accessor.bufferView!].target,
+      ),
       accessor,
-      buffer: await accessBuffer(asset, accessor.bufferView),
+      dataArray: await accessBuffer(asset, accessor.bufferView),
     })),
   );
 
@@ -182,7 +202,10 @@ export async function loadGltf(
   console.info(`Model contains ${meshNodes.length} nodes with mesh`);
   console.info(
     loadedBuffers
-      .map(({ type, buffer }) => `${type} size: ${buffer.byteLength} bytes`)
+      .map(
+        ({ type, dataArray }) =>
+          `${type} size: ${(dataArray.byteLength / 1000).toPrecision(1)} kB`,
+      )
       .join('\n'),
   );
   console.groupEnd();
@@ -190,8 +213,8 @@ export async function loadGltf(
   const modelName = meshNode.name ?? 'unknown mesh';
 
   const namedBuffers = loadedBuffers.reduce(
-    (acc, { type, accessor, buffer }) => {
-      acc[type] = makeBufferInfo(accessor, buffer);
+    (acc, { type, accessor, bufferTarget, dataArray }) => {
+      acc[type] = makeBufferInfo(accessor, bufferTarget, dataArray);
       return acc;
     },
     {} as Record<BufferType, BufferInfo>,
@@ -267,9 +290,11 @@ function accessBuffer(
 
 function makeBufferInfo(
   accessor: gltf.Accessor,
+  bufferTarget: BufferTarget,
   dataArray: Uint8Array,
 ): BufferInfo {
   return {
+    bufferTarget,
     componentType: accessor.componentType,
     componentDimension: lookupComponentDimension(accessor.type),
     elementsCount: accessor.count,

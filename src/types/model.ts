@@ -1,9 +1,6 @@
 import { mat4 } from 'gl-matrix';
 
-export const enum ComponentType {
-  UNSIGNED_SHORT = 5123,
-  FLOAT = 5126,
-}
+import type { BufferTarget, ComponentType } from './webgl';
 
 export const enum ModelType {
   REGULAR = 'REGULAR',
@@ -11,6 +8,7 @@ export const enum ModelType {
 }
 
 export type BufferInfo = {
+  bufferTarget: BufferTarget;
   componentType: ComponentType;
   componentDimension: number;
   elementsCount: number;

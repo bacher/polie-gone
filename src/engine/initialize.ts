@@ -5,6 +5,7 @@ import type { ShaderProgram } from '../shaderPrograms/programs';
 import { initModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
 import { mat4 } from 'gl-matrix';
+import { initVertexBufferObjects } from './buffers';
 
 type Params = {
   modelData: LoadedModel;
@@ -31,7 +32,14 @@ export function initialize(
 
   const program = initSimpleProgram(gl);
 
-  const modelVao = initModelVao(gl, program.attributeLocations, modelData);
+  const buffers = initVertexBufferObjects(gl, modelData);
+
+  const modelVao = initModelVao(
+    gl,
+    program.attributeLocations,
+    buffers,
+    modelData,
+  );
 
   const scene = setupScene({ modelVao });
 

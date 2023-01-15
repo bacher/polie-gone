@@ -1,5 +1,7 @@
-import type { Scene } from './scene';
 import type { ShaderProgram } from '../shaderPrograms/programs';
+import { glBindVertexArray } from '../utils/webgl';
+
+import type { Scene } from './scene';
 
 export function renderScene(
   gl: WebGL2RenderingContext,
@@ -15,7 +17,7 @@ export function renderScene(
 
   for (const model of scene.models) {
     program.uniforms.model(model.modelMat);
-    gl.bindVertexArray(model.modelVao.glVao);
+    glBindVertexArray(gl, model.modelVao);
     model.modelVao.draw();
   }
 }
