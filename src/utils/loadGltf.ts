@@ -1,6 +1,12 @@
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
-import { LoadedModel, ModelType, DataBuffer } from '../types/model';
+import {
+  LoadedModel,
+  ModelType,
+  DataBuffer,
+  SkinnedLoadedModel,
+  RegularLoadedModel,
+} from '../types/model';
 import { BufferTarget } from '../types/webgl';
 
 const enum BufferType {
@@ -87,10 +93,12 @@ type LoadedBuffer = LoadBuffer & {
   bufferTarget: BufferTarget;
 };
 
-export async function loadGltf(
+export async function loadGltf<T extends { loadSkin?: boolean }>(
   modelUri: string,
-  { loadSkin }: LoadGltfOptions = {},
-): Promise<LoadedModel> {
+  { loadSkin }: T,
+): Promise<
+  T['loadSkin'] extends true ? SkinnedLoadedModel : RegularLoadedModel
+> {
   const loader = new GltfLoader();
   const asset = await loader.load(modelUri);
 
@@ -248,7 +256,7 @@ export async function loadGltf(
       inverseJoints.push(inverseJointsFloatList.slice(offset, offset + 16));
     }
 
-    return {
+    const model: SkinnedLoadedModel = {
       type: ModelType.SKINNED,
       modelName,
       dataBuffers: {
@@ -258,13 +266,17 @@ export async function loadGltf(
       },
       inverseJoints,
     };
+
+    return model as any;
   }
 
-  return {
+  const model: RegularLoadedModel = {
     type: ModelType.REGULAR,
     modelName,
     dataBuffers: baseBuffers,
   };
+
+  return model as any;
 }
 
 function accessBuffer(
