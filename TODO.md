@@ -7,8 +7,10 @@
 - [x] Make dynamic scene
 - [x] Add several game objects
 - [x] Split shaders (regular and with skinning)
-- [ ] Support texturing
+- [x] Support texturing
 - [ ] Add texture based plains (height map)
+- [ ] Add free-look camera (capture mouse)
+- [ ] Add mouse-drag camera (drag to look)
 - [ ] Spawn and destroy objects in time
 - [ ] Add simple physics engine
 - [ ] Add animations

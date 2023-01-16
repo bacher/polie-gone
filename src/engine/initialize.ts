@@ -77,7 +77,6 @@ export function initializeModel<T extends ShaderProgramType>(
 
   if (modelData.texture) {
     manTexture = initTexture(glContext, modelData.texture);
-    console.log('manTexture =', manTexture);
   }
 
   const vaos = {} as Record<T, ModelVao>;

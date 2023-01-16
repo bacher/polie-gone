@@ -32,43 +32,28 @@ export function initModelVao(
 
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, vertexBuffers.index);
 
-  processFeature(
-    gl,
-    shaderProgram.attributeLocations.position,
-    gltfModel.dataBuffers.position,
-    vertexBuffers.position,
-  );
-
-  processFeature(
-    gl,
-    shaderProgram.attributeLocations.normal,
-    gltfModel.dataBuffers.normal,
-    vertexBuffers.normal,
-  );
-
-  processFeature(
-    gl,
-    shaderProgram.attributeLocations.texcoord,
-    gltfModel.dataBuffers.texcoord,
-    vertexBuffers.texcoord,
-  );
+  const features: (keyof VertexBufferObjectCollection)[] = [
+    'position',
+    'normal',
+    'texcoord',
+  ];
 
   if (
     gltfModel.type === ModelType.SKINNED &&
     shaderProgram.type === ShaderProgramType.SKIN
   ) {
-    processFeature(
-      gl,
-      shaderProgram.attributeLocations.joints,
-      gltfModel.dataBuffers.joints,
-      vertexBuffers.joints,
-    );
-    processFeature(
-      gl,
-      shaderProgram.attributeLocations.weights,
-      gltfModel.dataBuffers.weights,
-      vertexBuffers.weights,
-    );
+    features.push('joints', 'weights');
+  }
+
+  for (const featureName of features) {
+    processFeature(gl, {
+      shaderProgramType: shaderProgram.type,
+      modelName: gltfModel.modelName,
+      attributeLocations: shaderProgram.attributeLocations,
+      dataBuffers: gltfModel.dataBuffers,
+      vertexBuffers,
+      featureName,
+    });
   }
 
   gl.bindVertexArray(null);
@@ -142,12 +127,30 @@ function assertExistence<T>(value: unknown): asserts value is NonNullable<T> {
   }
 }
 
+type FeatureData = {
+  modelName: string;
+  shaderProgramType: ShaderProgramType;
+  attributeLocations: Record<string, AttributeLocation | undefined>;
+  dataBuffers: Record<string, DataBuffer | undefined>;
+  vertexBuffers: VertexBufferObjectCollection;
+  featureName: keyof VertexBufferObjectCollection;
+};
+
 export function processFeature(
   gl: WebGL2RenderingContext,
-  attributeLocation?: AttributeLocation,
-  dataBuffer?: DataBuffer,
-  vbo?: VertexBufferObject,
+  {
+    modelName,
+    shaderProgramType,
+    attributeLocations,
+    vertexBuffers,
+    dataBuffers,
+    featureName,
+  }: FeatureData,
 ): boolean {
+  const attributeLocation = attributeLocations[featureName];
+  const vbo = vertexBuffers[featureName];
+  const dataBuffer = dataBuffers[featureName];
+
   if (attributeLocation && dataBuffer) {
     assertExistence(vbo);
     bindBufferVertexArrayPointer(gl, dataBuffer, vbo, attributeLocation);
@@ -159,7 +162,13 @@ export function processFeature(
   }
 
   if (attributeLocation) {
-    console.error('Model and shader feature mismatch');
+    console.error(
+      `Model ${modelName} does not have ${featureName} buffer for shader ${shaderProgramType}`,
+    );
+  } else {
+    console.error(
+      `Model ${modelName} have unused ${featureName} buffer with shader ${shaderProgramType}`,
+    );
   }
 
   return false;
