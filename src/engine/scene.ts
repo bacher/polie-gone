@@ -4,6 +4,7 @@ import type { ShaderProgramType, ShaderProgram } from '../shaderPrograms/types';
 import type { ModelVao } from './initModelVao';
 import type { Transforms } from '../types/model';
 import type { Model } from './initialize';
+import type { GlContext } from './glContext';
 import { convertTransformsToMat4 } from './utils';
 
 export type ModelInstance = {
@@ -22,6 +23,7 @@ type AddDrawObjectParams = {
 
 export type Scene = {
   gl: GL;
+  glContext: GlContext;
   isRenderLoop: boolean;
   shaderPrograms: ShadersCollection;
   cameraMat: mat4;
@@ -32,11 +34,14 @@ export type Scene = {
 };
 
 type SceneSetupParams = {
-  gl: GL;
+  glContext: GlContext;
   shaderPrograms: ShadersCollection;
 };
 
-export function setupScene({ gl, shaderPrograms }: SceneSetupParams): Scene {
+export function setupScene({
+  glContext,
+  shaderPrograms,
+}: SceneSetupParams): Scene {
   const cameraMat = mat4.perspective(
     mat4.create(),
     Math.PI / 2,
@@ -50,7 +55,8 @@ export function setupScene({ gl, shaderPrograms }: SceneSetupParams): Scene {
   const lightDirection = vec3.fromValues(-5, 10, 4);
 
   const scene: Scene = {
-    gl,
+    gl: glContext.gl,
+    glContext,
     isRenderLoop: false,
     cameraMat,
     lightDirection,

@@ -12,8 +12,10 @@ import { Scene, setupScene } from './scene';
 import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 import { calculateGlobalJoinsMatrices } from './utils';
+import { createGlContext, GlContext } from './glContext';
 
 export type InitResults = {
+  glContext: GlContext;
   scene: Scene;
 };
 
@@ -27,17 +29,19 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     throw new Error('No WebGL 2');
   }
 
+  const glContext = createGlContext(gl);
+
   const shaderManager = createShadersManager(gl);
 
-  const defaultProgram = initDefaultProgram(gl, shaderManager);
-  const skinProgram = initSkinProgram(gl, shaderManager);
-  const modernProgram = initModernProgram(gl, shaderManager);
+  const defaultProgram = initDefaultProgram(glContext, shaderManager);
+  const skinProgram = initSkinProgram(glContext, shaderManager);
+  const modernProgram = initModernProgram(glContext, shaderManager);
 
   // After creation of all shader programs we can clear shader cache
   shaderManager.disposeAll();
 
   const scene = setupScene({
-    gl,
+    glContext,
     shaderPrograms: {
       [defaultProgram.type]: defaultProgram,
       [skinProgram.type]: skinProgram,
@@ -51,6 +55,7 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   console.info('Program init complete');
 
   return {
+    glContext,
     scene,
   };
 }
@@ -60,6 +65,7 @@ export type Model<T extends string> = {
 };
 
 export function initializeModel<T extends ShaderProgramType>(
+  glContext: GlContext,
   scene: Scene,
   modelData: LoadedModel,
   programTypes: T[],
@@ -77,7 +83,12 @@ export function initializeModel<T extends ShaderProgramType>(
       shaderProgram.type,
     );
 
-    const vao = initModelVao(scene.gl, shaderProgram, vertexBuffers, modelData);
+    const vao = initModelVao(
+      glContext,
+      shaderProgram,
+      vertexBuffers,
+      modelData,
+    );
 
     vaos[programType] = vao;
 

@@ -36,3 +36,8 @@ export type FragmentShaderInitParams = {
   source: string;
   init: FragmentShaderInitFunc;
 };
+
+export type ShaderInterface = {
+  glProgram: WebGLProgram;
+  dispose: () => void;
+};

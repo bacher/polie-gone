@@ -28,18 +28,18 @@ export async function setupGame({
   const manModelData = await loadGltf('/models/man.gltf', { loadSkin: true });
   const toiletModelData = await loadGltf('/models/toilet.gltf', {});
 
-  const { scene } = initialize(canvasElement);
+  const { glContext, scene } = initialize(canvasElement);
 
   const globalState = {
     isRotating: false,
   };
 
-  const manModel = initializeModel(scene, manModelData, [
+  const manModel = initializeModel(glContext, scene, manModelData, [
     ShaderProgramType.DEFAULT,
     ShaderProgramType.SKIN,
   ]);
 
-  const toiletModel = initializeModel(scene, toiletModelData, [
+  const toiletModel = initializeModel(glContext, scene, toiletModelData, [
     ShaderProgramType.DEFAULT,
   ]);
 

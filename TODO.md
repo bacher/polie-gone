@@ -6,7 +6,7 @@
 - [x] Use uint for joint attribute
 - [x] Make dynamic scene
 - [x] Add several game objects
-- [ ] Split shaders (regular and with skinning)
+- [x] Split shaders (regular and with skinning)
 - [ ] Add texture based plains (height map)
 - [ ] Spawn and destroy objects in time
 - [ ] Add simple physics engine

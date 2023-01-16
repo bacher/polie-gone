@@ -1,5 +1,3 @@
-import { glBindVertexArray } from '../utils/webgl';
-
 import type { Scene } from './scene';
 
 type TickTime = {
@@ -82,8 +80,6 @@ export function renderScene(scene: Scene): void {
     shaderProgram.uniforms.lightDirection(scene.lightDirection);
     shaderProgram.uniforms.model(model.modelMat);
 
-    // TODO: move VAO activation into draw method
-    glBindVertexArray(gl, model.modelVao);
     model.modelVao.draw();
   }
 }

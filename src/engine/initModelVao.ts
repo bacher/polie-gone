@@ -1,12 +1,13 @@
 import type { AttributeLocation } from '../types/webgl';
 import type { DataBuffer, LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
+import { glBindBuffer } from '../utils/webgl';
+import { ShaderProgram, ShaderProgramType } from '../shaderPrograms/types';
 import type {
   VertexBufferObject,
   VertexBufferObjectCollection,
 } from './initVertextBuffer';
-import { glBindBuffer, glBindVertexArray } from '../utils/webgl';
-import { ShaderProgram, ShaderProgramType } from '../shaderPrograms/types';
+import type { GlContext } from './glContext';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -23,11 +24,12 @@ export type Attributes = {
 };
 
 export function initModelVao(
-  gl: GL,
+  glContext: GlContext,
   shaderProgram: ShaderProgram,
   vertexBuffers: VertexBufferObjectCollection,
   gltfModel: LoadedModel,
 ): ModelVao {
+  const { gl } = glContext;
   const glVao = gl.createVertexArray();
 
   if (!glVao) {
@@ -88,16 +90,18 @@ export function initModelVao(
     );
   }
 
-  glBindVertexArray(gl, null);
+  gl.bindVertexArray(null);
   // TODO: Move next line before VAO unbind
   glBindBuffer(gl, gl.ARRAY_BUFFER, null);
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, null);
 
   const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
 
-  return {
+  const modelVao: ModelVao = {
     glVao,
     draw: () => {
+      glContext.useVao(modelVao);
+
       gl.drawElements(
         gl.TRIANGLES,
         elementsCount,
@@ -109,6 +113,8 @@ export function initModelVao(
       gl.deleteVertexArray(glVao);
     },
   };
+
+  return modelVao;
 }
 
 function bindBufferVertexArrayPointer(

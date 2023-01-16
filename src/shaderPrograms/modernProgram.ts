@@ -1,5 +1,6 @@
 import type { ShadersManager } from '../engine/shaders/shaderManager';
 import { initShaderProgram } from '../engine/shaders/initShaderProgram';
+import type { GlContext } from '../engine/glContext';
 
 import { initVertex, vertexSource } from '../shaders/default.vertex';
 import { initFragment, fragmentSource } from '../shaders/directLight.fragment';
@@ -13,10 +14,10 @@ export type ModerProgram = ProgramInit<
 >;
 
 export function initModernProgram(
-  gl: GL,
+  glContext: GlContext,
   shadersManager: ShadersManager,
 ): ModerProgram {
-  return initShaderProgram(gl, shadersManager, {
+  return initShaderProgram(glContext, shadersManager, {
     type: ShaderProgramType.MODERN,
     vertex: {
       source: vertexSource,

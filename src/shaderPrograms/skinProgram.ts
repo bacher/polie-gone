@@ -1,5 +1,6 @@
 import type { ShadersManager } from '../engine/shaders/shaderManager';
 import { initShaderProgram } from '../engine/shaders/initShaderProgram';
+import type { GlContext } from '../engine/glContext';
 
 import { initVertex, vertexSource } from '../shaders/skin.vertex';
 import { initFragment, fragmentSource } from '../shaders/directLight.fragment';
@@ -13,10 +14,10 @@ export type SkinProgram = ProgramInit<
 >;
 
 export function initSkinProgram(
-  gl: GL,
+  glContext: GlContext,
   shadersManager: ShadersManager,
 ): SkinProgram {
-  return initShaderProgram(gl, shadersManager, {
+  return initShaderProgram(glContext, shadersManager, {
     type: ShaderProgramType.SKIN,
     vertex: {
       source: vertexSource,

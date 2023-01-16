@@ -1,25 +1,27 @@
 // TODO: Remove
 import type { ShaderProgramType } from '../../shaderPrograms/types';
+import type { GlContext } from '../glContext';
 
 import type {
   FragmentShaderInitParams,
   VertexShaderInitParams,
   UniformsCollection,
   AttributeLocationsCollection,
+  ShaderInterface,
 } from './types';
 import type { ShaderInstance, ShadersManager } from './shaderManager';
 
-export type ShaderProgramInitial = {
-  glProgram: WebGLProgram;
+export type ShaderProgramInitial = ShaderInterface & {
   use: () => void;
-  dispose: () => void;
 };
 
 function createProgram(
-  gl: GL,
+  glContext: GlContext,
   vertexShader: ShaderInstance,
   fragmentShader: ShaderInstance,
 ): ShaderProgramInitial {
+  const { gl } = glContext;
+
   const glProgram = gl.createProgram();
 
   if (!glProgram) {
@@ -36,19 +38,21 @@ function createProgram(
     throw new Error();
   }
 
-  return {
+  const shaderProgram: ShaderProgramInitial = {
     glProgram: glProgram,
     use: () => {
-      gl.useProgram(glProgram);
+      glContext.useProgram(shaderProgram);
     },
     dispose: () => {
       gl.deleteProgram(glProgram);
     },
   };
+
+  return shaderProgram;
 }
 
 export function initShaderProgram(
-  gl: GL,
+  glContext: GlContext,
   shadersManager: ShadersManager,
   {
     type,
@@ -64,10 +68,12 @@ export function initShaderProgram(
   uniforms: UniformsCollection;
   attributeLocations: AttributeLocationsCollection;
 } {
+  const { gl } = glContext;
+
   const vertexShader = shadersManager.getVertexShader(vertex);
   const fragmentShader = shadersManager.getFragmentShader(fragment);
 
-  const program = createProgram(gl, vertexShader, fragmentShader);
+  const program = createProgram(glContext, vertexShader, fragmentShader);
 
   const vertexInit = vertex.init(gl, program);
   const fragmentInit = fragment.init(gl, program);
