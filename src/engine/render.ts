@@ -80,8 +80,9 @@ export function renderScene(scene: Scene): void {
     shaderProgram.use();
     shaderProgram.uniforms.projection(scene.cameraMat);
     shaderProgram.uniforms.lightDirection(scene.lightDirection);
-
     shaderProgram.uniforms.model(model.modelMat);
+
+    // TODO: move VAO activation into draw method
     glBindVertexArray(gl, model.modelVao);
     model.modelVao.draw();
   }

@@ -5,7 +5,7 @@ import {
 } from '../engine/shaders/utils';
 import type { ShaderProgramInitial } from '../engine/shaders/initShaderProgram';
 
-export { default as vertexSource } from './simple.vertex.glsl?raw';
+export { default as vertexSource } from './skin.vertex.glsl?raw';
 
 export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
   return {

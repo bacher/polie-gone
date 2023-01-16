@@ -7,7 +7,7 @@ export function extractAttributes<T extends string>(
   glProgram: WebGLProgram,
   attributesList: Array<T>,
 ) {
-  const attributes = {} as { [K in T]?: AttributeLocation };
+  const attributes = {} as { [K in T]: AttributeLocation };
 
   for (const attributeName of attributesList) {
     const fullAttributeName = `a_${attributeName}`;

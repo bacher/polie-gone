@@ -1,22 +1,23 @@
 import type { ShadersManager } from '../engine/shaders/shaderManager';
 import { initShaderProgram } from '../engine/shaders/initShaderProgram';
-import { initVertex, vertexSource } from '../shaders/simple.vertex';
-import { initFragment, fragmentSource } from '../shaders/simple.fragment';
+
+import { initVertex, vertexSource } from '../shaders/skin.vertex';
+import { initFragment, fragmentSource } from '../shaders/directLight.fragment';
 
 import { ProgramInit, ShaderProgramType } from './types';
 
-export type SimpleProgram = ProgramInit<
-  ShaderProgramType.SIMPLE,
+export type SkinProgram = ProgramInit<
+  ShaderProgramType.SKIN,
   typeof initVertex,
   typeof initFragment
 >;
 
-export function initSimpleProgram(
+export function initSkinProgram(
   gl: GL,
   shadersManager: ShadersManager,
-): SimpleProgram {
+): SkinProgram {
   return initShaderProgram(gl, shadersManager, {
-    type: ShaderProgramType.SIMPLE,
+    type: ShaderProgramType.SKIN,
     vertex: {
       source: vertexSource,
       init: initVertex,
@@ -25,5 +26,5 @@ export function initSimpleProgram(
       source: fragmentSource,
       init: initFragment,
     },
-  }) as SimpleProgram;
+  }) as SkinProgram;
 }

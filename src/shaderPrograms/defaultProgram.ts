@@ -6,18 +6,18 @@ import { initFragment, fragmentSource } from '../shaders/directLight.fragment';
 
 import { ProgramInit, ShaderProgramType } from './types';
 
-export type ModerProgram = ProgramInit<
-  ShaderProgramType.MODERN,
+export type DefaultProgram = ProgramInit<
+  ShaderProgramType.DEFAULT,
   typeof initVertex,
   typeof initFragment
 >;
 
-export function initModernProgram(
+export function initDefaultProgram(
   gl: GL,
   shadersManager: ShadersManager,
-): ModerProgram {
+): DefaultProgram {
   return initShaderProgram(gl, shadersManager, {
-    type: ShaderProgramType.MODERN,
+    type: ShaderProgramType.DEFAULT,
     vertex: {
       source: vertexSource,
       init: initVertex,
@@ -26,5 +26,5 @@ export function initModernProgram(
       source: fragmentSource,
       init: initFragment,
     },
-  }) as ModerProgram;
+  }) as DefaultProgram;
 }

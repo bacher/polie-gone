@@ -7,6 +7,7 @@ import { renderScene, startRenderLoop } from '../engine/render';
 
 import './exportGlMatrix';
 import { ShaderProgramType } from '../shaderPrograms/types';
+import { fromEuler } from './utils';
 
 export type Game = {
   scene: Scene;
@@ -25,6 +26,7 @@ export async function setupGame({
   canvasElement,
 }: SetupGameParams): Promise<Game> {
   const manModelData = await loadGltf('/models/man.gltf', { loadSkin: true });
+  const toiletModelData = await loadGltf('/models/toilet.gltf', {});
 
   const { scene } = initialize(canvasElement);
 
@@ -33,33 +35,48 @@ export async function setupGame({
   };
 
   const manModel = initializeModel(scene, manModelData, [
-    ShaderProgramType.SIMPLE,
+    ShaderProgramType.DEFAULT,
+    ShaderProgramType.SKIN,
   ]);
 
-  const manDrawObject = scene.addDrawObject({
+  const toiletModel = initializeModel(scene, toiletModelData, [
+    ShaderProgramType.DEFAULT,
+  ]);
+
+  const man1 = scene.addDrawObject({
     model: manModel,
     transforms: {
       translation: [0, -0.23, -1],
     },
-    defaultShaderProgramType: ShaderProgramType.SIMPLE,
+    defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });
 
-  const man2DrawObject = scene.addDrawObject({
+  const man2 = scene.addDrawObject({
     model: manModel,
     transforms: {
       translation: [3, -0.23, -3],
     },
-    defaultShaderProgramType: ShaderProgramType.SIMPLE,
+    defaultShaderProgramType: ShaderProgramType.SKIN,
   });
 
-  const man3DrawObject = scene.addDrawObject({
+  const man3 = scene.addDrawObject({
     model: manModel,
     transforms: {
-      rotation: quat.fromEuler(quat.create(), 50, 0, 47),
+      rotation: fromEuler(0.14, 0, 0.13),
       translation: [-3, -0.23, -2],
       scale: [0.4, 0.4, 0.4],
     },
-    defaultShaderProgramType: ShaderProgramType.SIMPLE,
+    defaultShaderProgramType: ShaderProgramType.SKIN,
+  });
+
+  const toilet = scene.addDrawObject({
+    model: toiletModel,
+    transforms: {
+      translation: [-0.9, -1, -1.5],
+      scale: [0.6, 0.6, 0.6],
+      rotation: fromEuler(0, 0.01, 0),
+    },
+    defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });
 
   const game = {

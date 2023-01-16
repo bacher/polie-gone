@@ -6,6 +6,7 @@ import type {
   VertexBufferObjectCollection,
 } from './initVertextBuffer';
 import { glBindBuffer, glBindVertexArray } from '../utils/webgl';
+import { ShaderProgram, ShaderProgramType } from '../shaderPrograms/types';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -23,7 +24,7 @@ export type Attributes = {
 
 export function initModelVao(
   gl: GL,
-  attributeLocations: Attributes,
+  shaderProgram: ShaderProgram,
   vertexBuffers: VertexBufferObjectCollection,
   gltfModel: LoadedModel,
 ): ModelVao {
@@ -41,34 +42,35 @@ export function initModelVao(
     gl,
     gltfModel.dataBuffers.position,
     vertexBuffers.position,
-    attributeLocations.position,
+    shaderProgram.attributeLocations.position,
   );
 
-  if (attributeLocations.normal && gltfModel.dataBuffers.normal) {
+  if (shaderProgram.attributeLocations.normal && gltfModel.dataBuffers.normal) {
     assertExistence(vertexBuffers.normal);
     bindBufferVertexArrayPointer(
       gl,
       gltfModel.dataBuffers.normal,
       vertexBuffers.normal,
-      attributeLocations.normal,
+      shaderProgram.attributeLocations.normal,
     );
   }
 
-  if (attributeLocations.uv && gltfModel.dataBuffers.uv) {
+  /*
+  if (shaderProgram.attributeLocations.uv && gltfModel.dataBuffers.uv) {
     assertExistence(vertexBuffers.uv);
     bindBufferVertexArrayPointer(
       gl,
       gltfModel.dataBuffers.uv,
       vertexBuffers.uv,
-      attributeLocations.uv,
+      shaderProgram.attributeLocations.uv,
     );
   }
+   */
 
-  if (gltfModel.type === ModelType.SKINNED) {
-    if (!attributeLocations.joints || !attributeLocations.weights) {
-      throw new Error('Shader without bones');
-    }
-
+  if (
+    gltfModel.type === ModelType.SKINNED &&
+    shaderProgram.type === ShaderProgramType.SKIN
+  ) {
     assertExistence(vertexBuffers.joints);
     assertExistence(vertexBuffers.weights);
 
@@ -76,13 +78,13 @@ export function initModelVao(
       gl,
       gltfModel.dataBuffers.joints,
       vertexBuffers.joints,
-      attributeLocations.joints,
+      shaderProgram.attributeLocations.joints,
     );
     bindBufferVertexArrayPointer(
       gl,
       gltfModel.dataBuffers.weights,
       vertexBuffers.weights,
-      attributeLocations.weights,
+      shaderProgram.attributeLocations.weights,
     );
   }
 

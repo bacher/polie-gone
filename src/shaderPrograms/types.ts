@@ -2,15 +2,18 @@ import type {
   FragmentShaderInitFunc,
   VertexShaderInitFunc,
 } from '../engine/shaders/types';
-import type { SimpleProgram } from './simpleProgram';
+
+import type { DefaultProgram } from './defaultProgram';
+import type { SkinProgram } from './skinProgram';
 import type { ModerProgram } from './modernProgram';
 
 export const enum ShaderProgramType {
-  SIMPLE = 'SIMPLE',
+  DEFAULT = 'DEFAULT',
+  SKIN = 'SKIN',
   MODERN = 'MODERN',
 }
 
-export type ShaderProgram = SimpleProgram | ModerProgram;
+export type ShaderProgram = DefaultProgram | SkinProgram | ModerProgram;
 
 export type ProgramInit<
   T extends ShaderProgramType,

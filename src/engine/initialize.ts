@@ -2,15 +2,16 @@ import { mat4 } from 'gl-matrix';
 
 import type { LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
-import { initSimpleProgram } from '../shaderPrograms/simpleProgram';
+import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
+import { initSkinProgram } from '../shaderPrograms/skinProgram';
+import { initModernProgram } from '../shaderPrograms/modernProgram';
+import { ShaderProgramType } from '../shaderPrograms/types';
 
 import { initModelVao, ModelVao } from './initModelVao';
 import { Scene, setupScene } from './scene';
 import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 import { calculateGlobalJoinsMatrices } from './utils';
-import { initModernProgram } from '../shaderPrograms/modernProgram';
-import { ShaderProgramType } from '../shaderPrograms/types';
 
 export type InitResults = {
   scene: Scene;
@@ -28,7 +29,8 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
 
   const shaderManager = createShadersManager(gl);
 
-  const simpleProgram = initSimpleProgram(gl, shaderManager);
+  const defaultProgram = initDefaultProgram(gl, shaderManager);
+  const skinProgram = initSkinProgram(gl, shaderManager);
   const modernProgram = initModernProgram(gl, shaderManager);
 
   // After creation of all shader programs we can clear shader cache
@@ -37,7 +39,8 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   const scene = setupScene({
     gl,
     shaderPrograms: {
-      [simpleProgram.type]: simpleProgram,
+      [defaultProgram.type]: defaultProgram,
+      [skinProgram.type]: skinProgram,
       [modernProgram.type]: modernProgram,
     },
   });
@@ -68,16 +71,20 @@ export function initializeModel<T extends ShaderProgramType>(
   for (const programType of programTypes) {
     const shaderProgram = scene.shaderPrograms[programType];
 
-    const vao = initModelVao(
-      scene.gl,
-      shaderProgram.attributeLocations,
-      vertexBuffers,
-      modelData,
+    checkIfModelMatchShader(
+      modelData.modelName,
+      modelData.type,
+      shaderProgram.type,
     );
+
+    const vao = initModelVao(scene.gl, shaderProgram, vertexBuffers, modelData);
 
     vaos[programType] = vao;
 
-    if (modelData.type === ModelType.SKINNED) {
+    if (
+      modelData.type === ModelType.SKINNED &&
+      shaderProgram.type === ShaderProgramType.SKIN
+    ) {
       const jointsCount = modelData.joints.length;
 
       const jointMatricesArray = new Float32Array(16 * jointsCount);
@@ -116,4 +123,28 @@ export function initializeModel<T extends ShaderProgramType>(
   return {
     vaos,
   };
+}
+
+function checkIfModelMatchShader(
+  modelName: string,
+  modelType: ModelType,
+  shaderProgramType: ShaderProgramType,
+): void {
+  if (
+    modelType === ModelType.SKINNED &&
+    shaderProgramType !== ShaderProgramType.SKIN
+  ) {
+    console.error(
+      `Model ${modelName} have joints but uses shader ${shaderProgramType}`,
+    );
+  }
+
+  if (
+    modelType !== ModelType.SKINNED &&
+    shaderProgramType === ShaderProgramType.SKIN
+  ) {
+    console.error(
+      `Model ${modelName} don't have joints but uses shader ${shaderProgramType}`,
+    );
+  }
 }
