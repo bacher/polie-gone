@@ -3,15 +3,14 @@ import type {
   VertexShaderInitFunc,
 } from '../engine/shaders/types';
 import type { SimpleProgram } from './simpleProgram';
+import type { ModerProgram } from './modernProgram';
 
 export const enum ShaderProgramType {
   SIMPLE = 'SIMPLE',
   MODERN = 'MODERN',
 }
 
-export type ShaderProgram =
-  | SimpleProgram
-  | (Omit<SimpleProgram, 'type'> & { type: ShaderProgramType.MODERN });
+export type ShaderProgram = SimpleProgram | ModerProgram;
 
 export type ProgramInit<
   T extends ShaderProgramType,

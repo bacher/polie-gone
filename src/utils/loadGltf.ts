@@ -275,9 +275,9 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
         nodeIndex: joinNodeIndex,
         children,
         transforms: {
-          rotation: Float32Array.from(jointInfo.rotation ?? [0, 0, 0, 1]),
-          scale: Float32Array.from(jointInfo.scale ?? [1, 1, 1]),
-          translate: Float32Array.from(jointInfo.translation ?? [0, 0, 0]),
+          rotation: castToFloat32List(jointInfo.rotation),
+          scale: castToFloat32List(jointInfo.scale),
+          translation: castToFloat32List(jointInfo.translation),
         },
         inverseMat,
       });
@@ -358,4 +358,14 @@ function convertUint8ListToFloat32List(uint8Array: Uint8Array): Float32Array {
       uint8Array.byteOffset + uint8Array.byteLength,
     ),
   );
+}
+
+function castToFloat32List(
+  values: number[] | undefined,
+): Float32Array | undefined {
+  if (!values) {
+    return undefined;
+  }
+
+  return Float32Array.from(values);
 }

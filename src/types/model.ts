@@ -28,14 +28,14 @@ export type RegularLoadedModel = {
 
 export type Transforms = {
   rotation: quat;
-  translate: vec3;
+  translation: vec3;
   scale: vec3;
 };
 
 export type JointInfo = {
   nodeIndex: number;
   children: number[] | undefined;
-  transforms: Transforms;
+  transforms: Partial<Transforms>;
   inverseMat: mat4;
 };
 

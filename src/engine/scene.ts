@@ -1,7 +1,10 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import type { ShaderProgram } from '../shaderPrograms/types';
+import type { ShaderProgramType, ShaderProgram } from '../shaderPrograms/types';
 import type { ModelVao } from './initModelVao';
+import type { Transforms } from '../types/model';
+import type { Model } from './initialize';
+import { convertTransformsToMat4 } from './utils';
 
 export type ModelInstance = {
   shaderProgram: ShaderProgram;
@@ -9,25 +12,31 @@ export type ModelInstance = {
   modelVao: ModelVao;
 };
 
+type ShadersCollection = Record<ShaderProgramType, ShaderProgram>;
+
+type AddDrawObjectParams = {
+  model: Model<any>;
+  transforms: Partial<Transforms>;
+  defaultShaderProgramType: ShaderProgramType;
+};
+
 export type Scene = {
   gl: GL;
   isRenderLoop: boolean;
+  shaderPrograms: ShadersCollection;
   cameraMat: mat4;
   lightDirection: vec3;
   models: ModelInstance[];
+  setGlobalLightDirection: (vec: vec3) => void;
+  addDrawObject: (params: AddDrawObjectParams) => ModelInstance;
 };
 
 type SceneSetupParams = {
   gl: GL;
-  shaderProgram: ShaderProgram;
-  modelVao: ModelVao;
+  shaderPrograms: ShadersCollection;
 };
 
-export function setupScene({
-  gl,
-  shaderProgram,
-  modelVao,
-}: SceneSetupParams): Scene {
+export function setupScene({ gl, shaderPrograms }: SceneSetupParams): Scene {
   const cameraMat = mat4.perspective(
     mat4.create(),
     Math.PI / 2,
@@ -38,22 +47,50 @@ export function setupScene({
 
   mat4.translate(cameraMat, cameraMat, [0, 0, -2]);
 
-  const modelMat = mat4.fromTranslation(mat4.create(), [0, -0.23, -1]);
-  // const modelMat = mat4.create();
-
   const lightDirection = vec3.fromValues(-5, 10, 4);
 
-  return {
+  const scene: Scene = {
     gl,
     isRenderLoop: false,
     cameraMat,
     lightDirection,
-    models: [
-      {
-        shaderProgram,
-        modelMat,
-        modelVao,
-      },
-    ],
+    shaderPrograms,
+    models: [],
+
+    setGlobalLightDirection: (...args) =>
+      sceneSetGlobalLightDirection(scene, ...args),
+    addDrawObject: (...args) => sceneAddDrawObject(scene, ...args),
   };
+
+  return scene;
+}
+
+export function sceneSetGlobalLightDirection(
+  scene: Scene,
+  direction: vec3,
+): void {
+  scene.lightDirection = direction;
+}
+
+function sceneAddDrawObject(
+  scene: Scene,
+  { model, transforms, defaultShaderProgramType }: AddDrawObjectParams,
+): ModelInstance {
+  const defaultVao = model.vaos[defaultShaderProgramType];
+
+  if (!defaultVao) {
+    throw new Error('Model do not have needed vao type');
+  }
+
+  const shaderProgram = scene.shaderPrograms[defaultShaderProgramType];
+
+  const modelInstance: ModelInstance = {
+    shaderProgram,
+    modelMat: convertTransformsToMat4(transforms),
+    modelVao: defaultVao,
+  };
+
+  scene.models.push(modelInstance);
+
+  return modelInstance;
 }

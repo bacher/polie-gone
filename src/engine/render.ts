@@ -64,7 +64,7 @@ export function startRenderLoop({
 
   scene.isRenderLoop = true;
 
-  console.log('Render Loop Started');
+  console.info('Render loop started');
 }
 
 export function renderScene(scene: Scene): void {

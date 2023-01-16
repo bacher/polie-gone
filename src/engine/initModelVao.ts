@@ -87,6 +87,7 @@ export function initModelVao(
   }
 
   glBindVertexArray(gl, null);
+  // TODO: Move next line before VAO unbind
   glBindBuffer(gl, gl.ARRAY_BUFFER, null);
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, null);
 
