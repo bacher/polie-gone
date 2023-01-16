@@ -10,7 +10,7 @@ export type VertexBufferObjectCollection = {
   index: VertexBufferObject;
   position: VertexBufferObject;
   normal?: VertexBufferObject;
-  uv?: VertexBufferObject;
+  texcoord?: VertexBufferObject;
   joints?: VertexBufferObject;
   weights?: VertexBufferObject;
 };
@@ -19,7 +19,7 @@ export function initVertexBufferObjects(
   gl: GL,
   model: LoadedModel,
 ): VertexBufferObjectCollection {
-  const { indices, position, uv, normal } = model.dataBuffers;
+  const { indices, position, texcoord, normal } = model.dataBuffers;
   let joints: DataBuffer | undefined;
   let weights: DataBuffer | undefined;
 
@@ -31,7 +31,7 @@ export function initVertexBufferObjects(
     index: createBuffer(gl, indices),
     position: createBuffer(gl, position),
     normal: normal ? createBuffer(gl, normal) : undefined,
-    uv: uv ? createBuffer(gl, uv) : undefined,
+    texcoord: texcoord ? createBuffer(gl, texcoord) : undefined,
     joints: joints ? createBuffer(gl, joints) : undefined,
     weights: weights ? createBuffer(gl, weights) : undefined,
   };

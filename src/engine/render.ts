@@ -79,6 +79,7 @@ export function renderScene(scene: Scene): void {
     shaderProgram.uniforms.projection(scene.cameraMat);
     shaderProgram.uniforms.lightDirection(scene.lightDirection);
     shaderProgram.uniforms.model(model.modelMat);
+    shaderProgram.uniforms.diffuseTexture(0);
 
     model.modelVao.draw();
   }

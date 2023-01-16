@@ -1,13 +1,14 @@
-import { mat4, quat } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 
 import { loadGltf } from '../utils/loadGltf';
 import { initialize, initializeModel } from '../engine/initialize';
 import type { Scene } from '../engine/scene';
 import { renderScene, startRenderLoop } from '../engine/render';
+import { ShaderProgramType } from '../shaderPrograms/types';
 
 import './exportGlMatrix';
-import { ShaderProgramType } from '../shaderPrograms/types';
 import { fromEuler } from './utils';
+import { loadTexture } from '../utils/loadTexture';
 
 export type Game = {
   scene: Scene;
@@ -25,8 +26,15 @@ type SetupGameParams = {
 export async function setupGame({
   canvasElement,
 }: SetupGameParams): Promise<Game> {
-  const manModelData = await loadGltf('/models/man.gltf', { loadSkin: true });
-  const toiletModelData = await loadGltf('/models/toilet.gltf', {});
+  const [manModelData, toiletModelData, manTextureImage] = await Promise.all([
+    loadGltf('/models/man/man.gltf', {
+      loadSkin: true,
+    }),
+    loadGltf('/models/toilet/toilet.gltf'),
+    loadTexture('/models/man/man.png'),
+  ]);
+
+  manModelData.texture = manTextureImage;
 
   const { glContext, scene } = initialize(canvasElement);
 

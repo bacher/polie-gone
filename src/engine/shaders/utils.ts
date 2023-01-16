@@ -80,6 +80,22 @@ export function makeUniformMat4Setter(
   };
 }
 
+export function makeUniformSamplerSetter(
+  gl: GL,
+  program: WebGLUniformLocation,
+  uniformName: string,
+) {
+  const uniformLocation = gl.getUniformLocation(program, uniformName);
+
+  if (!uniformLocation) {
+    console.warn(`Uniform ${uniformName} is not using`);
+  }
+
+  return (value: number) => {
+    gl.uniform1i(uniformLocation, value);
+  };
+}
+
 export function makeUniformMat4ArraySetter(
   gl: GL,
   program: WebGLUniformLocation,

@@ -22,6 +22,7 @@ export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
     attributeLocations: extractAttributes(gl, glProgram, [
       'position',
       'normal',
+      'texcoord',
       'joints',
       'weights',
     ]),

@@ -13,6 +13,7 @@ import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 import { calculateGlobalJoinsMatrices } from './utils';
 import { createGlContext, GlContext } from './glContext';
+import { initTexture, Texture } from './texture';
 
 export type InitResults = {
   glContext: GlContext;
@@ -71,6 +72,13 @@ export function initializeModel<T extends ShaderProgramType>(
   programTypes: T[],
 ): Model<T> {
   const vertexBuffers = initVertexBufferObjects(scene.gl, modelData);
+
+  let manTexture: Texture | undefined;
+
+  if (modelData.texture) {
+    manTexture = initTexture(glContext, modelData.texture);
+    console.log('manTexture =', manTexture);
+  }
 
   const vaos = {} as Record<T, ModelVao>;
 

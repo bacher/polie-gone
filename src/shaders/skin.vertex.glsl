@@ -5,11 +5,12 @@ uniform mat4 u_jointMatrices[20];
 
 in vec4 a_position;
 in vec3 a_normal;
-in vec3 a_uv;
+in vec2 a_texcoord;
 in uvec4 a_joints;
 in vec4 a_weights;
 
 out vec3 v_normal;
+out vec2 v_texcoord;
 
 void main() {
   mat4 skinMatrix =
@@ -24,5 +25,6 @@ void main() {
   mat4 model = u_model * skinMatrix;
 
   v_normal = (model * vec4(a_normal, 0.0)).xyz;
+  v_texcoord = a_texcoord;
   gl_Position = u_projection * model * a_position;
 }

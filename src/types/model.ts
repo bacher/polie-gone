@@ -15,14 +15,18 @@ export type DataBuffer = {
   dataArray: Uint8Array;
 };
 
-export type RegularLoadedModel = {
-  type: ModelType.REGULAR;
+type LoadedModelBase = {
   modelName: string;
+  texture?: HTMLImageElement;
+};
+
+export type RegularLoadedModel = LoadedModelBase & {
+  type: ModelType.REGULAR;
   dataBuffers: {
     indices: DataBuffer;
     position: DataBuffer;
     normal?: DataBuffer;
-    uv?: DataBuffer;
+    texcoord?: DataBuffer;
   };
 };
 
@@ -39,14 +43,13 @@ export type JointInfo = {
   inverseMat: mat4;
 };
 
-export type SkinnedLoadedModel = {
+export type SkinnedLoadedModel = LoadedModelBase & {
   type: ModelType.SKINNED;
-  modelName: string;
   dataBuffers: {
     indices: DataBuffer;
     position: DataBuffer;
     normal?: DataBuffer;
-    uv?: DataBuffer;
+    texcoord?: DataBuffer;
     joints: DataBuffer;
     weights: DataBuffer;
   };

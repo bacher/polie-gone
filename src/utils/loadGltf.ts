@@ -9,12 +9,13 @@ import {
 } from '../types/model';
 import { BufferTarget } from '../types/webgl';
 import { MAX_JOINTS } from '../engine/constants';
+import { Accessor } from 'gltf-loader-ts/lib/gltf';
 
 const enum BufferType {
   INDICES = 'INDICES',
   POSITION = 'POSITION',
   NORMAL = 'NORMAL',
-  UV = 'UV',
+  TEXCOORD = 'TEXCOORD',
   JOINTS = 'JOINTS',
   WEIGHTS = 'WEIGHTS',
   INVERSE_JOINTS = 'INVERSE_JOINTS',
@@ -96,7 +97,7 @@ type LoadedBuffer = LoadBuffer & {
 
 export async function loadGltf<T extends { loadSkin?: boolean }>(
   modelUri: string,
-  { loadSkin }: T,
+  { loadSkin }: Partial<T> = {},
 ): Promise<
   T['loadSkin'] extends true ? SkinnedLoadedModel : RegularLoadedModel
 > {
@@ -147,6 +148,11 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   const positionAccessor = gltfData.accessors[primitives.attributes.POSITION];
   const normalAccessor = gltfData.accessors[primitives.attributes.NORMAL];
 
+  let texcoordAccessor: Accessor | undefined;
+  if (primitives.attributes.TEXCOORD_0) {
+    texcoordAccessor = gltfData.accessors[primitives.attributes.TEXCOORD_0];
+  }
+
   if (indicesAccessor.type !== 'SCALAR') {
     throw new Error('Indices is not scalar array');
   }
@@ -165,6 +171,13 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
       accessor: normalAccessor,
     },
   ];
+
+  if (texcoordAccessor) {
+    loadingBuffers.push({
+      type: BufferType.TEXCOORD,
+      accessor: texcoordAccessor,
+    });
+  }
 
   let skin: gltf.Skin | undefined;
 
@@ -233,6 +246,9 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     indices: getBufferByName(BufferType.INDICES),
     position: getBufferByName(BufferType.POSITION),
     normal: getBufferByName(BufferType.NORMAL),
+    texcoord: texcoordAccessor
+      ? getBufferByName(BufferType.TEXCOORD)
+      : undefined,
   };
 
   function reportEnd() {

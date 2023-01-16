@@ -7,6 +7,7 @@
 - [x] Make dynamic scene
 - [x] Add several game objects
 - [x] Split shaders (regular and with skinning)
+- [ ] Support texturing
 - [ ] Add texture based plains (height map)
 - [ ] Spawn and destroy objects in time
 - [ ] Add simple physics engine

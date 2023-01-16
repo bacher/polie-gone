@@ -15,14 +15,6 @@ export type ModelVao = {
   dispose: () => void;
 };
 
-export type Attributes = {
-  position: AttributeLocation;
-  normal?: AttributeLocation;
-  uv?: AttributeLocation;
-  joints?: AttributeLocation;
-  weights?: AttributeLocation;
-};
-
 export function initModelVao(
   glContext: GlContext,
   shaderProgram: ShaderProgram,
@@ -40,53 +32,42 @@ export function initModelVao(
 
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, vertexBuffers.index);
 
-  bindBufferVertexArrayPointer(
+  processFeature(
     gl,
+    shaderProgram.attributeLocations.position,
     gltfModel.dataBuffers.position,
     vertexBuffers.position,
-    shaderProgram.attributeLocations.position,
   );
 
-  if (shaderProgram.attributeLocations.normal && gltfModel.dataBuffers.normal) {
-    assertExistence(vertexBuffers.normal);
-    bindBufferVertexArrayPointer(
-      gl,
-      gltfModel.dataBuffers.normal,
-      vertexBuffers.normal,
-      shaderProgram.attributeLocations.normal,
-    );
-  }
+  processFeature(
+    gl,
+    shaderProgram.attributeLocations.normal,
+    gltfModel.dataBuffers.normal,
+    vertexBuffers.normal,
+  );
 
-  /*
-  if (shaderProgram.attributeLocations.uv && gltfModel.dataBuffers.uv) {
-    assertExistence(vertexBuffers.uv);
-    bindBufferVertexArrayPointer(
-      gl,
-      gltfModel.dataBuffers.uv,
-      vertexBuffers.uv,
-      shaderProgram.attributeLocations.uv,
-    );
-  }
-   */
+  processFeature(
+    gl,
+    shaderProgram.attributeLocations.texcoord,
+    gltfModel.dataBuffers.texcoord,
+    vertexBuffers.texcoord,
+  );
 
   if (
     gltfModel.type === ModelType.SKINNED &&
     shaderProgram.type === ShaderProgramType.SKIN
   ) {
-    assertExistence(vertexBuffers.joints);
-    assertExistence(vertexBuffers.weights);
-
-    bindBufferVertexArrayPointer(
+    processFeature(
       gl,
+      shaderProgram.attributeLocations.joints,
       gltfModel.dataBuffers.joints,
       vertexBuffers.joints,
-      shaderProgram.attributeLocations.joints,
     );
-    bindBufferVertexArrayPointer(
+    processFeature(
       gl,
+      shaderProgram.attributeLocations.weights,
       gltfModel.dataBuffers.weights,
       vertexBuffers.weights,
-      shaderProgram.attributeLocations.weights,
     );
   }
 
@@ -159,4 +140,27 @@ function assertExistence<T>(value: unknown): asserts value is NonNullable<T> {
   if (value === undefined || value === null) {
     throw new Error();
   }
+}
+
+export function processFeature(
+  gl: WebGL2RenderingContext,
+  attributeLocation?: AttributeLocation,
+  dataBuffer?: DataBuffer,
+  vbo?: VertexBufferObject,
+): boolean {
+  if (attributeLocation && dataBuffer) {
+    assertExistence(vbo);
+    bindBufferVertexArrayPointer(gl, dataBuffer, vbo, attributeLocation);
+    return true;
+  }
+
+  if (!attributeLocation && !dataBuffer) {
+    return false;
+  }
+
+  if (attributeLocation) {
+    console.error('Model and shader feature mismatch');
+  }
+
+  return false;
 }
