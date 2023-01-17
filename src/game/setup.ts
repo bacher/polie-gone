@@ -5,10 +5,12 @@ import { initialize, initializeModel } from '../engine/initialize';
 import type { Scene } from '../engine/scene';
 import { renderScene, startRenderLoop } from '../engine/render';
 import { ShaderProgramType } from '../shaderPrograms/types';
+import { loadTexture } from '../utils/loadTexture';
 
 import './exportGlMatrix';
+import type { MouseState } from './inputTypes';
+import { MouseStateType } from './inputTypes';
 import { fromEuler } from './utils';
-import { loadTexture } from '../utils/loadTexture';
 
 export type Game = {
   scene: Scene;
@@ -17,6 +19,8 @@ export type Game = {
   };
   render: () => void;
   startRenderLoop: () => void;
+
+  updateMouseState: (mouseState: MouseState) => void;
 };
 
 type SetupGameParams = {
@@ -87,11 +91,16 @@ export async function setupGame({
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });
 
-  const game = {
+  const game: Game = {
     scene,
     globalState,
     render: () => gameRender(game),
     startRenderLoop: () => gameStartRenderLoop(game),
+    updateMouseState: (mouseState) => {
+      if (mouseState.mouseStateType === MouseStateType.PRESSED) {
+        // TODO:
+      }
+    },
   };
 
   return game;
