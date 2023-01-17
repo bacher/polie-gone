@@ -13,9 +13,7 @@ void main() {
   vec4 baseColor = texture(u_diffuse, v_texcoord);
 
   float lightFactor = max(dot(normalize(v_normal), u_lightDirection), 0.0);
+  lightFactor = smoothstep(0.0, 0.11, 0.01 + lightFactor);
 
   outColor = vec4(baseColor * (0.5 + lightFactor * 0.5));
-
-  // Old solid light
-  //  outColor = vec4(vec3(0.4 + (lightFactor * 0.4)), 1.0);
 }

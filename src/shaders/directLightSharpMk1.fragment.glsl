@@ -9,13 +9,12 @@ in vec2 v_texcoord;
 
 out vec4 outColor;
 
+float lightSizeFactor = 11.874342087037917;
+
 void main() {
   vec4 baseColor = texture(u_diffuse, v_texcoord);
 
-  float lightFactor = max(dot(normalize(v_normal), u_lightDirection), 0.0);
+  float lightFactor = clamp(dot(normalize(v_normal), lightSizeFactor * u_lightDirection), 0.0, 1.0);
 
   outColor = vec4(baseColor * (0.5 + lightFactor * 0.5));
-
-  // Old solid light
-  //  outColor = vec4(vec3(0.4 + (lightFactor * 0.4)), 1.0);
 }

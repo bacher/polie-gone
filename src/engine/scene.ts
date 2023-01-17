@@ -53,6 +53,7 @@ export function setupScene({
   mat4.translate(cameraMat, cameraMat, [0, 0, -2]);
 
   const lightDirection = vec3.fromValues(-5, 10, 4);
+  vec3.normalize(lightDirection, lightDirection);
 
   const scene: Scene = {
     gl: glContext.gl,
