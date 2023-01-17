@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { Game } from '../../game/setup';
+import type { Game } from '../../../game/setup';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 
 import styles from './Controls.module.scss';

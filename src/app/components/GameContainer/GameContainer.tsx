@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 
-import { Game, setupGame } from '../../game/setup';
+import { Game, setupGame } from '../../../game/setup';
 import { useOnlyOnce } from '../../hooks/useOnlyOnce';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { Controls } from '../Controls';
