@@ -5,7 +5,7 @@ import type { ModelVao } from './initModelVao';
 import type { Transforms } from '../types/model';
 import type { Model } from './initialize';
 import type { GlContext } from './glContext';
-import { convertTransformsToMat4 } from './utils';
+import { convertTransformsToMat4 } from '../utils/transforms';
 
 export type ModelInstance = {
   shaderProgram: ShaderProgram;
@@ -42,6 +42,7 @@ export function setupScene({
   glContext,
   shaderPrograms,
 }: SceneSetupParams): Scene {
+  // TODO: Do we need this?
   const cameraMat = mat4.perspective(
     mat4.create(),
     Math.PI / 2,

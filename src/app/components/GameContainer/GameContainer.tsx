@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import cn from 'classnames';
 
 import { Game, setupGame } from '../../../game/setup';
 import { useOnlyOnce } from '../../hooks/useOnlyOnce';
@@ -37,9 +38,16 @@ export function GameContainer() {
         }
 
         state.game.startRenderLoop();
+        forceUpdate();
       }}
     >
-      <canvas ref={canvasRef} width={600} height={400} />
+      <div
+        className={cn(styles.canvasWrapper, {
+          [styles.canvasWrapper_inLoop]: state.game?.scene.isRenderLoop,
+        })}
+      >
+        <canvas ref={canvasRef} width={600} height={400} />
+      </div>
       {state.game && <Controls game={state.game} />}
     </div>
   );

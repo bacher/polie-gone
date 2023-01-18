@@ -2,3 +2,16 @@
   display: flex;
   align-items: flex-start;
 }
+
+.canvasWrapper {
+  border: 4px solid #777;
+  margin: 0 16px 0 0;
+
+  &_inLoop {
+    border-color: #4cce0c;
+  }
+
+  & > canvas {
+    display: block;
+  }
+}

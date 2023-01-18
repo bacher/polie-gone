@@ -1,14 +1,17 @@
 import type { Scene } from './scene';
 
-type TickTime = {
+export type TickTime = {
   timestamp: number;
-  delta: number;
+  delta: number; // in seconds
+  deltaMs: number;
 };
+
+export type TickHandler = (tickTime: TickTime) => void;
 
 type StartRenderLoopParams = {
   scene: Scene;
   fps?: number;
-  onTick: (time: TickTime) => void;
+  onTick: TickHandler;
 };
 
 export function startRenderLoop({
@@ -26,16 +29,20 @@ export function startRenderLoop({
     const prevTimestamp = lastTimestamp;
     lastTimestamp = timestamp;
 
-    let delta;
+    let deltaMs: number;
 
     if (prevTimestamp) {
-      delta = timestamp - prevTimestamp;
+      deltaMs = timestamp - prevTimestamp;
     } else {
       // Set minimal interval of time
-      delta = 1;
+      deltaMs = 1;
     }
 
-    onTick({ timestamp, delta });
+    onTick({
+      timestamp,
+      delta: deltaMs * 0.001,
+      deltaMs,
+    });
   }
 
   function processFrame(timestamp: number) {

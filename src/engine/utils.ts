@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix';
 
-import type { JointInfo, Transforms } from '../types/model';
+import type { JointInfo } from '../types/model';
+import { convertTransformsToMat4 } from '../utils/transforms';
 
 export function calculateGlobalJoinsMatrices(joints: JointInfo[]) {
   const acc = Array(joints.length) as mat4[];
@@ -26,34 +27,4 @@ export function calculateGlobalJoinsMatrices(joints: JointInfo[]) {
   }
 
   return acc;
-}
-
-export function convertTransformsToMat4({
-  translation: t,
-  rotation: r,
-  scale: s,
-}: Partial<Transforms>): mat4 {
-  const mat = mat4.create();
-
-  if (r) {
-    if (t && s) {
-      return mat4.fromRotationTranslationScale(mat, r, t, s);
-    }
-    if (t && !s) {
-      return mat4.fromRotationTranslation(mat, r, t);
-    }
-    if (!t && !s) {
-      return mat4.fromQuat(mat, r);
-    }
-  }
-
-  if (t) {
-    mat4.translate(mat, mat, t);
-  }
-
-  if (s) {
-    mat4.scale(mat, mat, s);
-  }
-
-  return mat;
 }

@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 
 import type { Game } from '../../../game/setup';
-import { MouseStateType } from '../../../game/inputTypes';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
-import { useWindowEvent } from '../../hooks/useWindowEvent';
 
 import styles from './Controls.module.scss';
 
@@ -20,24 +18,6 @@ export function Controls({ game }: Props) {
     [],
   );
 
-  function handleMouse(event: MouseEvent) {
-    const isPressed = event.buttons === 1 && event.button === 0;
-
-    game.updateMouseState({
-      mouseStateType: isPressed
-        ? MouseStateType.PRESSED
-        : MouseStateType.RELEASED,
-      position: {
-        x: event.pageX,
-        y: event.pageY,
-      },
-    });
-  }
-
-  useWindowEvent('mousedown', handleMouse);
-  useWindowEvent('mouseup', handleMouse);
-  useWindowEvent('mousemove', handleMouse);
-
   return (
     <div className={styles.controls}>
       <h2>Controls</h2>
@@ -52,6 +32,9 @@ export function Controls({ game }: Props) {
           }}
         />{' '}
         Rotate
+      </label>
+      <label>
+        <input />
       </label>
     </div>
   );

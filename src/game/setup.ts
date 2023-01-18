@@ -8,19 +8,27 @@ import { ShaderProgramType } from '../shaderPrograms/types';
 import { loadTexture } from '../utils/loadTexture';
 
 import './exportGlMatrix';
-import type { MouseState } from './inputTypes';
-import { MouseStateType } from './inputTypes';
 import { fromEuler } from './utils';
+import {
+  initKeyboardController,
+  KeyboardController,
+} from './keyboardController';
+import { initMouseController, MouseController } from './mouseController';
+import { CameraController, createCameraController } from './cameraController';
 
 export type Game = {
   scene: Scene;
   globalState: {
     isRotating: boolean;
   };
+  inputControls: {
+    keyboard?: KeyboardController;
+    mouse?: MouseController;
+  };
+  cameraController: CameraController;
   render: () => void;
   startRenderLoop: () => void;
-
-  updateMouseState: (mouseState: MouseState) => void;
+  dispose: () => void;
 };
 
 type SetupGameParams = {
@@ -91,15 +99,29 @@ export async function setupGame({
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });
 
+  const keyboardController = initKeyboardController();
+  const mouseController = initMouseController();
+  const cameraController = createCameraController({
+    scene,
+    keyboardController,
+    mouseController,
+    movementSpeed: 2,
+  });
+  cameraController.setPosition([0, 0, -2]);
+
   const game: Game = {
     scene,
     globalState,
+    inputControls: {
+      keyboard: keyboardController,
+      mouse: mouseController,
+    },
+    cameraController,
     render: () => gameRender(game),
     startRenderLoop: () => gameStartRenderLoop(game),
-    updateMouseState: (mouseState) => {
-      if (mouseState.mouseStateType === MouseStateType.PRESSED) {
-        // TODO:
-      }
+    dispose: () => {
+      mouseController.dispose();
+      keyboardController.dispose();
     },
   };
 
@@ -114,20 +136,26 @@ function gameStartRenderLoop(game: Game) {
   startRenderLoop({
     scene: game.scene,
     // fps: 5,
-    onTick: ({ delta, timestamp }) => {
+    onTick: (tickParams) => {
+      const { delta } = tickParams;
+
+      if (game.cameraController) {
+        game.cameraController.tick(tickParams);
+      }
+
       if (game.globalState.isRotating) {
         const firstModel = game.scene.models[0];
 
         if (firstModel) {
           const modelMat = firstModel.modelMat;
-          mat4.rotateY(modelMat, modelMat, delta * 0.001);
+          mat4.rotateY(modelMat, modelMat, delta);
         }
 
         const thirdModel = game.scene.models[2];
 
         if (thirdModel) {
           const modelMat = thirdModel.modelMat;
-          mat4.rotateZ(modelMat, modelMat, delta * 0.001);
+          mat4.rotateZ(modelMat, modelMat, delta);
         }
       }
     },
