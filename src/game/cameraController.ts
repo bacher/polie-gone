@@ -18,7 +18,6 @@ const MOUSE_SENSITIVITY = 0.1;
 const ACCELERATION = 20;
 
 export type CameraController = {
-  transforms: Transforms;
   tick: TickHandler;
   setPosition: (pos: vec3) => void;
   dispose: () => void;
@@ -62,20 +61,20 @@ export function createCameraController({
     1000,
   );
 
-  const transforms = createIdentifyTransforms();
-
+  const position = vec3.create();
+  const rotationMat = mat4.create();
   // Normalized [0..1], 1 = full roll (2PI)
   let yawAngle = 0;
   let pitchAngle = 0;
 
   function checkLookDirection({ delta }: TickTime): void {
-    const position = mouseController.getPosition();
-    const prevPosition = state.previousMousePosition;
+    const mousePosition = mouseController.getPosition();
+    const { previousMousePosition } = state;
 
-    if (position && prevPosition) {
+    if (mousePosition && previousMousePosition) {
       const mouseMovement = {
-        x: position.x - prevPosition.x,
-        y: position.y - prevPosition.y,
+        x: mousePosition.x - previousMousePosition.x,
+        y: mousePosition.y - previousMousePosition.y,
       };
 
       if (mouseMovement.x !== 0 || mouseMovement.y !== 0) {
@@ -83,17 +82,19 @@ export function createCameraController({
         pitchAngle += mouseMovement.y * delta * MOUSE_SENSITIVITY;
         pitchAngle = clamp(pitchAngle, -0.23, 0.23);
 
+        // quat.identity(rotationMat);
+        // quat.rotateX(mat, mat, pitchAngle * PI2);
+        // quat.rotateY(mat, mat, yawAngle * PI2);
+
         // All operation uses original quat
-        const mat = transforms.rotation;
-        quat.identity(mat);
-        quat.rotateX(mat, mat, pitchAngle * PI2);
-        quat.rotateY(mat, mat, yawAngle * PI2);
+        mat4.fromXRotation(rotationMat, pitchAngle * PI2);
+        mat4.rotateY(rotationMat, rotationMat, yawAngle * PI2);
 
         isDirty = true;
       }
     }
 
-    state.previousMousePosition = position;
+    state.previousMousePosition = mousePosition;
   }
 
   function checkMovement({ delta }: TickTime): void {
@@ -124,6 +125,18 @@ export function createCameraController({
 
       if (iSomeMovement) {
         vec3.normalize(direction, direction);
+
+        // vec3.transformQuat(
+        //   direction,
+        //   direction,
+        //   quat.invert(quat.create(), transforms.rotation),
+        // );
+
+        vec3.transformMat4(
+          direction,
+          direction,
+          mat4.invert(mat4.create(), rotationMat),
+        );
         vec3.scale(targetSpeedVector, direction, movementSpeed);
       }
 
@@ -150,29 +163,34 @@ export function createCameraController({
     }
 
     if (state.isSpeedVectorNonEmpty) {
-      const { translation } = transforms;
       vec3.scale(moveByBuffer, state.speedVector, delta);
-      vec3.add(translation, translation, moveByBuffer);
+      vec3.add(position, position, moveByBuffer);
       isDirty = true;
     }
   }
 
   const cameraController: CameraController = {
-    transforms,
     tick: (tickTime) => {
       checkLookDirection(tickTime);
       checkMovement(tickTime);
 
       if (isDirty) {
-        const cameraTransformsMat = convertTransformsToMat4(transforms);
+        const { cameraMat } = scene;
+        // const cameraTransformsMat = convertTransformsToMat4(transforms);
+        // mat4.multiply(cameraMat, projectionMat, cameraTransformsMat);
+        //
+        // mat4.identity(scene.cameraMat);
+        mat4.copy(cameraMat, projectionMat);
+
+        mat4.multiply(cameraMat, cameraMat, rotationMat);
+        mat4.translate(cameraMat, cameraMat, position);
 
         // Write directly to scene camera matrix
-        mat4.multiply(scene.cameraMat, projectionMat, cameraTransformsMat);
         isDirty = false;
       }
     },
     setPosition: (pos: vec3) => {
-      transforms.translation = pos;
+      vec3.copy(position, pos);
       isDirty = true;
     },
     dispose: () => {},
