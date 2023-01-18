@@ -12,7 +12,7 @@ export type DataBuffer = {
   componentType: ComponentType;
   componentDimension: number;
   elementsCount: number;
-  dataArray: Uint8Array;
+  dataArray: Uint8Array | Uint16Array | Float32Array;
 };
 
 type LoadedModelBase = {

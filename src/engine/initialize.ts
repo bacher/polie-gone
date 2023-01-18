@@ -76,6 +76,7 @@ export function initializeModel<T extends ShaderProgramType>(
   let manTexture: Texture | undefined;
 
   if (modelData.texture) {
+    // TODO: Texture?
     manTexture = initTexture(glContext, modelData.texture);
   }
 

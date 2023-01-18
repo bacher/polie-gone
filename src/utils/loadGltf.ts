@@ -9,7 +9,6 @@ import {
 } from '../types/model';
 import { BufferTarget } from '../types/webgl';
 import { MAX_JOINTS } from '../engine/constants';
-import { Accessor } from 'gltf-loader-ts/lib/gltf';
 
 const enum BufferType {
   INDICES = 'INDICES',
@@ -148,7 +147,7 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   const positionAccessor = gltfData.accessors[primitives.attributes.POSITION];
   const normalAccessor = gltfData.accessors[primitives.attributes.NORMAL];
 
-  let texcoordAccessor: Accessor | undefined;
+  let texcoordAccessor: gltf.Accessor | undefined;
   if (primitives.attributes.TEXCOORD_0) {
     texcoordAccessor = gltfData.accessors[primitives.attributes.TEXCOORD_0];
   }
@@ -267,7 +266,10 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
 
   if (loadSkin) {
     const { dataArray } = getBufferByName(BufferType.INVERSE_JOINTS);
-    const inverseJointsFloatList = convertUint8ListToFloat32List(dataArray);
+    const inverseJointsFloatList = convertUint8ListToFloat32List(
+      // gltfLoader uses only Uint8Array as buffers
+      dataArray as Uint8Array,
+    );
 
     const joints: JointInfo[] = [];
 

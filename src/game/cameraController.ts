@@ -163,10 +163,7 @@ export function createCameraController({
 
       if (isDirty) {
         const { cameraMat } = scene;
-        // const cameraTransformsMat = convertTransformsToMat4(transforms);
-        // mat4.multiply(cameraMat, projectionMat, cameraTransformsMat);
-        //
-        // mat4.identity(scene.cameraMat);
+
         mat4.copy(cameraMat, projectionMat);
 
         // Apply rotation

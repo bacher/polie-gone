@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import { mat4, quat, vec3 } from 'gl-matrix';
 
 import { loadGltf } from '../utils/loadGltf';
 import { initialize, initializeModel } from '../engine/initialize';
@@ -15,6 +15,7 @@ import {
 } from './keyboardController';
 import { initMouseController, MouseController } from './mouseController';
 import { CameraController, createCameraController } from './cameraController';
+import { generatePlain } from '../utils/meshGenerator';
 
 export type Game = {
   scene: Scene;
@@ -95,6 +96,21 @@ export async function setupGame({
       translation: [-0.9, -1, -1.5],
       scale: [0.6, 0.6, 0.6],
       rotation: fromEuler(0, 0.01, 0),
+    },
+    defaultShaderProgramType: ShaderProgramType.DEFAULT,
+  });
+
+  const plainModelData = generatePlain({ dimension: 10 });
+  const plainModel = initializeModel(glContext, scene, plainModelData, [
+    ShaderProgramType.DEFAULT,
+  ]);
+
+  scene.addDrawObject({
+    model: plainModel,
+    transforms: {
+      translation: [0, -2.3, 0],
+      rotation: fromEuler(0.25, 0, 0),
+      scale: [30, 30, 30],
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });

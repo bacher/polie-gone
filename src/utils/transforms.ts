@@ -23,6 +23,10 @@ export function convertTransformsToMat4({
     if (t && !s) {
       return mat4.fromRotationTranslation(mat, r, t);
     }
+    if (!t && s) {
+      mat4.fromQuat(mat, r);
+      return mat4.scale(mat, mat, s);
+    }
     if (!t && !s) {
       return mat4.fromQuat(mat, r);
     }

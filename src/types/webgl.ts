@@ -1,6 +1,7 @@
 import type { Branded } from '../utils/typeHelpers';
 
 export const enum ComponentType {
+  UNSIGNED_BYTE = 5121,
   UNSIGNED_SHORT = 5123,
   FLOAT = 5126,
 }
