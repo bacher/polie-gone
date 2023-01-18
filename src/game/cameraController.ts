@@ -1,20 +1,15 @@
-import { mat4, quat, vec3 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
 import clamp from 'lodash/clamp';
 
-import type { Transforms } from '../types/model';
+import { PI2 } from '../utils/math';
 import type { Scene } from '../engine/scene';
 import type { TickHandler, TickTime } from '../engine/render';
-import {
-  convertTransformsToMat4,
-  createIdentifyTransforms,
-} from '../utils/transforms';
 
 import type { KeyboardController } from './keyboardController';
 import type { MouseController } from './mouseController';
 import type { Position2d } from './types';
-import { PI2 } from '../utils/math';
 
-const MOUSE_SENSITIVITY = 0.1;
+const MOUSE_SENSITIVITY = 0.05;
 const ACCELERATION = 20;
 
 export type CameraController = {
@@ -31,7 +26,7 @@ type CreateCameraControllerParams = {
 };
 
 type InnerState = {
-  previousMousePosition: Position2d | undefined;
+  previousMouseMovementPosition: Position2d | undefined;
   speedVector: vec3;
   isSpeedVectorNonEmpty: boolean;
 };
@@ -45,12 +40,12 @@ export function createCameraController({
   let isDirty = true;
 
   const state: InnerState = {
-    previousMousePosition: undefined,
+    previousMouseMovementPosition: undefined,
     speedVector: vec3.create(),
     isSpeedVectorNonEmpty: false,
   };
 
-  const moveByBuffer = vec3.create();
+  const moveByTempBuffer = vec3.create();
 
   const projectionMat = mat4.perspective(
     mat4.create(),
@@ -62,39 +57,38 @@ export function createCameraController({
   );
 
   const position = vec3.create();
-  const rotationMat = mat4.create();
+  const origin = vec3.create();
   // Normalized [0..1], 1 = full roll (2PI)
   let yawAngle = 0;
   let pitchAngle = 0;
 
   function checkLookDirection({ delta }: TickTime): void {
-    const mousePosition = mouseController.getPosition();
-    const { previousMousePosition } = state;
+    const isPointerLocked = mouseController.isPointerLocked();
 
-    if (mousePosition && previousMousePosition) {
-      const mouseMovement = {
-        x: mousePosition.x - previousMousePosition.x,
-        y: mousePosition.y - previousMousePosition.y,
-      };
-
-      if (mouseMovement.x !== 0 || mouseMovement.y !== 0) {
-        yawAngle += mouseMovement.x * delta * MOUSE_SENSITIVITY;
-        pitchAngle += mouseMovement.y * delta * MOUSE_SENSITIVITY;
-        pitchAngle = clamp(pitchAngle, -0.23, 0.23);
-
-        // quat.identity(rotationMat);
-        // quat.rotateX(mat, mat, pitchAngle * PI2);
-        // quat.rotateY(mat, mat, yawAngle * PI2);
-
-        // All operation uses original quat
-        mat4.fromXRotation(rotationMat, pitchAngle * PI2);
-        mat4.rotateY(rotationMat, rotationMat, yawAngle * PI2);
-
-        isDirty = true;
-      }
+    if (!isPointerLocked) {
+      state.previousMouseMovementPosition = undefined;
+      return;
     }
 
-    state.previousMousePosition = mousePosition;
+    const mouseMovementPosition = mouseController.getMovementPosition();
+    const { previousMouseMovementPosition } = state;
+
+    if (
+      previousMouseMovementPosition &&
+      mouseMovementPosition !== previousMouseMovementPosition
+    ) {
+      const mouseMovement = {
+        x: mouseMovementPosition.x - previousMouseMovementPosition.x,
+        y: mouseMovementPosition.y - previousMouseMovementPosition.y,
+      };
+
+      yawAngle += mouseMovement.x * delta * MOUSE_SENSITIVITY;
+      pitchAngle += mouseMovement.y * delta * MOUSE_SENSITIVITY;
+      pitchAngle = clamp(pitchAngle, -0.23, 0.23);
+      isDirty = true;
+    }
+
+    state.previousMouseMovementPosition = mouseMovementPosition;
   }
 
   function checkMovement({ delta }: TickTime): void {
@@ -126,17 +120,10 @@ export function createCameraController({
       if (iSomeMovement) {
         vec3.normalize(direction, direction);
 
-        // vec3.transformQuat(
-        //   direction,
-        //   direction,
-        //   quat.invert(quat.create(), transforms.rotation),
-        // );
+        // Inverted
+        vec3.rotateX(direction, direction, origin, -pitchAngle * PI2);
+        vec3.rotateY(direction, direction, origin, -yawAngle * PI2);
 
-        vec3.transformMat4(
-          direction,
-          direction,
-          mat4.invert(mat4.create(), rotationMat),
-        );
         vec3.scale(targetSpeedVector, direction, movementSpeed);
       }
 
@@ -163,8 +150,8 @@ export function createCameraController({
     }
 
     if (state.isSpeedVectorNonEmpty) {
-      vec3.scale(moveByBuffer, state.speedVector, delta);
-      vec3.add(position, position, moveByBuffer);
+      vec3.scale(moveByTempBuffer, state.speedVector, delta);
+      vec3.add(position, position, moveByTempBuffer);
       isDirty = true;
     }
   }
@@ -182,7 +169,10 @@ export function createCameraController({
         // mat4.identity(scene.cameraMat);
         mat4.copy(cameraMat, projectionMat);
 
-        mat4.multiply(cameraMat, cameraMat, rotationMat);
+        // Apply rotation
+        mat4.rotateX(cameraMat, cameraMat, pitchAngle * PI2);
+        mat4.rotateY(cameraMat, cameraMat, yawAngle * PI2);
+
         mat4.translate(cameraMat, cameraMat, position);
 
         // Write directly to scene camera matrix

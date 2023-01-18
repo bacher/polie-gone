@@ -33,9 +33,6 @@ export function Controls({ game }: Props) {
         />{' '}
         Rotate
       </label>
-      <label>
-        <input />
-      </label>
     </div>
   );
 }

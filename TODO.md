@@ -9,7 +9,7 @@
 - [x] Split shaders (regular and with skinning)
 - [x] Support texturing
 - [ ] Add texture based plains (height map)
-- [ ] Add free-look camera (capture mouse)
+- [x] Add free-look camera (capture mouse)
 - [ ] Add mouse-drag camera (drag to look)
 - [x] Make starting and ending of moving smooth
 - [ ] Spawn and destroy objects in time

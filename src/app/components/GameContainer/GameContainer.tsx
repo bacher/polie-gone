@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { Game, setupGame } from '../../../game/setup';
 import { useOnlyOnce } from '../../hooks/useOnlyOnce';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
+import { useWindowEvent } from '../../hooks/useWindowEvent';
 
 import { Controls } from '../Controls';
 
@@ -29,22 +30,24 @@ export function GameContainer() {
     forceUpdate();
   });
 
-  return (
-    <div
-      className={styles.wrapper}
-      onMouseDown={() => {
-        if (!state.game || state.game.scene.isRenderLoop) {
-          return;
-        }
+  useWindowEvent('mousedown', () => {
+    if (state.game && !state.game.scene.isRenderLoop) {
+      state.game.startRenderLoop();
+      forceUpdate();
+    }
+  });
 
-        state.game.startRenderLoop();
-        forceUpdate();
-      }}
-    >
+  return (
+    <div className={styles.wrapper}>
       <div
         className={cn(styles.canvasWrapper, {
           [styles.canvasWrapper_inLoop]: state.game?.scene.isRenderLoop,
         })}
+        onMouseDown={() => {
+          if (canvasRef.current && !document.pointerLockElement) {
+            canvasRef.current.requestPointerLock();
+          }
+        }}
       >
         <canvas ref={canvasRef} width={600} height={400} />
       </div>
