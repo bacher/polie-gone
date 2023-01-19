@@ -35,7 +35,7 @@ function createProgram(
   if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
     console.error(gl.getProgramInfoLog(glProgram));
     gl.deleteProgram(glProgram);
-    throw new Error();
+    throw new Error('Shader can not be linked');
   }
 
   const shaderProgram: ShaderProgramInitial = {

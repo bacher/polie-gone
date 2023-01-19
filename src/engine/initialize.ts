@@ -5,6 +5,7 @@ import { ModelType } from '../types/model';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram } from '../shaderPrograms/skinProgram';
 import { initModernProgram } from '../shaderPrograms/modernProgram';
+import { initHeightMapProgram } from '../shaderPrograms/heightMapProgram';
 import { ShaderProgramType } from '../shaderPrograms/types';
 
 import { initModelVao, ModelVao } from './initModelVao';
@@ -37,6 +38,7 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   const defaultProgram = initDefaultProgram(glContext, shaderManager);
   const skinProgram = initSkinProgram(glContext, shaderManager);
   const modernProgram = initModernProgram(glContext, shaderManager);
+  const heightMapProgram = initHeightMapProgram(glContext, shaderManager);
 
   // After creation of all shader programs we can clear shader cache
   shaderManager.disposeAll();
@@ -47,6 +49,7 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
       [defaultProgram.type]: defaultProgram,
       [skinProgram.type]: skinProgram,
       [modernProgram.type]: modernProgram,
+      [heightMapProgram.type]: heightMapProgram,
     },
   });
 

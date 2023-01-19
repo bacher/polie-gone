@@ -6,14 +6,20 @@ import type {
 import type { DefaultProgram } from './defaultProgram';
 import type { SkinProgram } from './skinProgram';
 import type { ModerProgram } from './modernProgram';
+import type { HeightMapProgram } from './heightMapProgram';
 
 export const enum ShaderProgramType {
   DEFAULT = 'DEFAULT',
   SKIN = 'SKIN',
   MODERN = 'MODERN',
+  HEIGHT_MAP = 'HEIGHT_MAP',
 }
 
-export type ShaderProgram = DefaultProgram | SkinProgram | ModerProgram;
+export type ShaderProgram =
+  | DefaultProgram
+  | SkinProgram
+  | ModerProgram
+  | HeightMapProgram;
 
 export type ProgramInit<
   T extends ShaderProgramType,

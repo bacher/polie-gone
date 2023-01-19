@@ -1,4 +1,4 @@
-import { mat4, quat, vec3 } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 
 import { loadGltf } from '../utils/loadGltf';
 import { initialize, initializeModel } from '../engine/initialize';
@@ -6,6 +6,7 @@ import type { Scene } from '../engine/scene';
 import { renderScene, startRenderLoop } from '../engine/render';
 import { ShaderProgramType } from '../shaderPrograms/types';
 import { loadTexture } from '../utils/loadTexture';
+import { generatePlain } from '../utils/meshGenerator';
 
 import './exportGlMatrix';
 import { fromEuler } from './utils';
@@ -15,7 +16,6 @@ import {
 } from './keyboardController';
 import { initMouseController, MouseController } from './mouseController';
 import { CameraController, createCameraController } from './cameraController';
-import { generatePlain } from '../utils/meshGenerator';
 
 export type Game = {
   scene: Scene;
@@ -103,16 +103,16 @@ export async function setupGame({
   const plainModelData = generatePlain({ dimension: 10 });
   const plainModel = initializeModel(glContext, scene, plainModelData, [
     ShaderProgramType.DEFAULT,
+    ShaderProgramType.HEIGHT_MAP,
   ]);
 
   scene.addDrawObject({
     model: plainModel,
     transforms: {
-      translation: [0, -2.3, 0],
-      rotation: fromEuler(0.25, 0, 0),
+      translation: [0, -6.3, 0],
       scale: [30, 30, 30],
     },
-    defaultShaderProgramType: ShaderProgramType.DEFAULT,
+    defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP,
   });
 
   const keyboardController = initKeyboardController();
