@@ -2,10 +2,11 @@ import {
   extractAttributes,
   makeUniformMat4Setter,
   makeUniformSamplerSetter,
+  makeUniformVec2Setter,
 } from '../engine/shaders/utils';
 import type { ShaderProgramInitial } from '../engine/shaders/initShaderProgram';
 
-export { default as vertexSource } from './heightMap.vertex.glsl?raw';
+export { default as vertexSource } from './heightMapInstanced.vertex.glsl?raw';
 
 export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
   return {
@@ -13,7 +14,11 @@ export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
       projection: makeUniformMat4Setter(gl, glProgram, 'u_projection'),
       model: makeUniformMat4Setter(gl, glProgram, 'u_model'),
       heightMap: makeUniformSamplerSetter(gl, glProgram, 'u_heightMap'),
+      cellSize: makeUniformVec2Setter(gl, glProgram, 'u_cellSize'),
     },
-    attributeLocations: extractAttributes(gl, glProgram, ['position']),
+    attributeLocations: extractAttributes(gl, glProgram, [
+      'position',
+      'offset',
+    ]),
   };
 }

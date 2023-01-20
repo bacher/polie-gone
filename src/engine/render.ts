@@ -88,6 +88,10 @@ export function renderScene(scene: Scene): void {
     shaderProgram.uniforms.model(model.modelMat);
     shaderProgram.uniforms.diffuseTexture(0);
 
+    if (model.beforeDraw) {
+      model.beforeDraw(model, shaderProgram);
+    }
+
     model.modelVao.draw();
   }
 }

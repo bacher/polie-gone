@@ -7,33 +7,51 @@ export type VertexBufferObject = {
 };
 
 export type VertexBufferObjectCollection = {
-  index: VertexBufferObject;
+  index?: VertexBufferObject;
   position: VertexBufferObject;
   normal?: VertexBufferObject;
   texcoord?: VertexBufferObject;
   joints?: VertexBufferObject;
   weights?: VertexBufferObject;
+  offset?: VertexBufferObject;
 };
 
 export function initVertexBufferObjects(
   gl: GL,
   model: LoadedModel,
 ): VertexBufferObjectCollection {
-  const { indices, position, texcoord, normal } = model.dataBuffers;
+  const { position } = model.dataBuffers;
+
+  let indices: DataBuffer | undefined;
+  let texcoord: DataBuffer | undefined;
+  let normal: DataBuffer | undefined;
   let joints: DataBuffer | undefined;
   let weights: DataBuffer | undefined;
+  let offset: DataBuffer | undefined;
+
+  if (model.type === ModelType.REGULAR || model.type === ModelType.SKINNED) {
+    indices = model.dataBuffers.indices;
+    texcoord = model.dataBuffers.texcoord;
+    normal = model.dataBuffers.normal;
+  }
 
   if (model.type === ModelType.SKINNED) {
     ({ joints, weights } = model.dataBuffers);
   }
 
+  if (model.type === ModelType.HEIGHT_MAP) {
+    offset = model.dataBuffers.offset;
+  }
+
   return {
-    index: createBuffer(gl, indices),
+    index: indices ? createBuffer(gl, indices) : undefined,
     position: createBuffer(gl, position),
     normal: normal ? createBuffer(gl, normal) : undefined,
     texcoord: texcoord ? createBuffer(gl, texcoord) : undefined,
     joints: joints ? createBuffer(gl, joints) : undefined,
     weights: weights ? createBuffer(gl, weights) : undefined,
+    // TODO: Make dynamic:
+    offset: offset ? createBuffer(gl, offset) : undefined,
   };
 }
 

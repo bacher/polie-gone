@@ -1,4 +1,4 @@
-import type { mat4, vec3, vec4 } from 'gl-matrix';
+import type { mat4, vec2, vec3, vec4 } from 'gl-matrix';
 
 import type { AttributeLocation } from '../../types/webgl';
 
@@ -34,10 +34,10 @@ export function extractAttributes<T extends string>(
 
 export function makeUniformVec3Setter(
   gl: GL,
-  program: WebGLUniformLocation,
+  glProgram: WebGLProgram,
   uniformName: string,
 ) {
-  const uniformLocation = gl.getUniformLocation(program, uniformName);
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
 
   if (!uniformLocation) {
     console.warn(`Uniform ${uniformName} is not using`);
@@ -50,10 +50,10 @@ export function makeUniformVec3Setter(
 
 export function makeUniformVec4Setter(
   gl: GL,
-  program: WebGLUniformLocation,
+  glProgram: WebGLProgram,
   uniformName: string,
 ) {
-  const uniformLocation = gl.getUniformLocation(program, uniformName);
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
 
   if (!uniformLocation) {
     console.warn(`Uniform ${uniformName} is not using`);
@@ -66,10 +66,10 @@ export function makeUniformVec4Setter(
 
 export function makeUniformMat4Setter(
   gl: GL,
-  program: WebGLUniformLocation,
+  glProgram: WebGLProgram,
   uniformName: string,
 ) {
-  const uniformLocation = gl.getUniformLocation(program, uniformName);
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
 
   if (!uniformLocation) {
     console.warn(`Uniform ${uniformName} is not using`);
@@ -82,10 +82,10 @@ export function makeUniformMat4Setter(
 
 export function makeUniformSamplerSetter(
   gl: GL,
-  program: WebGLUniformLocation,
+  glProgram: WebGLProgram,
   uniformName: string,
 ) {
-  const uniformLocation = gl.getUniformLocation(program, uniformName);
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
 
   if (!uniformLocation) {
     console.warn(`Uniform ${uniformName} is not using`);
@@ -96,13 +96,29 @@ export function makeUniformSamplerSetter(
   };
 }
 
+export function makeUniformVec2Setter(
+  gl: GL,
+  glProgram: WebGLProgram,
+  uniformName: string,
+) {
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
+
+  if (!uniformLocation) {
+    console.warn(`Uniform ${uniformName} is not using`);
+  }
+
+  return (value: vec2) => {
+    gl.uniform2fv(uniformLocation, value);
+  };
+}
+
 export function makeUniformMat4ArraySetter(
   gl: GL,
-  program: WebGLUniformLocation,
+  glProgram: WebGLProgram,
   uniformName: string,
   length: number,
 ) {
-  const uniformLocation = gl.getUniformLocation(program, uniformName);
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
 
   if (!uniformLocation) {
     console.warn(`Uniform ${uniformName} is not using`);

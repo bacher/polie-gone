@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import { mat4, vec2 } from 'gl-matrix';
 
 import { loadGltf } from '../utils/loadGltf';
 import { initialize, initializeModel } from '../engine/initialize';
@@ -6,7 +6,12 @@ import type { Scene } from '../engine/scene';
 import { renderScene, startRenderLoop } from '../engine/render';
 import { ShaderProgramType } from '../shaderPrograms/types';
 import { loadTexture } from '../utils/loadTexture';
-import { generatePlain } from '../utils/meshGenerator';
+import {
+  generateHeightMapInstanced,
+  generatePlain,
+  generateQuad,
+} from '../utils/meshGenerator';
+import type { HeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
 
 import './exportGlMatrix';
 import { fromEuler } from './utils';
@@ -50,6 +55,10 @@ export async function setupGame({
   manModelData.texture = manTextureImage;
 
   const { glContext, scene } = initialize(canvasElement);
+
+  if (process.env.NODE_ENV !== 'production') {
+    (window as any).gl = glContext.gl;
+  }
 
   const globalState = {
     isRotating: false,
@@ -109,11 +118,44 @@ export async function setupGame({
   scene.addDrawObject({
     model: plainModel,
     transforms: {
-      translation: [0, -6.3, 0],
-      scale: [30, 30, 30],
+      translation: [0, -2.8, 0],
+      scale: [10, 10, 10],
     },
     defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP,
   });
+
+  if (false) {
+    const dimension = 50;
+    const cellSize = vec2.fromValues(1 / dimension, 1 / dimension);
+
+    const heightMapInstancedModelData = generateHeightMapInstanced({
+      size: dimension,
+    });
+
+    const heightMapInstancedModel = initializeModel(
+      glContext,
+      scene,
+      heightMapInstancedModelData,
+      [ShaderProgramType.HEIGHT_MAP_INSTANCED],
+    );
+
+    scene.addDrawObject({
+      model: heightMapInstancedModel,
+      transforms: {
+        translation: [0, -2.8, 0],
+        scale: [10, 10, 10],
+      },
+      defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP_INSTANCED,
+      beforeDraw: (model, program) => {
+        // TODO: Do we actually use several shaders for same draw object?
+        // switch (program.type) {
+        //   case ShaderProgramType.HEIGHT_MAP_INSTANCED:
+        (program as HeightMapInstancedProgram).uniforms.cellSize(cellSize);
+        // break;
+        // }
+      },
+    });
+  }
 
   const keyboardController = initKeyboardController();
   const mouseController = initMouseController();

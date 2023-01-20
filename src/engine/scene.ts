@@ -1,17 +1,24 @@
 import { mat4, vec3 } from 'gl-matrix';
 
 import type { ShaderProgramType, ShaderProgram } from '../shaderPrograms/types';
-import type { ModelVao } from './initModelVao';
 import type { Transforms } from '../types/model';
+import { convertTransformsToMat4 } from '../utils/transforms';
+
+import type { ModelVao } from './initModelVao';
 import type { Model } from './initialize';
 import type { GlContext } from './glContext';
-import { convertTransformsToMat4 } from '../utils/transforms';
 
 export type ModelInstance = {
   shaderProgram: ShaderProgram;
   modelMat: mat4;
   modelVao: ModelVao;
+  beforeDraw?: BeforeDrawHandler;
 };
+
+export type BeforeDrawHandler = (
+  drawObject: ModelInstance,
+  program: ShaderProgram,
+) => void;
 
 type ShadersCollection = Record<ShaderProgramType, ShaderProgram>;
 
@@ -19,6 +26,7 @@ type AddDrawObjectParams = {
   model: Model<any>;
   transforms: Partial<Transforms>;
   defaultShaderProgramType: ShaderProgramType;
+  beforeDraw?: BeforeDrawHandler;
 };
 
 export type Scene = {
@@ -82,7 +90,12 @@ export function sceneSetGlobalLightDirection(
 
 function sceneAddDrawObject(
   scene: Scene,
-  { model, transforms, defaultShaderProgramType }: AddDrawObjectParams,
+  {
+    model,
+    transforms,
+    defaultShaderProgramType,
+    beforeDraw,
+  }: AddDrawObjectParams,
 ): ModelInstance {
   const defaultVao = model.vaos[defaultShaderProgramType];
 
@@ -96,6 +109,7 @@ function sceneAddDrawObject(
     shaderProgram,
     modelMat: convertTransformsToMat4(transforms),
     modelVao: defaultVao,
+    beforeDraw,
   };
 
   scene.models.push(modelInstance);

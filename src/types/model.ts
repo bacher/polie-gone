@@ -5,6 +5,8 @@ import type { BufferTarget, ComponentType } from './webgl';
 export const enum ModelType {
   REGULAR = 'REGULAR',
   SKINNED = 'SKINNED',
+  BASIC = 'BASIC',
+  HEIGHT_MAP = 'HEIGHT_MAP',
 }
 
 export type DataBuffer = {
@@ -13,6 +15,7 @@ export type DataBuffer = {
   componentDimension: number;
   elementsCount: number;
   dataArray: Uint8Array | Uint16Array | Float32Array;
+  divisor?: number;
 };
 
 type LoadedModelBase = {
@@ -27,6 +30,24 @@ export type RegularLoadedModel = LoadedModelBase & {
     position: DataBuffer;
     normal?: DataBuffer;
     texcoord?: DataBuffer;
+  };
+};
+
+export type BasicLoadedModel = LoadedModelBase & {
+  type: ModelType.BASIC;
+  dataBuffers: {
+    position: DataBuffer;
+    normal?: DataBuffer;
+    texcoord?: DataBuffer;
+  };
+};
+
+export type HeightMapLoadedModel = LoadedModelBase & {
+  type: ModelType.HEIGHT_MAP;
+  instancedCount: number;
+  dataBuffers: {
+    position: DataBuffer;
+    offset: DataBuffer;
   };
 };
 
@@ -56,4 +77,8 @@ export type SkinnedLoadedModel = LoadedModelBase & {
   joints: JointInfo[];
 };
 
-export type LoadedModel = RegularLoadedModel | SkinnedLoadedModel;
+export type LoadedModel =
+  | RegularLoadedModel
+  | SkinnedLoadedModel
+  | BasicLoadedModel
+  | HeightMapLoadedModel;

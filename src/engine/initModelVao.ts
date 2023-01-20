@@ -30,7 +30,9 @@ export function initModelVao(
 
   gl.bindVertexArray(glVao);
 
-  glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, vertexBuffers.index);
+  if (vertexBuffers.index) {
+    glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, vertexBuffers.index);
+  }
 
   const features: (keyof VertexBufferObjectCollection)[] = [
     'position',
@@ -43,6 +45,13 @@ export function initModelVao(
     shaderProgram.type === ShaderProgramType.SKIN
   ) {
     features.push('joints', 'weights');
+  }
+
+  if (
+    gltfModel.type === ModelType.HEIGHT_MAP &&
+    shaderProgram.type === ShaderProgramType.HEIGHT_MAP_INSTANCED
+  ) {
+    features.push('offset');
   }
 
   for (const featureName of features) {
@@ -61,19 +70,39 @@ export function initModelVao(
   glBindBuffer(gl, gl.ARRAY_BUFFER, null);
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, null);
 
-  const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
+  let renderFunc: () => void;
 
-  const modelVao: ModelVao = {
-    glVao,
-    draw: () => {
-      glContext.useVao(modelVao);
+  if (gltfModel.type === ModelType.BASIC) {
+    const elementsCount = gltfModel.dataBuffers.position.elementsCount;
 
+    renderFunc = () => {
+      gl.drawArrays(gl.TRIANGLES, 0, elementsCount);
+    };
+  } else if (gltfModel.type === ModelType.HEIGHT_MAP) {
+    const elementsCount = gltfModel.dataBuffers.position.elementsCount;
+    const instancedCount = gltfModel.instancedCount;
+
+    renderFunc = () => {
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, elementsCount, instancedCount);
+    };
+  } else {
+    const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
+
+    renderFunc = () => {
       gl.drawElements(
         gl.TRIANGLES,
         elementsCount,
         componentType,
         0 /* offset */,
       );
+    };
+  }
+
+  const modelVao: ModelVao = {
+    glVao,
+    draw: () => {
+      glContext.useVao(modelVao);
+      renderFunc();
     },
     dispose: () => {
       gl.deleteVertexArray(glVao);
@@ -89,8 +118,10 @@ function bindBufferVertexArrayPointer(
   bufferInstance: VertexBufferObject,
   attributeLocation: AttributeLocation,
 ): void {
+  const location = attributeLocation.get();
+
   glBindBuffer(gl, gl.ARRAY_BUFFER, bufferInstance);
-  gl.enableVertexAttribArray(attributeLocation.get());
+  gl.enableVertexAttribArray(location);
 
   let isFloat = true;
 
@@ -103,7 +134,7 @@ function bindBufferVertexArrayPointer(
 
   if (isFloat) {
     gl.vertexAttribPointer(
-      attributeLocation.get(),
+      location,
       bufferInfo.componentDimension,
       bufferInfo.componentType,
       false /* normalize */,
@@ -112,12 +143,16 @@ function bindBufferVertexArrayPointer(
     );
   } else {
     gl.vertexAttribIPointer(
-      attributeLocation.get(),
+      location,
       bufferInfo.componentDimension,
       bufferInfo.componentType,
       0,
       0,
     );
+  }
+
+  if (bufferInfo.divisor) {
+    gl.vertexAttribDivisor(location, bufferInfo.divisor);
   }
 }
 

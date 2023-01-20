@@ -1,5 +1,10 @@
 import { BufferTarget, ComponentType } from '../types/webgl';
-import { ModelType, RegularLoadedModel } from '../types/model';
+import {
+  BasicLoadedModel,
+  HeightMapLoadedModel,
+  ModelType,
+  RegularLoadedModel,
+} from '../types/model';
 
 export function generatePlain({
   dimension,
@@ -57,6 +62,88 @@ export function generatePlain({
         componentType: ComponentType.FLOAT,
         elementsCount: vertexData.length / 2,
         dataArray: vertexData,
+      },
+    },
+  };
+}
+
+export function generateQuad({
+  clockwise,
+}: {
+  clockwise?: boolean;
+} = {}): BasicLoadedModel {
+  const downLeft = [0, 0];
+  const downRight = [1, 0];
+  const upLeft = [0, 1];
+  const upRight = [1, 1];
+
+  const dataArray = Float32Array.from(
+    clockwise
+      ? [
+          ...downLeft,
+          ...upLeft,
+          ...upRight,
+          ...downLeft,
+          ...upRight,
+          ...downRight,
+        ]
+      : [
+          ...downLeft,
+          ...upRight,
+          ...upLeft,
+          ...downLeft,
+          ...downRight,
+          ...upRight,
+        ],
+  );
+
+  return {
+    type: ModelType.BASIC,
+    modelName: 'quad',
+    dataBuffers: {
+      position: {
+        bufferTarget: BufferTarget.ARRAY_BUFFER,
+        componentDimension: 2,
+        componentType: ComponentType.FLOAT,
+        elementsCount: dataArray.length / 2,
+        dataArray: dataArray,
+      },
+    },
+  };
+}
+
+export function generateHeightMapInstanced({
+  size,
+}: {
+  size: number;
+}): HeightMapLoadedModel {
+  // clockwise because in mixing axis in shader
+  const quadModelData = generateQuad({ clockwise: true });
+
+  const count = size ** 2;
+
+  const cellSize = 1 / size;
+  const offsetData = new Float32Array(count * 2);
+
+  for (let i = 0; i < size; i += 1) {
+    for (let j = 0; j < size; j += 1) {
+      offsetData.set([j * cellSize, i * cellSize], (i * size + j) * 2);
+    }
+  }
+
+  return {
+    modelName: 'heightmap',
+    type: ModelType.HEIGHT_MAP,
+    instancedCount: count,
+    dataBuffers: {
+      position: quadModelData.dataBuffers.position,
+      offset: {
+        bufferTarget: BufferTarget.ARRAY_BUFFER,
+        componentDimension: 2,
+        componentType: ComponentType.FLOAT,
+        elementsCount: offsetData.length / 2,
+        dataArray: offsetData,
+        divisor: 1,
       },
     },
   };

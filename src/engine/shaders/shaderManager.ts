@@ -62,7 +62,7 @@ function createShader(gl: GL, type: GLenum, source: string): ShaderInstance {
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     console.error(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
-    throw new Error();
+    throw new Error('Shader can not be compiled');
   }
 
   const shaderInstance: ShaderInstance = {
