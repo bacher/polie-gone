@@ -18,9 +18,9 @@ export function generatePlain({
   const vertexData = new Float32Array((dim + 1) ** 2 * 2);
 
   for (let y = 0; y <= dim; y += 1) {
-    const yPos = (y / dim) * 2 - 1;
+    const yPos = y / dim;
     for (let x = 0; x <= dim; x += 1) {
-      const xPos = (x / dim) * 2 - 1;
+      const xPos = x / dim;
       vertexData.set([xPos, yPos], (y * (dim + 1) + x) * 2);
     }
   }

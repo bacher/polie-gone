@@ -1,26 +1,19 @@
-import { mat4, vec2 } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 
 import { loadGltf } from '../utils/loadGltf';
-import { initialize, initializeModel } from '../engine/initialize';
+import { initialize } from '../engine/initialize';
 import type { Scene } from '../engine/scene';
 import { renderScene, startRenderLoop } from '../engine/render';
-import { ShaderProgramType } from '../shaderPrograms/types';
 import { loadTexture } from '../utils/loadTexture';
-import {
-  generateHeightMapInstanced,
-  generatePlain,
-  generateQuad,
-} from '../utils/meshGenerator';
-import type { HeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
 
 import './exportGlMatrix';
-import { fromEuler } from './utils';
 import {
   initKeyboardController,
   KeyboardController,
 } from './keyboardController';
 import { initMouseController, MouseController } from './mouseController';
 import { CameraController, createCameraController } from './cameraController';
+import { addTestSceneDrawObjects } from './testSceneDrawObjects';
 
 export type Game = {
   scene: Scene;
@@ -64,98 +57,7 @@ export async function setupGame({
     isRotating: false,
   };
 
-  const manModel = initializeModel(glContext, scene, manModelData, [
-    ShaderProgramType.DEFAULT,
-    ShaderProgramType.SKIN,
-  ]);
-
-  const toiletModel = initializeModel(glContext, scene, toiletModelData, [
-    ShaderProgramType.DEFAULT,
-  ]);
-
-  const man1 = scene.addDrawObject({
-    model: manModel,
-    transforms: {
-      translation: [0, -0.23, -1],
-    },
-    defaultShaderProgramType: ShaderProgramType.DEFAULT,
-  });
-
-  const man2 = scene.addDrawObject({
-    model: manModel,
-    transforms: {
-      translation: [3, -0.23, -3],
-    },
-    defaultShaderProgramType: ShaderProgramType.SKIN,
-  });
-
-  const man3 = scene.addDrawObject({
-    model: manModel,
-    transforms: {
-      rotation: fromEuler(0.14, 0, 0.13),
-      translation: [-3, -0.23, -2],
-      scale: [0.4, 0.4, 0.4],
-    },
-    defaultShaderProgramType: ShaderProgramType.SKIN,
-  });
-
-  const toilet = scene.addDrawObject({
-    model: toiletModel,
-    transforms: {
-      translation: [-0.9, -1, -1.5],
-      scale: [0.6, 0.6, 0.6],
-      rotation: fromEuler(0, 0.01, 0),
-    },
-    defaultShaderProgramType: ShaderProgramType.DEFAULT,
-  });
-
-  const plainModelData = generatePlain({ dimension: 10 });
-  const plainModel = initializeModel(glContext, scene, plainModelData, [
-    ShaderProgramType.DEFAULT,
-    ShaderProgramType.HEIGHT_MAP,
-  ]);
-
-  scene.addDrawObject({
-    model: plainModel,
-    transforms: {
-      translation: [0, -2.8, 0],
-      scale: [10, 10, 10],
-    },
-    defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP,
-  });
-
-  if (false) {
-    const dimension = 50;
-    const cellSize = vec2.fromValues(1 / dimension, 1 / dimension);
-
-    const heightMapInstancedModelData = generateHeightMapInstanced({
-      size: dimension,
-    });
-
-    const heightMapInstancedModel = initializeModel(
-      glContext,
-      scene,
-      heightMapInstancedModelData,
-      [ShaderProgramType.HEIGHT_MAP_INSTANCED],
-    );
-
-    scene.addDrawObject({
-      model: heightMapInstancedModel,
-      transforms: {
-        translation: [0, -2.8, 0],
-        scale: [10, 10, 10],
-      },
-      defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP_INSTANCED,
-      beforeDraw: (model, program) => {
-        // TODO: Do we actually use several shaders for same draw object?
-        // switch (program.type) {
-        //   case ShaderProgramType.HEIGHT_MAP_INSTANCED:
-        (program as HeightMapInstancedProgram).uniforms.cellSize(cellSize);
-        // break;
-        // }
-      },
-    });
-  }
+  addTestSceneDrawObjects(scene, { manModelData, toiletModelData });
 
   const keyboardController = initKeyboardController();
   const mouseController = initMouseController();
