@@ -8,7 +8,7 @@
 - [x] Add several game objects
 - [x] Split shaders (regular and with skinning)
 - [x] Support texturing
-- [ ] Add texture based plains (height map)
+- [X] Add texture based plains (height map)
 - [ ] Add procedural terrains
 - [ ] Mix procedural terrains with height map textures
 - [x] Add free-look camera (capture mouse)

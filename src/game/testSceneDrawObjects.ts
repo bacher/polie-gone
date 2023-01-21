@@ -102,7 +102,7 @@ function addTerrain(scene: Scene, noiseTextureImage: HTMLImageElement) {
     model: heightMapInstancedModel,
     transforms: {
       translation: [0, -2.4, 0],
-      scale: [50, 2, 50],
+      scale: [100, 4, 100],
     },
     defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP_INSTANCED,
     beforeDraw: (model, program) => {
