@@ -27,5 +27,9 @@ export function initHeightMapInstancedProgram(
       source: fragmentSource,
       init: initFragment,
     },
+    modifyBounds: (bounds) => ({
+      min: [bounds.min[0] - 0.5, bounds.min[0] - 0.5, -0.5],
+      max: [bounds.max[0] - 0.5, bounds.max[0] - 0.5, 0.5],
+    }),
   }) as HeightMapInstancedProgram;
 }

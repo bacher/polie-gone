@@ -66,7 +66,7 @@ export async function setupGame({
     },
     textureImages: {
       noiseTextureImage,
-    }
+    },
   });
 
   const keyboardController = initKeyboardController();
@@ -87,7 +87,10 @@ export async function setupGame({
       mouse: mouseController,
     },
     cameraController,
-    render: () => gameRender(game),
+    render: () => {
+      cameraController.applyCameraState();
+      gameRender(game);
+    },
     startRenderLoop: () => gameStartRenderLoop(game),
     dispose: () => {
       mouseController.dispose();

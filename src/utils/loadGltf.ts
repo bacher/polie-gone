@@ -6,9 +6,12 @@ import {
   RegularLoadedModel,
   SkinnedLoadedModel,
   JointInfo,
+  LoadedModel,
+  Bounds,
 } from '../types/model';
 import { BufferTarget } from '../types/webgl';
 import { MAX_JOINTS } from '../engine/constants';
+import { vec3 } from 'gl-matrix';
 
 const enum BufferType {
   INDICES = 'INDICES',
@@ -103,9 +106,6 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   const loader = new GltfLoader();
   const asset = await loader.load(modelUri);
 
-  // TODO: For debugging
-  (window as any).asset = asset;
-
   const gltfData = asset.gltf;
   checkValidityOfGltfModel(gltfData);
 
@@ -146,6 +146,15 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   const indicesAccessor = gltfData.accessors[primitives.indices];
   const positionAccessor = gltfData.accessors[primitives.attributes.POSITION];
   const normalAccessor = gltfData.accessors[primitives.attributes.NORMAL];
+
+  if (!positionAccessor.min || !positionAccessor.max) {
+    throw new Error('Model without bounds');
+  }
+
+  const modelBounds: Bounds = {
+    min: positionAccessor.min as vec3,
+    max: positionAccessor.max as vec3,
+  };
 
   let texcoordAccessor: gltf.Accessor | undefined;
   if (primitives.attributes.TEXCOORD_0) {
@@ -264,6 +273,8 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     console.groupEnd();
   }
 
+  let model: LoadedModel;
+
   if (loadSkin) {
     const { dataArray } = getBufferByName(BufferType.INVERSE_JOINTS);
     const inverseJointsFloatList = convertUint8ListToFloat32List(
@@ -301,7 +312,7 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
       });
     }
 
-    const model: SkinnedLoadedModel = {
+    const skinnedModel: SkinnedLoadedModel = {
       type: ModelType.SKINNED,
       modelName,
       dataBuffers: {
@@ -310,18 +321,20 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
         weights: getBufferByName(BufferType.WEIGHTS),
       },
       joints,
+      bounds: modelBounds,
     };
 
-    reportEnd();
+    model = skinnedModel;
+  } else {
+    const regularModel: RegularLoadedModel = {
+      type: ModelType.REGULAR,
+      modelName,
+      dataBuffers: baseBuffers,
+      bounds: modelBounds,
+    };
 
-    return model as any;
+    model = regularModel;
   }
-
-  const model: RegularLoadedModel = {
-    type: ModelType.REGULAR,
-    modelName,
-    dataBuffers: baseBuffers,
-  };
 
   reportEnd();
 

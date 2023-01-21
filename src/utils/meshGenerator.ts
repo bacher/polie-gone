@@ -64,6 +64,10 @@ export function generatePlain({
         dataArray: vertexData,
       },
     },
+    bounds: {
+      min: [0, 0, 0],
+      max: [1, 1, 0],
+    },
   };
 }
 
@@ -109,6 +113,10 @@ export function generateQuad({
         dataArray: dataArray,
       },
     },
+    bounds: {
+      min: [0, 0, 0],
+      max: [1, 1, 0],
+    },
   };
 }
 
@@ -145,6 +153,12 @@ export function generateHeightMapInstanced({
         dataArray: offsetData,
         divisor: 1,
       },
+    },
+    bounds: {
+      // min: [-0.5, -0.5, -0.5],
+      // min: [-0.5, -0.5, -0.5],
+      min: [0, 0, 0],
+      max: [1, 1, 0],
     },
   };
 }

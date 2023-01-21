@@ -1,4 +1,4 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { mat4, quat, vec3 } from 'gl-matrix';
 import clamp from 'lodash/clamp';
 
 import { PI2 } from '../utils/math';
@@ -14,6 +14,7 @@ const ACCELERATION = 20;
 
 export type CameraController = {
   tick: TickHandler;
+  applyCameraState: () => void;
   setPosition: (pos: vec3) => void;
   dispose: () => void;
 };
@@ -46,15 +47,6 @@ export function createCameraController({
   };
 
   const moveByTempBuffer = vec3.create();
-
-  const projectionMat = mat4.perspective(
-    mat4.create(),
-    Math.PI / 2,
-    // TODO: use actual size
-    600 / 400,
-    0.1,
-    1000,
-  );
 
   const position = vec3.create();
   const origin = vec3.create();
@@ -94,30 +86,30 @@ export function createCameraController({
   function checkMovement({ delta }: TickTime): void {
     const direction = vec3.create();
 
-    let iSomeMovement = false;
+    let isSomeMovement = false;
 
     if (keyboardController.isPressed('KeyW')) {
       vec3.add(direction, direction, [0, 0, 1]);
-      iSomeMovement = true;
+      isSomeMovement = true;
     }
     if (keyboardController.isPressed('KeyS')) {
       vec3.add(direction, direction, [0, 0, -1]);
-      iSomeMovement = true;
+      isSomeMovement = true;
     }
     if (keyboardController.isPressed('KeyA')) {
       vec3.add(direction, direction, [1, 0, 0]);
-      iSomeMovement = true;
+      isSomeMovement = true;
     }
     if (keyboardController.isPressed('KeyD')) {
       vec3.add(direction, direction, [-1, 0, 0]);
-      iSomeMovement = true;
+      isSomeMovement = true;
     }
 
-    if (iSomeMovement || state.isSpeedVectorNonEmpty) {
+    if (isSomeMovement || state.isSpeedVectorNonEmpty) {
       // TODO: Use static buffer
       const targetSpeedVector = vec3.create();
 
-      if (iSomeMovement) {
+      if (isSomeMovement) {
         vec3.normalize(direction, direction);
 
         // Inverted
@@ -161,18 +153,18 @@ export function createCameraController({
       checkLookDirection(tickTime);
       checkMovement(tickTime);
 
+      cameraController.applyCameraState();
+    },
+    applyCameraState: () => {
       if (isDirty) {
-        const { cameraMat } = scene;
+        scene.camera.setTransforms({
+          direction: {
+            pitch: pitchAngle,
+            yaw: yawAngle,
+          },
+          position,
+        });
 
-        mat4.copy(cameraMat, projectionMat);
-
-        // Apply rotation
-        mat4.rotateX(cameraMat, cameraMat, pitchAngle * PI2);
-        mat4.rotateY(cameraMat, cameraMat, yawAngle * PI2);
-
-        mat4.translate(cameraMat, cameraMat, position);
-
-        // Write directly to scene camera matrix
         isDirty = false;
       }
     },

@@ -8,6 +8,7 @@ import type { SkinProgram } from './skinProgram';
 import type { ModerProgram } from './modernProgram';
 import type { HeightMapProgram } from './heightMapProgram';
 import { HeightMapInstancedProgram } from './heightMapInstancedProgram';
+import { Bounds } from '../types/model';
 
 export const enum ShaderProgramType {
   DEFAULT = 'DEFAULT',
@@ -33,6 +34,9 @@ export type ProgramInit<
   glProgram: WebGLProgram;
   uniforms: ReturnType<V>['uniforms'] & ReturnType<F>['uniforms'];
   attributeLocations: ReturnType<V>['attributeLocations'];
+  modifyBounds: BoundsModifier;
   use: () => void;
   dispose: () => void;
 };
+
+export type BoundsModifier = (bounds: Bounds) => Bounds;

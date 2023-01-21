@@ -1,3 +1,5 @@
+import { vec3, mat4 } from 'gl-matrix';
+
 import type { Scene } from './scene';
 
 export type TickTime = {
@@ -72,18 +74,52 @@ export function startRenderLoop({
   console.info('Render loop started');
 }
 
+const boundCenterTempBuffer = vec3.create();
+const topLeftTempBuffer = vec3.create();
+const bottomRightTempBuffer = vec3.create();
+const topLeftPoint = vec3.fromValues(-1, 1, 1);
+const bottomRightPoint = vec3.fromValues(1, -1, 1);
+
 export function renderScene(scene: Scene): void {
   const { gl } = scene;
 
-  gl.enable(gl.CULL_FACE);
-  gl.enable(gl.DEPTH_TEST);
+  vec3.transformMat4(topLeftTempBuffer, topLeftPoint, scene.camera.inverseMat);
+  vec3.transformMat4(
+    bottomRightTempBuffer,
+    bottomRightPoint,
+    scene.camera.inverseMat,
+  );
+
+  /*
+  console.group();
+  console.log('center      ', Array.from(scene.camera.position));
+  console.log('top left    ', Array.from(topLeftTempBuffer));
+  console.log('bottom right', Array.from(bottomRightTempBuffer));
+  console.groupEnd();
+   */
+
+  // const cameraBoundBox = {
+  //   min:
+  // }
+
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   for (const model of scene.models) {
-    const { shaderProgram } = model;
+    const { shaderProgram, boundInfo, modelMat } = model;
+
+    // console.log('boundInfo', boundInfo);
+
+    // We could use only translate (not whole matrix transform)
+    vec3.transformMat4(boundCenterTempBuffer, boundInfo.center, modelMat);
+
+    // console.log('boundCenterTempBuffer', Array.from(boundCenterTempBuffer));
+
+    // Calculate if object could be visible?
 
     shaderProgram.use();
-    shaderProgram.uniforms.projection(scene.cameraMat);
+
+    // TODO: Don't update if nothing was changed
+    shaderProgram.uniforms.projection(scene.camera.mat);
     shaderProgram.uniforms.lightDirection(scene.lightDirection);
     shaderProgram.uniforms.model(model.modelMat);
     shaderProgram.uniforms.diffuseTexture(0);

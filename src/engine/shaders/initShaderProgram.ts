@@ -1,5 +1,10 @@
+import identity from 'lodash/identity';
+
 // TODO: Remove
-import type { ShaderProgramType } from '../../shaderPrograms/types';
+import type {
+  BoundsModifier,
+  ShaderProgramType,
+} from '../../shaderPrograms/types';
 import type { GlContext } from '../glContext';
 
 import type {
@@ -58,15 +63,18 @@ export function initShaderProgram(
     type,
     vertex,
     fragment,
+    modifyBounds,
   }: {
     type: ShaderProgramType;
     vertex: VertexShaderInitParams;
     fragment: FragmentShaderInitParams;
+    modifyBounds?: BoundsModifier;
   },
 ): ShaderProgramInitial & {
   type: ShaderProgramType;
   uniforms: UniformsCollection;
   attributeLocations: AttributeLocationsCollection;
+  modifyBounds: BoundsModifier;
 } {
   const { gl } = glContext;
 
@@ -87,6 +95,7 @@ export function initShaderProgram(
       ...fragmentInit.uniforms,
     },
     attributeLocations: vertexInit.attributeLocations,
+    modifyBounds: modifyBounds ?? identity,
     dispose: () => {
       program.dispose();
     },

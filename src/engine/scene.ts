@@ -1,17 +1,23 @@
 import { mat4, vec3 } from 'gl-matrix';
 
 import type { ShaderProgramType, ShaderProgram } from '../shaderPrograms/types';
-import type { Transforms } from '../types/model';
+import type { Bounds, Transforms } from '../types/model';
 import { convertTransformsToMat4 } from '../utils/transforms';
 
 import type { ModelVao } from './initModelVao';
 import type { Model } from './initialize';
 import type { GlContext } from './glContext';
+import { initCamera, Camera } from './camera';
 
 export type ModelInstance = {
   shaderProgram: ShaderProgram;
   modelMat: mat4;
   modelVao: ModelVao;
+  boundInfo: {
+    originalBounds: Bounds;
+    center: vec3;
+    radius: number;
+  };
   beforeDraw?: BeforeDrawHandler;
 };
 
@@ -34,7 +40,7 @@ export type Scene = {
   glContext: GlContext;
   isRenderLoop: boolean;
   shaderPrograms: ShadersCollection;
-  cameraMat: mat4;
+  camera: Camera;
   lightDirection: vec3;
   models: ModelInstance[];
   setGlobalLightDirection: (vec: vec3) => void;
@@ -50,16 +56,7 @@ export function setupScene({
   glContext,
   shaderPrograms,
 }: SceneSetupParams): Scene {
-  // TODO: Do we need this?
-  const cameraMat = mat4.perspective(
-    mat4.create(),
-    Math.PI / 2,
-    600 / 400,
-    0.1,
-    1000,
-  );
-
-  mat4.translate(cameraMat, cameraMat, [0, 0, -2]);
+  const camera = initCamera();
 
   const lightDirection = vec3.fromValues(-5, 10, 4);
   vec3.normalize(lightDirection, lightDirection);
@@ -68,7 +65,7 @@ export function setupScene({
     gl: glContext.gl,
     glContext,
     isRenderLoop: false,
-    cameraMat,
+    camera,
     lightDirection,
     shaderPrograms,
     models: [],
@@ -105,14 +102,35 @@ function sceneAddDrawObject(
 
   const shaderProgram = scene.shaderPrograms[defaultShaderProgramType];
 
+  const bounds = shaderProgram.modifyBounds(model.bounds);
+
   const modelInstance: ModelInstance = {
     shaderProgram,
     modelMat: convertTransformsToMat4(transforms),
     modelVao: defaultVao,
+    boundInfo: {
+      originalBounds: bounds,
+      ...getSphereBound(bounds),
+    },
     beforeDraw,
   };
 
   scene.models.push(modelInstance);
 
   return modelInstance;
+}
+
+function getSphereBound(bounds: Bounds): { center: vec3; radius: number } {
+  const x = bounds.max[0] - bounds.min[0];
+  const y = bounds.max[1] - bounds.min[1];
+  const z = bounds.max[2] - bounds.min[2];
+
+  return {
+    center: [
+      bounds.min[0] + x * 0.5,
+      bounds.min[1] + y * 0.5,
+      bounds.min[2] + z * 0.5,
+    ],
+    radius: Math.max(x, y, z) / 2,
+  };
 }

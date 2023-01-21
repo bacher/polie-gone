@@ -1,6 +1,6 @@
 import { mat4 } from 'gl-matrix';
 
-import type { LoadedModel } from '../types/model';
+import type { Bounds, LoadedModel } from '../types/model';
 import { ModelType, SkinnedLoadedModel } from '../types/model';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram, SkinProgram } from '../shaderPrograms/skinProgram';
@@ -48,6 +48,9 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   // After creation of all shader programs we can clear shader cache
   shaderManager.disposeAll();
 
+  gl.enable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST);
+
   const scene = setupScene({
     glContext,
     shaderPrograms: {
@@ -72,6 +75,7 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
 
 export type Model<T extends string> = {
   vaos: Record<T, ModelVao>;
+  bounds: Bounds;
 };
 
 export function initializeModel<T extends ShaderProgramType>(
@@ -120,6 +124,7 @@ export function initializeModel<T extends ShaderProgramType>(
 
   return {
     vaos,
+    bounds: modelData.bounds,
   };
 }
 
