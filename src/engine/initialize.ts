@@ -82,11 +82,10 @@ export function initializeModel<T extends ShaderProgramType>(
 ): Model<T> {
   const vertexBuffers = initVertexBufferObjects(scene.gl, modelData);
 
-  let manTexture: Texture | undefined;
+  const textures: Texture[] = [];
 
   if (modelData.texture) {
-    // TODO: Texture?
-    manTexture = initTexture(glContext, modelData.texture);
+    textures.push(initTexture(glContext, modelData.texture));
   }
 
   const vaos = {} as Record<T, ModelVao>;
@@ -105,6 +104,7 @@ export function initializeModel<T extends ShaderProgramType>(
       shaderProgram,
       vertexBuffers,
       modelData,
+      textures,
     );
 
     vaos[programType] = vao;

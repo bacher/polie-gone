@@ -9,13 +9,21 @@ import type { HeightMapInstancedProgram } from '../shaderPrograms/heightMapInsta
 
 import { fromEuler } from './utils';
 
+type Params = {
+  models: Record<string, LoadedModel>;
+  textureImages: Record<string, HTMLImageElement>;
+};
+
 export function addTestSceneDrawObjects(
   scene: Scene,
-  { manModelData, toiletModelData }: Record<string, LoadedModel>,
+  {
+    models: { manModelData, toiletModelData },
+    textureImages: { noiseTextureImage },
+  }: Params,
 ) {
   addMen(scene, manModelData);
   addToilet(scene, toiletModelData);
-  addTerrain(scene);
+  addTerrain(scene, noiseTextureImage);
 }
 
 function addMen(scene: Scene, manModelData: LoadedModel) {
@@ -71,7 +79,7 @@ function addToilet(scene: Scene, toiletModelData: LoadedModel) {
   });
 }
 
-function addTerrain(scene: Scene) {
+function addTerrain(scene: Scene, noiseTextureImage: HTMLImageElement) {
   const { glContext } = scene;
 
   const dimension = 50;
@@ -80,6 +88,8 @@ function addTerrain(scene: Scene) {
   const heightMapInstancedModelData = generateHeightMapInstanced({
     size: dimension,
   });
+
+  heightMapInstancedModelData.texture = noiseTextureImage;
 
   const heightMapInstancedModel = initializeModel(
     glContext,
@@ -91,8 +101,8 @@ function addTerrain(scene: Scene) {
   scene.addDrawObject({
     model: heightMapInstancedModel,
     transforms: {
-      translation: [0, -2.8, 0],
-      scale: [10, 10, 10],
+      translation: [0, -2.4, 0],
+      scale: [50, 2, 50],
     },
     defaultShaderProgramType: ShaderProgramType.HEIGHT_MAP_INSTANCED,
     beforeDraw: (model, program) => {

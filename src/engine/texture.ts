@@ -2,6 +2,7 @@ import type { GlContext } from './glContext';
 
 export type Texture = {
   glTexture: WebGLTexture;
+  use: (slotIndex: number) => void;
 };
 
 type InitTextureParams = {
@@ -15,13 +16,20 @@ export function initTexture(
 ): Texture {
   const { gl } = glContext;
 
-  gl.activeTexture(gl.TEXTURE0 + 0);
   const glTexture = gl.createTexture();
 
   if (!glTexture) {
     throw new Error("Can't create texture");
   }
 
+  const texture: Texture = {
+    glTexture,
+    use: (slotIndex: number) => glContext.useTexture(texture, slotIndex),
+  };
+
+  glContext.useTexture(texture, 0);
+
+  gl.activeTexture(gl.TEXTURE0 + 0);
   gl.bindTexture(gl.TEXTURE_2D, glTexture);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
@@ -36,7 +44,8 @@ export function initTexture(
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
-  return {
-    glTexture,
-  };
+  // TODO: Maybe reset after loading?
+  // glContext.useTexture(null, 0);
+
+  return texture;
 }

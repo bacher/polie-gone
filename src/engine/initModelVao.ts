@@ -8,6 +8,7 @@ import type {
   VertexBufferObjectCollection,
 } from './initVertextBuffer';
 import type { GlContext } from './glContext';
+import type { Texture } from './texture';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -20,6 +21,7 @@ export function initModelVao(
   shaderProgram: ShaderProgram,
   vertexBuffers: VertexBufferObjectCollection,
   gltfModel: LoadedModel,
+  textures: Texture[],
 ): ModelVao {
   const { gl } = glContext;
   const glVao = gl.createVertexArray();
@@ -70,12 +72,21 @@ export function initModelVao(
   glBindBuffer(gl, gl.ARRAY_BUFFER, null);
   glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, null);
 
+  function applyTextures() {
+    if (textures.length) {
+      for (let i = 0; i < textures.length; i += 1) {
+        textures[i].use(i);
+      }
+    }
+  }
+
   let renderFunc: () => void;
 
   if (gltfModel.type === ModelType.BASIC) {
     const elementsCount = gltfModel.dataBuffers.position.elementsCount;
 
     renderFunc = () => {
+      applyTextures();
       gl.drawArrays(gl.TRIANGLES, 0, elementsCount);
     };
   } else if (gltfModel.type === ModelType.HEIGHT_MAP) {
@@ -83,12 +94,14 @@ export function initModelVao(
     const instancedCount = gltfModel.instancedCount;
 
     renderFunc = () => {
+      applyTextures();
       gl.drawArraysInstanced(gl.TRIANGLES, 0, elementsCount, instancedCount);
     };
   } else {
     const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
 
     renderFunc = () => {
+      applyTextures();
       gl.drawElements(
         gl.TRIANGLES,
         elementsCount,

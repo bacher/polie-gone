@@ -15,6 +15,6 @@ void main() {
 
   v_normal = (u_model * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
   v_texcoord = position;
-  float height = (texture(u_heightMap, v_texcoord).r - 0.5) * 0.2;
+  float height = texture(u_heightMap, v_texcoord).r - 0.5;
   gl_Position = u_projection * u_model * vec4(position.x - 0.5, height, position.y - 0.5, 1.0);
 }

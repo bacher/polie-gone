@@ -37,13 +37,15 @@ type SetupGameParams = {
 export async function setupGame({
   canvasElement,
 }: SetupGameParams): Promise<Game> {
-  const [manModelData, toiletModelData, manTextureImage] = await Promise.all([
-    loadGltf('/models/man/man.gltf', {
-      loadSkin: true,
-    }),
-    loadGltf('/models/toilet/toilet.gltf'),
-    loadTexture('/models/man/man.png'),
-  ]);
+  const [manModelData, toiletModelData, manTextureImage, noiseTextureImage] =
+    await Promise.all([
+      loadGltf('/models/man/man.gltf', {
+        loadSkin: true,
+      }),
+      loadGltf('/models/toilet/toilet.gltf'),
+      loadTexture('/models/man/man.png'),
+      loadTexture('/textures/noise.png'),
+    ]);
 
   manModelData.texture = manTextureImage;
 
@@ -57,7 +59,15 @@ export async function setupGame({
     isRotating: false,
   };
 
-  addTestSceneDrawObjects(scene, { manModelData, toiletModelData });
+  addTestSceneDrawObjects(scene, {
+    models: {
+      manModelData,
+      toiletModelData,
+    },
+    textureImages: {
+      noiseTextureImage,
+    }
+  });
 
   const keyboardController = initKeyboardController();
   const mouseController = initMouseController();
