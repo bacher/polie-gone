@@ -97,6 +97,7 @@ export function initializeModel<T extends ShaderProgramType>(
       modelData.modelName,
       modelData.type,
       shaderProgram.type,
+      textures.length,
     );
 
     const vao = initModelVao(
@@ -126,7 +127,19 @@ function checkIfModelMatchShader(
   modelName: string,
   modelType: ModelType,
   shaderProgramType: ShaderProgramType,
+  texturesCount: number,
 ): void {
+  // switch (shaderProgramType) {
+  // case ShaderProgramType.SKIN:
+  // case ShaderProgramType.HEIGHT_MAP_INSTANCED:
+  if (texturesCount === 0) {
+    console.error(
+      `Model ${modelName} do not have textures for shader ${shaderProgramType}`,
+    );
+  }
+  // break;
+  // }
+
   if (
     (modelType === ModelType.HEIGHT_MAP) !==
     (shaderProgramType === ShaderProgramType.HEIGHT_MAP_INSTANCED)

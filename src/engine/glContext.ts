@@ -13,6 +13,7 @@ export type GlContext = {
 export function createGlContext(gl: WebGL2RenderingContext): GlContext {
   let currentProgram: WebGLVertexArrayObject;
   let currentVao: WebGLVertexArrayObject;
+  let currentActiveTextureIndex = 0;
   let currentTextures: WebGLTexture[] = [];
 
   return {
@@ -32,7 +33,10 @@ export function createGlContext(gl: WebGL2RenderingContext): GlContext {
     useTexture: (texture: Texture, slotIndex: number): void => {
       const currentGlTexture = currentTextures[slotIndex];
       if (currentGlTexture !== texture.glTexture) {
-        gl.activeTexture(gl.TEXTURE0 + slotIndex);
+        if (currentActiveTextureIndex !== slotIndex) {
+          gl.activeTexture(gl.TEXTURE0 + slotIndex);
+        }
+        currentActiveTextureIndex = slotIndex;
         gl.bindTexture(gl.TEXTURE_2D, texture.glTexture);
         currentTextures[slotIndex] = texture.glTexture;
       }

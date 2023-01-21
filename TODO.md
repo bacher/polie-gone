@@ -22,6 +22,7 @@
 - [ ] Add possibility to use specular textures
 - [ ] Add possibility to use bump textures
 - [ ] Add shadows
+- [ ] Add fullscreen mode
 - [ ] Game should be paused when window lose focus?
       (problem with to big deltas in logic loop)
 
