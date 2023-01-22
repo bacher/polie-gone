@@ -1,6 +1,6 @@
 import { mat4 } from 'gl-matrix';
 
-import type { Bounds, LoadedModel } from '../types/model';
+import type { BoundBox, LoadedModel } from '../types/model';
 import { ModelType, SkinnedLoadedModel } from '../types/model';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram, SkinProgram } from '../shaderPrograms/skinProgram';
@@ -75,7 +75,7 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
 
 export type Model<T extends string> = {
   vaos: Record<T, ModelVao>;
-  bounds: Bounds;
+  bounds: BoundBox;
 };
 
 export function initializeModel<T extends ShaderProgramType>(

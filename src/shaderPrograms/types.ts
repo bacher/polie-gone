@@ -8,7 +8,7 @@ import type { SkinProgram } from './skinProgram';
 import type { ModerProgram } from './modernProgram';
 import type { HeightMapProgram } from './heightMapProgram';
 import { HeightMapInstancedProgram } from './heightMapInstancedProgram';
-import { Bounds } from '../types/model';
+import { BoundBox } from '../types/model';
 
 export const enum ShaderProgramType {
   DEFAULT = 'DEFAULT',
@@ -39,4 +39,4 @@ export type ProgramInit<
   dispose: () => void;
 };
 
-export type BoundsModifier = (bounds: Bounds) => Bounds;
+export type BoundsModifier = (bounds: BoundBox) => BoundBox;

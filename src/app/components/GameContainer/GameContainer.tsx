@@ -13,9 +13,13 @@ import styles from './GameContainer.module.scss';
 export function GameContainer() {
   const forceUpdate = useForceUpdate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const state = useMemo<{ game: Game | undefined }>(
+  const state = useMemo<{
+    game: Game | undefined;
+    cancelLoop: (() => void) | undefined;
+  }>(
     () => ({
       game: undefined,
+      cancelLoop: undefined,
     }),
     [],
   );
@@ -27,13 +31,23 @@ export function GameContainer() {
 
     state.game = await setupGame({ canvasElement: canvasRef.current });
     state.game.render();
+
     forceUpdate();
   });
 
   useWindowEvent('mousedown', () => {
     if (state.game && !state.game.scene.isRenderLoop) {
-      state.game.startRenderLoop();
+      state.cancelLoop = state.game.startRenderLoop();
       forceUpdate();
+    }
+  });
+
+  useWindowEvent('keydown', (event) => {
+    if (event.code === 'Space') {
+      if (state.cancelLoop) {
+        state.cancelLoop();
+        forceUpdate();
+      }
     }
   });
 

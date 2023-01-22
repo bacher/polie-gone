@@ -1,7 +1,7 @@
 import { mat4, vec3 } from 'gl-matrix';
 
 import type { ShaderProgramType, ShaderProgram } from '../shaderPrograms/types';
-import type { Bounds, Transforms } from '../types/model';
+import type { BoundBox, BoundSphere, Transforms } from '../types/model';
 import { convertTransformsToMat4 } from '../utils/transforms';
 
 import type { ModelVao } from './initModelVao';
@@ -13,11 +13,7 @@ export type ModelInstance = {
   shaderProgram: ShaderProgram;
   modelMat: mat4;
   modelVao: ModelVao;
-  boundInfo: {
-    originalBounds: Bounds;
-    center: vec3;
-    radius: number;
-  };
+  boundInfo: BoundSphere;
   beforeDraw?: BeforeDrawHandler;
 };
 
@@ -108,10 +104,7 @@ function sceneAddDrawObject(
     shaderProgram,
     modelMat: convertTransformsToMat4(transforms),
     modelVao: defaultVao,
-    boundInfo: {
-      originalBounds: bounds,
-      ...getSphereBound(bounds),
-    },
+    boundInfo: getSphereBound(bounds),
     beforeDraw,
   };
 
@@ -120,7 +113,7 @@ function sceneAddDrawObject(
   return modelInstance;
 }
 
-function getSphereBound(bounds: Bounds): { center: vec3; radius: number } {
+function getSphereBound(bounds: BoundBox): BoundSphere {
   const x = bounds.max[0] - bounds.min[0];
   const y = bounds.max[1] - bounds.min[1];
   const z = bounds.max[2] - bounds.min[2];

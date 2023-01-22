@@ -8,7 +8,7 @@
 - [x] Add several game objects
 - [x] Split shaders (regular and with skinning)
 - [x] Support texturing
-- [X] Add texture based plains (height map)
+- [x] Add texture based plains (height map)
 - [ ] Add procedural terrains
 - [ ] Mix procedural terrains with height map textures
 - [x] Add free-look camera (capture mouse)
@@ -28,10 +28,15 @@
 
 Optimizations:
 
-- [ ] Add out of view render optimization
+- [x] Add out of view render optimization
+- [ ] Optimize out of view optimization (use camera's angles)
 - [ ] Add dynamic LOD optimization
 - [ ] Use fewer joints to skinning
   - [ ] Optimize model (remove unnecessary joint weights)
   - [ ] Adapt shader to know how many joints should be used
   - [ ] Visualize weights distribution
 - [ ] Allow change antialias
+
+Helpers:
+
+- [ ] Add easy way to display debug objects as overlay on same canvas

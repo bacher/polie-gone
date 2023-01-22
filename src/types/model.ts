@@ -18,15 +18,20 @@ export type DataBuffer = {
   divisor?: number;
 };
 
-export type Bounds = {
+export type BoundBox = {
   min: vec3;
   max: vec3;
+};
+
+export type BoundSphere = {
+  center: vec3;
+  radius: number;
 };
 
 type LoadedModelBase = {
   modelName: string;
   texture?: HTMLImageElement;
-  bounds: Bounds;
+  bounds: BoundBox;
 };
 
 export type RegularLoadedModel = LoadedModelBase & {

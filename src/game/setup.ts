@@ -26,7 +26,7 @@ export type Game = {
   };
   cameraController: CameraController;
   render: () => void;
-  startRenderLoop: () => void;
+  startRenderLoop: () => () => void;
   dispose: () => void;
 };
 
@@ -105,8 +105,8 @@ function gameRender(game: Game) {
   renderScene(game.scene);
 }
 
-function gameStartRenderLoop(game: Game) {
-  startRenderLoop({
+function gameStartRenderLoop(game: Game): () => void {
+  return startRenderLoop({
     scene: game.scene,
     // fps: 5,
     onTick: (tickParams) => {

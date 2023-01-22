@@ -123,6 +123,7 @@ export function createCameraController({
 
       if (state.isSpeedVectorNonEmpty) {
         distanceVector = vec3.subtract(
+          // TODO: Use static buffer
           vec3.create(),
           targetSpeedVector,
           state.speedVector,

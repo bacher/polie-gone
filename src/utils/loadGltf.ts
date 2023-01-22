@@ -7,7 +7,7 @@ import {
   SkinnedLoadedModel,
   JointInfo,
   LoadedModel,
-  Bounds,
+  BoundBox,
 } from '../types/model';
 import { BufferTarget } from '../types/webgl';
 import { MAX_JOINTS } from '../engine/constants';
@@ -151,7 +151,7 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     throw new Error('Model without bounds');
   }
 
-  const modelBounds: Bounds = {
+  const modelBounds: BoundBox = {
     min: positionAccessor.min as vec3,
     max: positionAccessor.max as vec3,
   };

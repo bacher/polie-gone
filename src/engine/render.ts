@@ -1,4 +1,6 @@
-import { vec3, mat4 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
+
+import { isBoundsIntersect, makeBoundBoxByPoints } from '../utils/boundBox';
 
 import type { Scene } from './scene';
 
@@ -20,7 +22,7 @@ export function startRenderLoop({
   scene,
   fps,
   onTick,
-}: StartRenderLoopParams): void {
+}: StartRenderLoopParams): () => void {
   if (scene.isRenderLoop) {
     throw new Error('Already in render loop');
   }
@@ -52,19 +54,20 @@ export function startRenderLoop({
     renderScene(scene);
   }
 
+  let intervalId: number | undefined;
+  let animationFrameId: number | undefined;
+
   if (fps) {
-    setInterval(() => {
+    intervalId = window.setInterval(() => {
       processFrame(performance.now());
     }, 1000 / fps);
   } else {
     function animationFrameHandler(timestamp: number): void {
       processFrame(timestamp);
-      requestAnimationFrame(animationFrameHandler);
+      animationFrameId = window.requestAnimationFrame(animationFrameHandler);
     }
 
-    requestAnimationFrame((timestamp) => {
-      animationFrameHandler(timestamp);
-    });
+    animationFrameId = window.requestAnimationFrame(animationFrameHandler);
   }
 
   processFrame(performance.now());
@@ -72,49 +75,69 @@ export function startRenderLoop({
   scene.isRenderLoop = true;
 
   console.info('Render loop started');
+
+  return () => {
+    scene.isRenderLoop = false;
+
+    if (intervalId !== undefined) {
+      window.clearInterval(intervalId);
+    }
+    if (animationFrameId !== undefined) {
+      window.cancelAnimationFrame(animationFrameId);
+    }
+
+    console.info('Render loop stopped');
+  };
 }
 
-const boundCenterTempBuffer = vec3.create();
-const topLeftTempBuffer = vec3.create();
-const bottomRightTempBuffer = vec3.create();
-const topLeftPoint = vec3.fromValues(-1, 1, 1);
-const bottomRightPoint = vec3.fromValues(1, -1, 1);
+const topLeftScreenPoint = vec3.fromValues(-1, 1, 1);
+const bottomRightScreenPoint = vec3.fromValues(1, -1, 1);
+
+const boundCenterTempVec = vec3.create();
+const topLeftTempVec = vec3.create();
+const bottomRightTempVec = vec3.create();
 
 export function renderScene(scene: Scene): void {
   const { gl } = scene;
 
-  vec3.transformMat4(topLeftTempBuffer, topLeftPoint, scene.camera.inverseMat);
   vec3.transformMat4(
-    bottomRightTempBuffer,
-    bottomRightPoint,
+    topLeftTempVec,
+    topLeftScreenPoint,
+    scene.camera.inverseMat,
+  );
+  vec3.transformMat4(
+    bottomRightTempVec,
+    bottomRightScreenPoint,
     scene.camera.inverseMat,
   );
 
-  /*
-  console.group();
-  console.log('center      ', Array.from(scene.camera.position));
-  console.log('top left    ', Array.from(topLeftTempBuffer));
-  console.log('bottom right', Array.from(bottomRightTempBuffer));
-  console.groupEnd();
-   */
+  const pos = scene.camera.position;
 
-  // const cameraBoundBox = {
-  //   min:
-  // }
+  const cameraBoundBox = makeBoundBoxByPoints([
+    // TODO: Remove inverse
+    [-pos[0], -pos[1], -pos[2]],
+    topLeftTempVec,
+    bottomRightTempVec,
+  ]);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   for (const model of scene.models) {
     const { shaderProgram, boundInfo, modelMat } = model;
 
-    // console.log('boundInfo', boundInfo);
-
     // We could use only translate (not whole matrix transform)
-    vec3.transformMat4(boundCenterTempBuffer, boundInfo.center, modelMat);
+    vec3.transformMat4(boundCenterTempVec, boundInfo.center, modelMat);
 
-    // console.log('boundCenterTempBuffer', Array.from(boundCenterTempBuffer));
+    const radius = boundInfo.radius * getMaxScaleFactor(modelMat);
 
-    // Calculate if object could be visible?
+    if (
+      !isBoundsIntersect(cameraBoundBox, {
+        center: boundCenterTempVec,
+        radius,
+      })
+    ) {
+      continue;
+    }
 
     shaderProgram.use();
 
@@ -130,4 +153,13 @@ export function renderScene(scene: Scene): void {
 
     model.modelVao.draw();
   }
+}
+
+const tempVec = vec3.create();
+
+function getMaxScaleFactor(mat: mat4): number {
+  // TODO: Compare and replace by optimized version, or use scale from model directly
+  return Math.max(...mat4.getScaling(tempVec, mat));
+
+  // return Math.max(mat[0], mat[5], mat[10]);
 }
