@@ -40,3 +40,6 @@ Optimizations:
 Helpers:
 
 - [ ] Add easy way to display debug objects as overlay on same canvas
+
+Bugs
+- [x] Fix camera position and orientation

@@ -111,11 +111,8 @@ export function renderScene(scene: Scene): void {
     scene.camera.inverseMat,
   );
 
-  const pos = scene.camera.position;
-
   const cameraBoundBox = makeBoundBoxByPoints([
-    // TODO: Remove inverse
-    [-pos[0], -pos[1], -pos[2]],
+    scene.camera.position,
     topLeftTempVec,
     bottomRightTempVec,
   ]);

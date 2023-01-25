@@ -74,8 +74,8 @@ export function createCameraController({
         y: mouseMovementPosition.y - previousMouseMovementPosition.y,
       };
 
-      yawAngle += mouseMovement.x * delta * MOUSE_SENSITIVITY;
-      pitchAngle += mouseMovement.y * delta * MOUSE_SENSITIVITY;
+      yawAngle -= mouseMovement.x * delta * MOUSE_SENSITIVITY;
+      pitchAngle -= mouseMovement.y * delta * MOUSE_SENSITIVITY;
       pitchAngle = clamp(pitchAngle, -0.23, 0.23);
       isDirty = true;
     }
@@ -89,19 +89,19 @@ export function createCameraController({
     let isSomeMovement = false;
 
     if (keyboardController.isPressed('KeyW')) {
-      vec3.add(direction, direction, [0, 0, 1]);
-      isSomeMovement = true;
-    }
-    if (keyboardController.isPressed('KeyS')) {
       vec3.add(direction, direction, [0, 0, -1]);
       isSomeMovement = true;
     }
+    if (keyboardController.isPressed('KeyS')) {
+      vec3.add(direction, direction, [0, 0, 1]);
+      isSomeMovement = true;
+    }
     if (keyboardController.isPressed('KeyA')) {
-      vec3.add(direction, direction, [1, 0, 0]);
+      vec3.add(direction, direction, [-1, 0, 0]);
       isSomeMovement = true;
     }
     if (keyboardController.isPressed('KeyD')) {
-      vec3.add(direction, direction, [-1, 0, 0]);
+      vec3.add(direction, direction, [1, 0, 0]);
       isSomeMovement = true;
     }
 
@@ -112,9 +112,8 @@ export function createCameraController({
       if (isSomeMovement) {
         vec3.normalize(direction, direction);
 
-        // Inverted
-        vec3.rotateX(direction, direction, origin, -pitchAngle * PI2);
-        vec3.rotateY(direction, direction, origin, -yawAngle * PI2);
+        vec3.rotateX(direction, direction, origin, pitchAngle * PI2);
+        vec3.rotateY(direction, direction, origin, yawAngle * PI2);
 
         vec3.scale(targetSpeedVector, direction, movementSpeed);
       }
@@ -158,7 +157,7 @@ export function createCameraController({
     },
     applyCameraState: () => {
       if (isDirty) {
-        scene.camera.setTransforms({
+        scene.camera.setOrientation({
           direction: {
             pitch: pitchAngle,
             yaw: yawAngle,

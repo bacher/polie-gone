@@ -6,7 +6,7 @@ export type Camera = {
   mat: mat4;
   inverseMat: mat4;
   position: vec3;
-  setTransforms: (params: {
+  setOrientation: (params: {
     position: vec3;
     direction: CameraDirection;
   }) => void;
@@ -30,26 +30,26 @@ export function initCamera(): Camera {
   const mat = mat4.create();
   const inverseMat = mat4.create();
   const currentPosition = vec3.create();
+  const invertedCurrentPosition = vec3.create();
   const currentDirection: CameraDirection = {
     pitch: 0,
     yaw: 0,
   };
 
-  // mat4.translate(cameraMat, cameraMat, [0, 0, -2]);
-
   const camera: Camera = {
     mat,
     inverseMat,
     position: currentPosition,
-    setTransforms: ({ position, direction }) => {
+    setOrientation: ({ position, direction }) => {
       vec3.copy(currentPosition, position);
+      vec3.scale(invertedCurrentPosition, currentPosition, -1);
       currentDirection.yaw = direction.yaw;
       currentDirection.pitch = direction.pitch;
 
       mat4.copy(mat, perspectiveMat);
-      mat4.rotateX(mat, mat, currentDirection.pitch * PI2);
-      mat4.rotateY(mat, mat, currentDirection.yaw * PI2);
-      mat4.translate(mat, mat, currentPosition);
+      mat4.rotateX(mat, mat, -currentDirection.pitch * PI2);
+      mat4.rotateY(mat, mat, -currentDirection.yaw * PI2);
+      mat4.translate(mat, mat, invertedCurrentPosition);
 
       mat4.invert(inverseMat, mat);
     },

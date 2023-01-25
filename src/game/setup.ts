@@ -77,7 +77,7 @@ export async function setupGame({
     mouseController,
     movementSpeed: 2,
   });
-  cameraController.setPosition([0, 0, -2]);
+  cameraController.setPosition([0, 0, 2]);
 
   const game: Game = {
     scene,
