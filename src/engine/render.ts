@@ -1,8 +1,9 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import { isBoundsIntersect, makeBoundBoxByPoints } from '../utils/boundBox';
+import { isBoundsIntersect } from '../utils/boundBox';
 
 import type { Scene } from './scene';
+import { getCameraViewBoundBox } from './camera';
 
 export type TickTime = {
   timestamp: number;
@@ -90,39 +91,21 @@ export function startRenderLoop({
   };
 }
 
-const topLeftScreenPoint = vec3.fromValues(-1, 1, 1);
-const bottomRightScreenPoint = vec3.fromValues(1, -1, 1);
+// TODO: Move to camera.ts
 
 const boundCenterTempVec = vec3.create();
-const topLeftTempVec = vec3.create();
-const bottomRightTempVec = vec3.create();
 
 export function renderScene(scene: Scene): void {
   const { gl } = scene;
 
-  vec3.transformMat4(
-    topLeftTempVec,
-    topLeftScreenPoint,
-    scene.camera.inverseMat,
-  );
-  vec3.transformMat4(
-    bottomRightTempVec,
-    bottomRightScreenPoint,
-    scene.camera.inverseMat,
-  );
-
-  const cameraBoundBox = makeBoundBoxByPoints([
-    scene.camera.position,
-    topLeftTempVec,
-    bottomRightTempVec,
-  ]);
+  const cameraBoundBox = getCameraViewBoundBox(scene.camera);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   for (const model of scene.models) {
     const { shaderProgram, boundInfo, modelMat } = model;
 
-    // We could use only translate (not whole matrix transform)
+    // TODO: We could use only translate (not whole matrix transform)
     vec3.transformMat4(boundCenterTempVec, boundInfo.center, modelMat);
 
     const radius = boundInfo.radius * getMaxScaleFactor(modelMat);

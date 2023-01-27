@@ -1,6 +1,7 @@
 import { mat4, vec3 } from 'gl-matrix';
 
 import { PI2 } from '../utils/math';
+import { makeBoundBoxByPoints } from '../utils/boundBox';
 
 export type Camera = {
   mat: mat4;
@@ -56,4 +57,24 @@ export function initCamera(): Camera {
   };
 
   return camera;
+}
+
+const topLeftScreenPoint = vec3.fromValues(-1, 1, 1);
+const bottomRightScreenPoint = vec3.fromValues(1, -1, 1);
+const topLeftTempVec = vec3.create();
+const bottomRightTempVec = vec3.create();
+
+export function getCameraViewBoundBox(camera: Camera) {
+  vec3.transformMat4(topLeftTempVec, topLeftScreenPoint, camera.inverseMat);
+  vec3.transformMat4(
+    bottomRightTempVec,
+    bottomRightScreenPoint,
+    camera.inverseMat,
+  );
+
+  return makeBoundBoxByPoints([
+    camera.position,
+    topLeftTempVec,
+    bottomRightTempVec,
+  ]);
 }
