@@ -29,6 +29,7 @@
 Optimizations:
 
 - [x] Add out of view render optimization
+- [ ] Add out of view render optimization base on camera frustum
 - [ ] Optimize out of view optimization (use camera's angles)
 - [ ] Add dynamic LOD optimization
 - [ ] Use fewer joints to skinning
@@ -37,11 +38,16 @@ Optimizations:
   - [ ] Visualize weights distribution
 - [ ] Allow change antialias
 
+Refactoring:
+
+- [ ] Look at model features (not on model type) in initVertexBufferObjects
+- [ ] Move draw mode (points, lines, triangles) in model data
+
 Helpers:
 
 - [x] Add easy way to display debug objects as overlay on same canvas
 
-Bugs
+Bugs:
 
 - [x] Fix camera position and orientation
 - [x] Fix bounding sphere size, r = (maxSide/2) \* sqrt(2)
