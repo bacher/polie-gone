@@ -39,7 +39,9 @@ Optimizations:
 
 Helpers:
 
-- [ ] Add easy way to display debug objects as overlay on same canvas
+- [x] Add easy way to display debug objects as overlay on same canvas
 
 Bugs
+
 - [x] Fix camera position and orientation
+- [ ] Fix bounding sphere size, r = (maxSide/2) \* sqrt(2)

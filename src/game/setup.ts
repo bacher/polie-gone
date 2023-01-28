@@ -37,15 +37,21 @@ type SetupGameParams = {
 export async function setupGame({
   canvasElement,
 }: SetupGameParams): Promise<Game> {
-  const [manModelData, toiletModelData, manTextureImage, noiseTextureImage] =
-    await Promise.all([
-      loadGltf('/models/man/man.gltf', {
-        loadSkin: true,
-      }),
-      loadGltf('/models/toilet/toilet.gltf'),
-      loadTexture('/models/man/man.png'),
-      loadTexture('/textures/noise.png'),
-    ]);
+  const [
+    manModelData,
+    toiletModelData,
+    unitSphereModelData,
+    manTextureImage,
+    noiseTextureImage,
+  ] = await Promise.all([
+    loadGltf('/models/man/man.gltf', {
+      loadSkin: true,
+    }),
+    loadGltf('/models/toilet/toilet.gltf'),
+    loadGltf('/models/unit-sphere/unit-sphere.gltf'),
+    loadTexture('/models/man/man.png'),
+    loadTexture('/textures/noise.png'),
+  ]);
 
   manModelData.texture = manTextureImage;
 
@@ -63,6 +69,7 @@ export async function setupGame({
     models: {
       manModelData,
       toiletModelData,
+      unitSphereModelData,
     },
     textureImages: {
       noiseTextureImage,

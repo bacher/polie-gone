@@ -7,6 +7,7 @@ export const enum ModelType {
   SKINNED = 'SKINNED',
   BASIC = 'BASIC',
   HEIGHT_MAP = 'HEIGHT_MAP',
+  WIREFRAME = 'WIREFRAME',
 }
 
 export type DataBuffer = {
@@ -41,6 +42,14 @@ export type RegularLoadedModel = LoadedModelBase & {
     position: DataBuffer;
     normal?: DataBuffer;
     texcoord?: DataBuffer;
+  };
+};
+
+export type WireframeLoadedModel = LoadedModelBase & {
+  type: ModelType.WIREFRAME;
+  dataBuffers: {
+    indices: DataBuffer;
+    position: DataBuffer;
   };
 };
 
@@ -92,4 +101,5 @@ export type LoadedModel =
   | RegularLoadedModel
   | SkinnedLoadedModel
   | BasicLoadedModel
-  | HeightMapLoadedModel;
+  | HeightMapLoadedModel
+  | WireframeLoadedModel;

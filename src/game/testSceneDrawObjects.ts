@@ -1,6 +1,13 @@
 import { vec2 } from 'gl-matrix';
 
-import type { LoadedModel } from '../types/model';
+import {
+  DataBuffer,
+  ModelType,
+  LoadedModel,
+  RegularLoadedModel,
+  SkinnedLoadedModel,
+} from '../types/model';
+import { BufferTarget, ComponentType } from '../types/webgl';
 import type { Scene } from '../engine/scene';
 import { generateHeightMapInstanced } from '../utils/meshGenerator';
 import { initializeModel } from '../engine/initialize';
@@ -17,13 +24,15 @@ type Params = {
 export function addTestSceneDrawObjects(
   scene: Scene,
   {
-    models: { manModelData, toiletModelData },
+    models: { manModelData, toiletModelData, unitSphereModelData },
     textureImages: { noiseTextureImage },
   }: Params,
 ) {
   addMen(scene, manModelData);
   addToilet(scene, toiletModelData);
   addTerrain(scene, noiseTextureImage);
+
+  addUnitSphere(scene, unitSphereModelData);
 }
 
 function addMen(scene: Scene, manModelData: LoadedModel) {
@@ -114,4 +123,131 @@ function addTerrain(scene: Scene, noiseTextureImage: HTMLImageElement) {
       // }
     },
   });
+}
+
+function transformModelToWireframe(
+  modelData: RegularLoadedModel | SkinnedLoadedModel,
+): LoadedModel {
+  return {
+    type: ModelType.WIREFRAME,
+    modelName: `${modelData.modelName}_wireframe`,
+    bounds: modelData.bounds,
+    dataBuffers: {
+      indices: convertToLines(modelData.dataBuffers.indices),
+      position: modelData.dataBuffers.position,
+    },
+  };
+}
+
+function convertToLines(buf: DataBuffer): DataBuffer {
+  let arrayType: typeof Uint8Array | typeof Uint16Array;
+  let view: Uint8Array | Uint16Array;
+
+  switch (buf.componentType) {
+    case ComponentType.UNSIGNED_BYTE:
+      arrayType = Uint8Array;
+      break;
+    case ComponentType.UNSIGNED_SHORT:
+      arrayType = Uint16Array;
+      break;
+    default:
+      throw new Error('Invalid index buffer');
+  }
+
+  if (buf.dataArray instanceof arrayType) {
+    view = buf.dataArray;
+  } else {
+    view = new arrayType(buf.dataArray.buffer).subarray(
+      buf.dataArray.byteOffset / arrayType.BYTES_PER_ELEMENT,
+      (buf.dataArray.byteOffset + buf.dataArray.byteLength) /
+        arrayType.BYTES_PER_ELEMENT,
+    );
+  }
+
+  // TODO: Choose:
+  //  1. Use precreated typed array and shrink after creation
+  //  2. Or use regular Array and create typed array at the end
+  // const linesBuffer = new arrayType(view.length * 2);
+  // let linesBufferIndex = 0;
+  const values: number[] = [];
+  let useUint16 = false;
+  const alreadyLines = new Map<number, number[]>();
+
+  function check(v1: number, v2: number): void {
+    if (process.env.NODE_ENV !== 'production') {
+      if (v1 === v2) {
+        throw new Error('Invalid');
+      }
+    }
+
+    if (v1 > v2) {
+      const t = v1;
+      v1 = v2;
+      v2 = t;
+    }
+
+    const list = alreadyLines.get(v1);
+
+    if (!list || !list.includes(v2)) {
+      if (!list) {
+        alreadyLines.set(v1, [v2]);
+      } else {
+        list.push(v2);
+      }
+
+      // linesBuffer.set([v1, v2], linesBufferIndex);
+      // linesBufferIndex += 2;
+      values.push(v1, v2);
+
+      if (v1 > 255 || v2 > 255) {
+        useUint16 = true;
+      }
+    } else {
+      console.log('Skip');
+    }
+  }
+
+  for (let i = 0; i < view.length; i += 3) {
+    const vertex1 = view[i];
+    const vertex2 = view[i + 1];
+    const vertex3 = view[i + 2];
+
+    check(vertex1, vertex2);
+    check(vertex2, vertex3);
+    check(vertex3, vertex1);
+  }
+
+  const finalLinesBuffer = (useUint16 ? Uint16Array : Uint8Array).from(values);
+
+  return {
+    bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
+    componentType: useUint16
+      ? ComponentType.UNSIGNED_SHORT
+      : ComponentType.UNSIGNED_BYTE,
+    componentDimension: 1,
+    dataArray: finalLinesBuffer,
+    elementsCount: finalLinesBuffer.length,
+  };
+}
+
+function addUnitSphere(scene: Scene, modelData: LoadedModel): void {
+  const { glContext } = scene;
+
+  if (modelData.type !== ModelType.REGULAR) {
+    throw new Error('Invalid model type');
+  }
+
+  const wireframeModelData = transformModelToWireframe(modelData);
+
+  const wireframeModel = initializeModel(glContext, scene, wireframeModelData, [
+    ShaderProgramType.DEFAULT,
+  ]);
+
+  scene.debug.models['unitSphere'] = wireframeModel;
+
+  // const sphere = scene.addDrawObject({
+  //   model: wireframeModel,
+  //   transforms: {},
+  //   defaultShaderProgramType: ShaderProgramType.DEFAULT,
+  // });
 }

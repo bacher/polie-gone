@@ -8,6 +8,7 @@ import type { ModelVao } from './initModelVao';
 import type { Model } from './initialize';
 import type { GlContext } from './glContext';
 import { initCamera, Camera } from './camera';
+import type { DebugFigure } from './debugRender';
 
 export type ModelInstance = {
   shaderProgram: ShaderProgram;
@@ -39,6 +40,10 @@ export type Scene = {
   camera: Camera;
   lightDirection: vec3;
   models: ModelInstance[];
+  debug: {
+    models: Record<string, Model<any>>;
+    overlay: DebugFigure[];
+  };
   setGlobalLightDirection: (vec: vec3) => void;
   addDrawObject: (params: AddDrawObjectParams) => ModelInstance;
 };
@@ -65,7 +70,10 @@ export function setupScene({
     lightDirection,
     shaderPrograms,
     models: [],
-
+    debug: {
+      models: {},
+      overlay: [],
+    },
     setGlobalLightDirection: (...args) =>
       sceneSetGlobalLightDirection(scene, ...args),
     addDrawObject: (...args) => sceneAddDrawObject(scene, ...args),

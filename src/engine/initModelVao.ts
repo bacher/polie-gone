@@ -97,6 +97,13 @@ export function initModelVao(
       applyTextures();
       gl.drawArraysInstanced(gl.TRIANGLES, 0, elementsCount, instancedCount);
     };
+  } else if (gltfModel.type === ModelType.WIREFRAME) {
+    const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
+
+    renderFunc = () => {
+      applyTextures();
+      gl.drawElements(gl.LINES, elementsCount, componentType, 0 /* offset */);
+    };
   } else {
     const { elementsCount, componentType } = gltfModel.dataBuffers.indices;
 
@@ -211,11 +218,11 @@ export function processFeature(
 
   if (attributeLocation) {
     console.error(
-      `Model ${modelName} does not have ${featureName} buffer for shader ${shaderProgramType}`,
+      `Model "${modelName}" does not have ${featureName} buffer for shader ${shaderProgramType}`,
     );
   } else {
     console.error(
-      `Model ${modelName} have unused ${featureName} buffer with shader ${shaderProgramType}`,
+      `Model "${modelName}" have unused ${featureName} buffer with shader ${shaderProgramType}`,
     );
   }
 

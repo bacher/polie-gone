@@ -139,7 +139,7 @@ function checkIfModelMatchShader(
   // case ShaderProgramType.HEIGHT_MAP_INSTANCED:
   if (texturesCount === 0) {
     console.error(
-      `Model ${modelName} do not have textures for shader ${shaderProgramType}`,
+      `Model "${modelName}" does not have textures for shader ${shaderProgramType}`,
     );
   }
   // break;
@@ -150,7 +150,7 @@ function checkIfModelMatchShader(
     (shaderProgramType === ShaderProgramType.HEIGHT_MAP_INSTANCED)
   ) {
     console.error(
-      `Model ${modelName} cant be used with shader ${shaderProgramType}`,
+      `Model "${modelName}" cant be used with shader ${shaderProgramType}`,
     );
   }
 
@@ -159,7 +159,7 @@ function checkIfModelMatchShader(
     shaderProgramType !== ShaderProgramType.SKIN
   ) {
     console.error(
-      `Model ${modelName} have joints but uses shader ${shaderProgramType}`,
+      `Model "${modelName}" have joints but uses shader ${shaderProgramType}`,
     );
   }
 
@@ -168,7 +168,7 @@ function checkIfModelMatchShader(
     shaderProgramType === ShaderProgramType.SKIN
   ) {
     console.error(
-      `Model ${modelName} don't have joints but uses shader ${shaderProgramType}`,
+      `Model "${modelName}" does not have joints but uses shader ${shaderProgramType}`,
     );
   }
 }

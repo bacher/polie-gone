@@ -4,6 +4,7 @@ import { isBoundsIntersect } from '../utils/boundBox';
 
 import type { Scene } from './scene';
 import { getCameraViewBoundBox } from './camera';
+import { DebugFigureType, sceneRenderDebugOverlay } from './debugRender';
 
 export type TickTime = {
   timestamp: number;
@@ -102,6 +103,8 @@ export function renderScene(scene: Scene): void {
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  scene.debug.overlay = [];
+
   for (const model of scene.models) {
     const { shaderProgram, boundInfo, modelMat } = model;
 
@@ -109,6 +112,14 @@ export function renderScene(scene: Scene): void {
     vec3.transformMat4(boundCenterTempVec, boundInfo.center, modelMat);
 
     const radius = boundInfo.radius * getMaxScaleFactor(modelMat);
+
+    if (process.env.NODE_ENV !== 'production') {
+      scene.debug.overlay.push({
+        type: DebugFigureType.SPHERE,
+        center: vec3.copy(vec3.create(), boundCenterTempVec),
+        radius,
+      });
+    }
 
     if (
       !isBoundsIntersect(cameraBoundBox, {
@@ -132,6 +143,10 @@ export function renderScene(scene: Scene): void {
     }
 
     model.modelVao.draw();
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    sceneRenderDebugOverlay(scene);
   }
 }
 
