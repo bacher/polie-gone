@@ -121,6 +121,8 @@ function sceneAddDrawObject(
   return modelInstance;
 }
 
+const SQRT_2 = Math.sqrt(2);
+
 function getSphereBound(bounds: BoundBox): BoundSphere {
   const x = bounds.max[0] - bounds.min[0];
   const y = bounds.max[1] - bounds.min[1];
@@ -132,6 +134,6 @@ function getSphereBound(bounds: BoundBox): BoundSphere {
       bounds.min[1] + y * 0.5,
       bounds.min[2] + z * 0.5,
     ],
-    radius: Math.max(x, y, z) / 2,
+    radius: SQRT_2 * 0.5 * Math.max(x, y, z),
   };
 }

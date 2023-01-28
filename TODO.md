@@ -44,4 +44,4 @@ Helpers:
 Bugs
 
 - [x] Fix camera position and orientation
-- [ ] Fix bounding sphere size, r = (maxSide/2) \* sqrt(2)
+- [x] Fix bounding sphere size, r = (maxSide/2) \* sqrt(2)
