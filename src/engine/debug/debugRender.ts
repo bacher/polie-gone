@@ -1,26 +1,9 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 
-import { ShaderProgramType } from '../shaderPrograms/types';
+import { ShaderProgramType } from '../../shaderPrograms/types';
+import type { Scene } from '../sceneInterface';
 
-import type { Scene } from './scene';
-
-export const enum DebugFigureType {
-  SPHERE = 'SPHERE',
-  // TODO:
-  OTHER = 'OTHER',
-}
-
-export type DebugSphereFigure = {
-  type: DebugFigureType.SPHERE;
-  center: vec3;
-  radius: number;
-};
-
-export type DebugOtherFigure = {
-  type: DebugFigureType.OTHER;
-};
-
-export type DebugFigure = DebugSphereFigure | DebugOtherFigure;
+import { DebugFigureType } from './types';
 
 export function sceneRenderDebugOverlay(scene: Scene): void {
   if (scene.debug.overlay.length) {

@@ -1,6 +1,5 @@
 import type { ShaderInterface } from './shaders/types';
-import type { ModelVao } from './initModelVao';
-import type { Texture } from './texture';
+import type { ModelVao, Texture } from './types';
 
 export type GlContext = {
   gl: GL;

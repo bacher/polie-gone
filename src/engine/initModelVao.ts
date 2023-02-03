@@ -2,19 +2,12 @@ import type { AttributeLocation } from '../types/webgl';
 import type { DataBuffer, LoadedModel } from '../types/model';
 import { ModelType } from '../types/model';
 import { glBindBuffer } from '../utils/webgl';
-import { ShaderProgram, ShaderProgramType } from '../shaderPrograms/types';
-import type {
-  VertexBufferObject,
-  VertexBufferObjectCollection,
-} from './initVertextBuffer';
-import type { GlContext } from './glContext';
-import type { Texture } from './texture';
+import { ShaderProgramType } from '../shaderPrograms/types';
+import { ShaderProgram } from '../shaderPrograms/programs';
 
-export type ModelVao = {
-  glVao: WebGLVertexArrayObject;
-  draw: () => void;
-  dispose: () => void;
-};
+import type { ModelVao, Texture, VertexBufferObject } from './types';
+import type { GlContext } from './glContext';
+import type { VertexBufferObjectCollection } from './initVertextBuffer';
 
 export function initModelVao(
   glContext: GlContext,

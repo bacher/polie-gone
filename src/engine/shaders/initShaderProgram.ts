@@ -12,13 +12,9 @@ import type {
   VertexShaderInitParams,
   UniformsCollection,
   AttributeLocationsCollection,
-  ShaderInterface,
+  ShaderProgramInitial,
 } from './types';
 import type { ShaderInstance, ShadersManager } from './shaderManager';
-
-export type ShaderProgramInitial = ShaderInterface & {
-  use: () => void;
-};
 
 function createProgram(
   glContext: GlContext,

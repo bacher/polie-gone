@@ -2,7 +2,7 @@ import { mat4 } from 'gl-matrix';
 
 import { loadGltf } from '../utils/loadGltf';
 import { initialize } from '../engine/initialize';
-import type { Scene } from '../engine/scene';
+import type { Scene } from '../engine/sceneInterface';
 import { renderScene, startRenderLoop } from '../engine/render';
 import { loadTexture } from '../utils/loadTexture';
 

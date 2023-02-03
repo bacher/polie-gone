@@ -2,7 +2,7 @@ import {
   extractAttributes,
   makeUniformMat4Setter,
 } from '../engine/shaders/utils';
-import type { ShaderProgramInitial } from '../engine/shaders/initShaderProgram';
+import type { ShaderProgramInitial } from '../engine/shaders/types';
 
 export { default as vertexSource } from './default.vertex.glsl?raw';
 

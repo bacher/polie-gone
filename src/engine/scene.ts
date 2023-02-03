@@ -1,52 +1,16 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { vec3 } from 'gl-matrix';
 
-import type { ShaderProgramType, ShaderProgram } from '../shaderPrograms/types';
-import type { BoundBox, BoundSphere, Transforms } from '../types/model';
+import type { BoundBox, BoundSphere } from '../types/model';
 import { convertTransformsToMat4 } from '../utils/transforms';
 
-import type { ModelVao } from './initModelVao';
-import type { Model } from './initialize';
 import type { GlContext } from './glContext';
-import { initCamera, Camera } from './camera';
-import type { DebugFigure } from './debugRender';
-
-export type ModelInstance = {
-  shaderProgram: ShaderProgram;
-  modelMat: mat4;
-  modelVao: ModelVao;
-  boundInfo: BoundSphere;
-  beforeDraw?: BeforeDrawHandler;
-};
-
-export type BeforeDrawHandler = (
-  drawObject: ModelInstance,
-  program: ShaderProgram,
-) => void;
-
-type ShadersCollection = Record<ShaderProgramType, ShaderProgram>;
-
-type AddDrawObjectParams = {
-  model: Model<any>;
-  transforms: Partial<Transforms>;
-  defaultShaderProgramType: ShaderProgramType;
-  beforeDraw?: BeforeDrawHandler;
-};
-
-export type Scene = {
-  gl: GL;
-  glContext: GlContext;
-  isRenderLoop: boolean;
-  shaderPrograms: ShadersCollection;
-  camera: Camera;
-  lightDirection: vec3;
-  models: ModelInstance[];
-  debug: {
-    models: Record<string, Model<any>>;
-    overlay: DebugFigure[];
-  };
-  setGlobalLightDirection: (vec: vec3) => void;
-  addDrawObject: (params: AddDrawObjectParams) => ModelInstance;
-};
+import type {
+  AddDrawObjectParams,
+  ModelInstance,
+  Scene,
+  ShadersCollection,
+} from './sceneInterface';
+import { initCamera } from './camera';
 
 type SceneSetupParams = {
   glContext: GlContext;

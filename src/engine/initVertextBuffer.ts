@@ -2,9 +2,7 @@ import type { DataBuffer } from '../types/model';
 import { LoadedModel, ModelType } from '../types/model';
 import { glBindBuffer } from '../utils/webgl';
 
-export type VertexBufferObject = {
-  glBuffer: WebGLBuffer;
-};
+import type { VertexBufferObject } from './types';
 
 export type VertexBufferObjectCollection = {
   index?: VertexBufferObject;

@@ -1,9 +1,5 @@
 import type { GlContext } from './glContext';
-
-export type Texture = {
-  glTexture: WebGLTexture;
-  use: (slotIndex: number) => void;
-};
+import type { Texture } from './types';
 
 type InitTextureParams = {
   useMipmaps?: boolean;

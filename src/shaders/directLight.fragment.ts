@@ -1,4 +1,4 @@
-import type { ShaderProgramInitial } from '../engine/shaders/initShaderProgram';
+import type { ShaderProgramInitial } from '../engine/shaders/types';
 import {
   makeUniformSamplerSetter,
   makeUniformVec3Setter,

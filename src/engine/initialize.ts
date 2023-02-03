@@ -1,6 +1,6 @@
 import { mat4 } from 'gl-matrix';
 
-import type { BoundBox, LoadedModel } from '../types/model';
+import type { LoadedModel } from '../types/model';
 import { ModelType, SkinnedLoadedModel } from '../types/model';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram, SkinProgram } from '../shaderPrograms/skinProgram';
@@ -9,13 +9,15 @@ import { initHeightMapProgram } from '../shaderPrograms/heightMapProgram';
 import { ShaderProgramType } from '../shaderPrograms/types';
 import { initHeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
 
-import { initModelVao, ModelVao } from './initModelVao';
-import { Scene, setupScene } from './scene';
+import type { Model, ModelVao, Texture } from './types';
+import { initModelVao } from './initModelVao';
+import { setupScene } from './scene';
+import type { Scene } from './sceneInterface';
 import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 import { calculateGlobalJoinsMatrices } from './utils';
 import { createGlContext, GlContext } from './glContext';
-import { initTexture, Texture } from './texture';
+import { initTexture } from './texture';
 
 export type InitResults = {
   glContext: GlContext;
@@ -72,11 +74,6 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     scene,
   };
 }
-
-export type Model<T extends string> = {
-  vaos: Record<T, ModelVao>;
-  bounds: BoundBox;
-};
 
 export function initializeModel<T extends ShaderProgramType>(
   glContext: GlContext,

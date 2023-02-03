@@ -2,7 +2,7 @@ import { vec3 } from 'gl-matrix';
 import clamp from 'lodash/clamp';
 
 import { PI2 } from '../utils/math';
-import type { Scene } from '../engine/scene';
+import type { Scene } from '../engine/sceneInterface';
 import type { TickHandler, TickTime } from '../engine/render';
 
 import type { KeyboardController } from './keyboardController';

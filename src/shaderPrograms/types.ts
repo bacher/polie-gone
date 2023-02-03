@@ -2,13 +2,7 @@ import type {
   FragmentShaderInitFunc,
   VertexShaderInitFunc,
 } from '../engine/shaders/types';
-
-import type { DefaultProgram } from './defaultProgram';
-import type { SkinProgram } from './skinProgram';
-import type { ModerProgram } from './modernProgram';
-import type { HeightMapProgram } from './heightMapProgram';
-import { HeightMapInstancedProgram } from './heightMapInstancedProgram';
-import { BoundBox } from '../types/model';
+import type { BoundBox } from '../types/model';
 
 export const enum ShaderProgramType {
   DEFAULT = 'DEFAULT',
@@ -17,13 +11,6 @@ export const enum ShaderProgramType {
   HEIGHT_MAP = 'HEIGHT_MAP',
   HEIGHT_MAP_INSTANCED = 'HEIGHT_MAP_INSTANCED',
 }
-
-export type ShaderProgram =
-  | DefaultProgram
-  | SkinProgram
-  | ModerProgram
-  | HeightMapProgram
-  | HeightMapInstancedProgram;
 
 export type ProgramInit<
   T extends ShaderProgramType,

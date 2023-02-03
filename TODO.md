@@ -42,6 +42,7 @@ Refactoring:
 
 - [ ] Look at model features (not on model type) in initVertexBufferObjects
 - [ ] Move draw mode (points, lines, triangles) in model data
+- [x] Remove cyclic dependencies
 
 Helpers:
 

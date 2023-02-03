@@ -1,7 +1,8 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import type { Scene } from './scene';
-import { DebugFigureType, sceneRenderDebugOverlay } from './debugRender';
+import type { Scene } from './sceneInterface';
+import { DebugFigureType } from './debug/types';
+import { sceneRenderDebugOverlay } from './debug/debugRender';
 import { debugVec } from '../utils/debug';
 
 export type TickTime = {

@@ -4,7 +4,7 @@ import {
   makeUniformSamplerSetter,
   makeUniformVec2Setter,
 } from '../engine/shaders/utils';
-import type { ShaderProgramInitial } from '../engine/shaders/initShaderProgram';
+import type { ShaderProgramInitial } from '../engine/shaders/types';
 
 export { default as vertexSource } from './heightMapInstanced.vertex.glsl?raw';
 

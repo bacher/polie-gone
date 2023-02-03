@@ -1,5 +1,4 @@
 import type { AttributeLocation } from '../../types/webgl';
-import type { ShaderProgramInitial } from './initShaderProgram';
 
 export type UniformsCollection = Record<string, (data: any) => void>;
 
@@ -40,4 +39,8 @@ export type FragmentShaderInitParams = {
 export type ShaderInterface = {
   glProgram: WebGLProgram;
   dispose: () => void;
+};
+
+export type ShaderProgramInitial = ShaderInterface & {
+  use: () => void;
 };

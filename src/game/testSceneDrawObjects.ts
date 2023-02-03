@@ -8,7 +8,7 @@ import {
   SkinnedLoadedModel,
 } from '../types/model';
 import { BufferTarget, ComponentType } from '../types/webgl';
-import type { Scene } from '../engine/scene';
+import type { Scene } from '../engine/sceneInterface';
 import { generateHeightMapInstanced } from '../utils/meshGenerator';
 import { initializeModel } from '../engine/initialize';
 import { ShaderProgramType } from '../shaderPrograms/types';
