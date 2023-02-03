@@ -29,7 +29,7 @@
 Optimizations:
 
 - [x] Add out of view render optimization
-- [ ] Add out of view render optimization base on camera frustum
+- [x] Add out of view render optimization base on camera frustum
 - [ ] Optimize out of view optimization (use camera's angles)
 - [ ] Add dynamic LOD optimization
 - [ ] Use fewer joints to skinning

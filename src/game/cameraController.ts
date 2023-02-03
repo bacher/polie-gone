@@ -1,4 +1,4 @@
-import { mat4, quat, vec3 } from 'gl-matrix';
+import { vec3 } from 'gl-matrix';
 import clamp from 'lodash/clamp';
 
 import { PI2 } from '../utils/math';

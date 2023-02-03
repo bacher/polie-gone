@@ -1,10 +1,8 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import { isBoundsIntersect } from '../utils/boundBox';
-
 import type { Scene } from './scene';
-import { getCameraViewBoundBox } from './camera';
 import { DebugFigureType, sceneRenderDebugOverlay } from './debugRender';
+import { debugVec } from '../utils/debug';
 
 export type TickTime = {
   timestamp: number;
@@ -99,7 +97,7 @@ const boundCenterTempVec = vec3.create();
 export function renderScene(scene: Scene): void {
   const { gl } = scene;
 
-  const cameraBoundBox = getCameraViewBoundBox(scene.camera);
+  // const cameraBoundBox = getCameraViewBoundBox(scene.camera);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -110,8 +108,12 @@ export function renderScene(scene: Scene): void {
 
     // TODO: We could use only translate (not whole matrix transform)
     vec3.transformMat4(boundCenterTempVec, boundInfo.center, modelMat);
-
     const radius = boundInfo.radius * getMaxScaleFactor(modelMat);
+
+    const isVisible = scene.camera.isSphereBoundVisible({
+      center: boundCenterTempVec,
+      radius,
+    });
 
     if (process.env.NODE_ENV !== 'production') {
       scene.debug.overlay.push({
@@ -121,6 +123,13 @@ export function renderScene(scene: Scene): void {
       });
     }
 
+    if (!isVisible) {
+      continue;
+    }
+
+    /* TODO:
+        Is not using now because of isSphereBoundVisible is more correct
+        This section can be deleted
     if (
       !isBoundsIntersect(cameraBoundBox, {
         center: boundCenterTempVec,
@@ -129,6 +138,7 @@ export function renderScene(scene: Scene): void {
     ) {
       continue;
     }
+    */
 
     shaderProgram.use();
 
