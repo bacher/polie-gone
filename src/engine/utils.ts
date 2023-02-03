@@ -3,6 +3,7 @@ import { mat4 } from 'gl-matrix';
 import type { JointInfo } from '../types/model';
 import { convertTransformsToMat4 } from '../utils/transforms';
 
+// TODO: Not using now
 export function calculateGlobalJoinsMatrices(joints: JointInfo[]) {
   const acc = Array(joints.length) as mat4[];
 

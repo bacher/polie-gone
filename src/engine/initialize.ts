@@ -15,7 +15,6 @@ import { setupScene } from './scene';
 import type { Scene } from './sceneInterface';
 import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
-import { calculateGlobalJoinsMatrices } from './utils';
 import { createGlContext, GlContext } from './glContext';
 import { initTexture } from './texture';
 
@@ -181,13 +180,14 @@ function applySkin({
 
   const jointMatricesArray = new Float32Array(16 * jointsCount);
 
-  const alreadyCalculatedMatrices = calculateGlobalJoinsMatrices(
-    modelData.joints,
-  );
+  // const alreadyCalculatedMatrices = calculateGlobalJoinsMatrices(
+  //   modelData.joints,
+  // );
 
   for (let i = 0; i < jointsCount; i += 1) {
     const jointInfo = modelData.joints[i];
-    const jointGlobal = alreadyCalculatedMatrices[i];
+    // const jointGlobal = alreadyCalculatedMatrices[i];
+    const jointGlobal = mat4.invert(mat4.create(), jointInfo.inverseMat);
 
     const mat = mat4.create();
 
