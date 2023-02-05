@@ -39,6 +39,7 @@ export type ModelInstance = {
   modelMat: mat4;
   modelVao: ModelVao;
   boundInfo: BoundSphere;
+  jointsDataArray?: Float32Array;
   beforeDraw?: BeforeDrawHandler;
 };
 

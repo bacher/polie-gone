@@ -16,7 +16,7 @@
 - [x] Make starting and ending of moving smooth
 - [ ] Spawn and destroy objects in time
 - [ ] Add simple physics engine
-- [ ] Add animations
+- [x] Add animations
 - [ ] Use layout for shader attributes
 - [ ] Use material specular modifier
 - [ ] Add possibility to use specular textures

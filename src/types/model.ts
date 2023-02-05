@@ -1,5 +1,7 @@
 import type { mat4, quat, vec3 } from 'gl-matrix';
 
+import type { Animation } from '../utils/loadGltf';
+
 import type { BufferTarget, ComponentType } from './webgl';
 
 export const enum ModelType {
@@ -95,6 +97,7 @@ export type SkinnedLoadedModel = LoadedModelBase & {
     weights: DataBuffer;
   };
   joints: JointInfo[];
+  animations: Animation[] | undefined;
 };
 
 export type LoadedModel =

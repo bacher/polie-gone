@@ -2,8 +2,8 @@ import { vec2 } from 'gl-matrix';
 
 import {
   DataBuffer,
-  ModelType,
   LoadedModel,
+  ModelType,
   RegularLoadedModel,
   SkinnedLoadedModel,
 } from '../types/model';
@@ -15,6 +15,7 @@ import { ShaderProgramType } from '../shaderPrograms/types';
 import type { HeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
 
 import { fromEuler } from './utils';
+import { applyAnimationFrame } from './animation';
 
 type Params = {
   models: Record<string, LoadedModel>;
@@ -57,6 +58,16 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
       translation: [3, -0.23, -3],
     },
     defaultShaderProgramType: ShaderProgramType.SKIN,
+    beforeDraw: (model, shaderProgram) => {
+      if (shaderProgram.type === ShaderProgramType.SKIN) {
+        const frameIndex = Math.floor((Date.now() % 1000) / (1000 / 25));
+        applyAnimationFrame({
+          jointsDataArray: model.jointsDataArray!,
+          animation: manModel.animations![0],
+          frameIndex,
+        });
+      }
+    },
   });
 
   const man3 = scene.addDrawObject({
@@ -67,6 +78,16 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
       scale: [0.4, 0.4, 0.4],
     },
     defaultShaderProgramType: ShaderProgramType.SKIN,
+    beforeDraw: (model, shaderProgram) => {
+      if (shaderProgram.type === ShaderProgramType.SKIN) {
+        const frameIndex = 24 - Math.floor((Date.now() % 2000) / (2000 / 25));
+        applyAnimationFrame({
+          jointsDataArray: model.jointsDataArray!,
+          animation: manModel.animations![0],
+          frameIndex,
+        });
+      }
+    },
   });
 }
 

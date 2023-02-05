@@ -2,6 +2,7 @@ import { mat4 } from 'gl-matrix';
 
 import type { LoadedModel } from '../types/model';
 import { ModelType, SkinnedLoadedModel } from '../types/model';
+import type { Animation } from '../utils/loadGltf';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram, SkinProgram } from '../shaderPrograms/skinProgram';
 import { initModernProgram } from '../shaderPrograms/modernProgram';
@@ -89,6 +90,8 @@ export function initializeModel<T extends ShaderProgramType>(
   }
 
   const vaos = {} as Record<T, ModelVao>;
+  let animations: Animation[] | undefined;
+  let jointsCount: number | undefined;
 
   for (const programType of programTypes) {
     const shaderProgram = scene.shaderPrograms[programType];
@@ -114,13 +117,16 @@ export function initializeModel<T extends ShaderProgramType>(
       modelData.type === ModelType.SKINNED &&
       shaderProgram.type === ShaderProgramType.SKIN
     ) {
-      applySkin({ modelData, shaderProgram });
+      jointsCount = modelData.joints.length;
+      animations = modelData.animations;
     }
   }
 
   return {
     vaos,
     bounds: modelData.bounds,
+    jointsCount,
+    animations,
   };
 }
 
@@ -167,46 +173,4 @@ function checkIfModelMatchShader(
       `Model "${modelName}" does not have joints but uses shader ${shaderProgramType}`,
     );
   }
-}
-
-function applySkin({
-  modelData,
-  shaderProgram,
-}: {
-  modelData: SkinnedLoadedModel;
-  shaderProgram: SkinProgram;
-}) {
-  const jointsCount = modelData.joints.length;
-
-  const jointMatricesArray = new Float32Array(16 * jointsCount);
-
-  // const alreadyCalculatedMatrices = calculateGlobalJoinsMatrices(
-  //   modelData.joints,
-  // );
-
-  for (let i = 0; i < jointsCount; i += 1) {
-    const jointInfo = modelData.joints[i];
-    // const jointGlobal = alreadyCalculatedMatrices[i];
-    const jointGlobal = mat4.invert(mat4.create(), jointInfo.inverseMat);
-
-    const mat = mat4.create();
-
-    mat4.multiply(mat, mat, jointGlobal);
-    // Bend arm
-    if (true) {
-      if (i === 7) {
-        mat4.rotateX(mat, mat, 0.2 * Math.PI);
-      }
-      if (i === 8) {
-        mat4.translate(mat, mat, [0, -0.2, 0.4]);
-        mat4.rotateX(mat, mat, 0.2 * Math.PI);
-      }
-    }
-    mat4.multiply(mat, mat, jointInfo.inverseMat);
-
-    jointMatricesArray.set(mat, i * 16);
-  }
-
-  shaderProgram.use();
-  shaderProgram.uniforms.jointMatrices(jointMatricesArray);
 }

@@ -1,7 +1,8 @@
-import { vec3 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
 
 import type { BoundBox, BoundSphere } from '../types/model';
 import { convertTransformsToMat4 } from '../utils/transforms';
+import { ShaderProgramType } from '../shaderPrograms/types';
 
 import type { GlContext } from './glContext';
 import type {
@@ -72,17 +73,46 @@ function sceneAddDrawObject(
 
   const bounds = shaderProgram.modifyBounds(model.bounds);
 
+  let jointsDataArray: Float32Array | undefined;
+
+  if (shaderProgram.type === ShaderProgramType.SKIN) {
+    if (!model.jointsCount) {
+      throw new Error('Skin model without joints');
+    }
+
+    jointsDataArray = makeSkinIdentityMatrices({
+      jointsCount: model.jointsCount,
+    });
+  }
+
   const modelInstance: ModelInstance = {
     shaderProgram,
     modelMat: convertTransformsToMat4(transforms),
     modelVao: defaultVao,
     boundInfo: getSphereBound(bounds),
+    jointsDataArray,
     beforeDraw,
   };
 
   scene.models.push(modelInstance);
 
   return modelInstance;
+}
+
+function makeSkinIdentityMatrices({
+  jointsCount,
+}: {
+  jointsCount: number;
+}): Float32Array {
+  const jointMatricesArray = new Float32Array(16 * jointsCount);
+
+  const mat = mat4.create();
+
+  for (let i = 0; i < jointsCount; i += 1) {
+    jointMatricesArray.set(mat, i * 16);
+  }
+
+  return jointMatricesArray;
 }
 
 const SQRT_2 = Math.sqrt(2);

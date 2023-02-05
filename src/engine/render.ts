@@ -1,9 +1,10 @@
 import { mat4, vec3 } from 'gl-matrix';
 
+import { ShaderProgramType } from '../shaderPrograms/types';
+
 import type { Scene } from './sceneInterface';
 import { DebugFigureType } from './debug/types';
 import { sceneRenderDebugOverlay } from './debug/debugRender';
-import { debugVec } from '../utils/debug';
 
 export type TickTime = {
   timestamp: number;
@@ -148,6 +149,11 @@ export function renderScene(scene: Scene): void {
     shaderProgram.uniforms.lightDirection(scene.lightDirection);
     shaderProgram.uniforms.model(model.modelMat);
     shaderProgram.uniforms.diffuseTexture(0);
+
+    if (shaderProgram.type === ShaderProgramType.SKIN) {
+      // TODO: Use more strict check (instead of !)
+      shaderProgram.uniforms.jointMatrices(model.jointsDataArray!);
+    }
 
     if (model.beforeDraw) {
       model.beforeDraw(model, shaderProgram);

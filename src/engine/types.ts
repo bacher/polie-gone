@@ -1,4 +1,5 @@
-import { BoundBox } from '../types/model';
+import type { BoundBox } from '../types/model';
+import type { Animation } from '../utils/loadGltf';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -18,4 +19,6 @@ export type VertexBufferObject = {
 export type Model<T extends string> = {
   vaos: Record<T, ModelVao>;
   bounds: BoundBox;
+  jointsCount?: number;
+  animations: Animation[] | undefined;
 };

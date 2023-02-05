@@ -1,3 +1,5 @@
+import { vec3 } from 'gl-matrix';
+import isNil from 'lodash/isNil';
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
 import {
@@ -9,9 +11,8 @@ import {
   LoadedModel,
   BoundBox,
 } from '../types/model';
-import { BufferTarget } from '../types/webgl';
+import { BufferTarget, ComponentType } from '../types/webgl';
 import { MAX_JOINTS } from '../engine/constants';
-import { vec3 } from 'gl-matrix';
 
 const enum BufferType {
   INDICES = 'INDICES',
@@ -97,6 +98,34 @@ type LoadedBuffer = LoadBuffer & {
   bufferTarget: BufferTarget;
 };
 
+type AnimationTemp = {
+  name: string;
+  channels: {
+    target: {
+      node: number;
+      path: 'translation' | 'rotation' | 'scale';
+    };
+    sampler: Sampler;
+  }[];
+};
+
+export type Animation = {
+  name: string;
+  joints: {
+    joint: JointInfo;
+    mutations: {
+      path: 'translation' | 'rotation' | 'scale';
+      sampler: Sampler;
+    }[];
+  }[];
+};
+
+type Sampler = {
+  interpolation: 'LINEAR' | 'STEP' | 'CUBICSPLINE';
+  input: Accessor;
+  output: Accessor;
+};
+
 export async function loadGltf<T extends { loadSkin?: boolean }>(
   modelUri: string,
   { loadSkin }: Partial<T> = {},
@@ -180,6 +209,8 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
     },
   ];
 
+  const otherPromises: Promise<unknown>[] = [];
+
   if (texcoordAccessor) {
     loadingBuffers.push({
       type: BufferType.TEXCOORD,
@@ -188,6 +219,7 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   }
 
   let skin: gltf.Skin | undefined;
+  let animations: AnimationTemp[] | undefined;
 
   //  Skin processing
   if (loadSkin) {
@@ -217,18 +249,71 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
         accessor: gltfData.accessors[skin.inverseBindMatrices],
       },
     );
+
+    if (gltfData.animations?.length) {
+      animations = [];
+
+      for (const { name, samplers, channels } of gltfData.animations) {
+        animations.push({
+          name,
+          channels: channels.map(({ target, sampler }) => {
+            if (isNil(target.node)) {
+              throw new Error('Channel target without node');
+            }
+
+            const { input, interpolation, output } = samplers[sampler];
+
+            const inputAccessor = gltfData.accessors[input];
+            const outputAccessor = gltfData.accessors[output];
+
+            const inputPromise = accessBuffer(asset, inputAccessor.bufferView);
+            const outputPromise = accessBuffer(
+              asset,
+              outputAccessor.bufferView,
+            );
+
+            otherPromises.push(inputPromise, outputPromise);
+
+            const samp: Partial<Sampler> = {
+              // TODO: check interpolation value
+              interpolation: (interpolation as any) ?? 'LINEAR',
+            };
+
+            inputPromise.then((dataArray) => {
+              samp.input = makeAccessor(inputAccessor, dataArray);
+            });
+
+            outputPromise.then((dataArray) => {
+              samp.output = makeAccessor(outputAccessor, dataArray);
+            });
+
+            return {
+              target: {
+                node: target.node,
+                // TODO: Check path value before passing
+                path: target.path as any,
+              },
+              sampler: samp as Sampler,
+            };
+          }),
+        });
+      }
+    }
   }
 
-  const loadedBuffers: LoadedBuffer[] = await Promise.all(
-    loadingBuffers.map(async ({ type, accessor }: LoadBuffer) => ({
-      type,
-      bufferTarget: ensureBufferTarget(
-        gltfData.bufferViews[accessor.bufferView!].target,
-      ),
-      accessor,
-      dataArray: await accessBuffer(asset, accessor.bufferView),
-    })),
-  );
+  const [loadedBuffers]: [LoadedBuffer[], unknown] = await Promise.all([
+    Promise.all(
+      loadingBuffers.map(async ({ type, accessor }: LoadBuffer) => ({
+        type,
+        bufferTarget: ensureBufferTarget(
+          gltfData.bufferViews[accessor.bufferView!].target,
+        ),
+        accessor,
+        dataArray: await accessBuffer(asset, accessor.bufferView),
+      })),
+    ),
+    Promise.all(otherPromises),
+  ]);
 
   const modelName = meshNode.name ?? 'unknown mesh';
 
@@ -322,6 +407,9 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
       },
       joints,
       bounds: modelBounds,
+      animations: animations?.map((animation) =>
+        linkAnimationAndJoints(animation, joints),
+      ),
     };
 
     model = skinnedModel;
@@ -339,6 +427,57 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   reportEnd();
 
   return model as any;
+}
+
+type Accessor = {
+  accessor: gltf.Accessor;
+  dataArray: Uint8Array | Float32Array;
+};
+
+function makeAccessor(
+  accessor: gltf.Accessor,
+  dataArray: Uint8Array,
+): Accessor {
+  let convertedDataArray;
+
+  switch (accessor.componentType) {
+    case ComponentType.UNSIGNED_BYTE:
+      convertedDataArray = dataArray;
+      break;
+    case ComponentType.FLOAT:
+      convertedDataArray = convertUint8ListToFloat32List(dataArray);
+      break;
+    default:
+      // TODO: Implement other conversions
+      throw new Error(
+        `Component type ${accessor.componentType} is not supported yet`,
+      );
+  }
+
+  return {
+    accessor,
+    dataArray: convertedDataArray,
+  };
+}
+
+function linkAnimationAndJoints(
+  animation: AnimationTemp,
+  joints: JointInfo[],
+): Animation {
+  return {
+    name: animation.name,
+    joints: joints.map((joint) => {
+      return {
+        joint,
+        mutations: animation.channels
+          .filter((channel) => channel.target.node === joint.nodeIndex)
+          .map((channel) => ({
+            path: channel.target.path,
+            sampler: channel.sampler,
+          })),
+      };
+    }),
+  };
 }
 
 function accessBuffer(
