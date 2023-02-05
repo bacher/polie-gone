@@ -17,6 +17,8 @@
 - [ ] Spawn and destroy objects in time
 - [ ] Add simple physics engine
 - [x] Add animations
+- [ ] Add animation interpolation
+- [ ] Add smooth animation transition
 - [ ] Use layout for shader attributes
 - [ ] Use material specular modifier
 - [ ] Add possibility to use specular textures
