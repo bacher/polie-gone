@@ -20,7 +20,7 @@
 - [ ] Add animation interpolation
 - [ ] Add smooth animation transition
 - [ ] Use layout for shader attributes
-- [ ] Use material specular modifier
+- [ ] Use material specular modifier (look at https://github.com/tparisi/webgl-lessons/tree/master/lesson15)
 - [ ] Add possibility to use specular textures
 - [ ] Add possibility to use bump textures
 - [ ] Add shadows
