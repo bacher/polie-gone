@@ -20,7 +20,7 @@ export type VertexBufferObject = {
 };
 
 export type Model<T extends string> = {
-  vaos: Record<T, ModelVao>;
+  vaos: Record<T, ModelVao | undefined>;
   bounds: BoundBox;
   jointsCount?: number;
   animations: Animation[] | undefined;

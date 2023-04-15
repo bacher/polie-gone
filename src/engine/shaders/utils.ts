@@ -132,3 +132,19 @@ export function makeUniformMat4ArraySetter(
     gl.uniformMatrix4fv(uniformLocation, false, value);
   };
 }
+
+export function makeUniformBoolSetter(
+  gl: GL,
+  glProgram: WebGLProgram,
+  uniformName: string,
+) {
+  const uniformLocation = gl.getUniformLocation(glProgram, uniformName);
+
+  if (!uniformLocation) {
+    console.warn(`Uniform ${uniformName} is not using`);
+  }
+
+  return (enabled: boolean) => {
+    gl.uniform1ui(uniformLocation, enabled ? 1 : 0);
+  };
+}

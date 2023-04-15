@@ -1,7 +1,10 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 
 import type { Transforms, BoundSphere } from '../types/core';
-import type { ShaderProgram } from '../shaderPrograms/programs';
+import type {
+  ShaderProgram,
+  ShadersCollection,
+} from '../shaderPrograms/programs';
 import type { ShaderProgramType } from '../shaderPrograms/types';
 
 import type { Light, Model, ModelVao } from './types';
@@ -14,6 +17,7 @@ export type Scene = {
   gl: GL;
   glContext: GlContext;
   initOptions: SceneInitOptions;
+  viewport: { width: number; height: number };
   isRenderLoop: boolean;
   shaderPrograms: ShadersCollection;
   camera: Camera;
@@ -30,8 +34,6 @@ export type Scene = {
 export type SceneInitOptions = {
   renderShadows: boolean;
 };
-
-export type ShadersCollection = Record<ShaderProgramType, ShaderProgram>;
 
 export type AddDrawObjectParams = {
   model: Model<any>;

@@ -16,6 +16,8 @@ import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 import { createGlContext, GlContext } from './glContext';
 import { initTextureByImageData } from './texture';
+import { initOverlayQuadProgram } from '../shaderPrograms/overlayQuadProgram';
+import { generateQuad } from '../utils/meshGenerator';
 
 export type InitResults = {
   glContext: GlContext;
@@ -53,6 +55,8 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   );
    */
 
+  const overlayQuadProgram = initOverlayQuadProgram(glContext, shaderManager);
+
   // After creation of all shader programs we can clear shader cache
   shaderManager.disposeAll();
 
@@ -71,11 +75,19 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
       [heightMapProgram.type]: heightMapProgram,
       [heightMapInstancedProgram.type]: heightMapInstancedProgram,
        */
+      [overlayQuadProgram.type]: overlayQuadProgram,
     } as any,
     initOptions: {
       renderShadows: true,
     },
   });
+
+  scene.debug.models['quad'] = initializeModel(
+    glContext,
+    scene,
+    generateQuad(),
+    [ShaderProgramType.OVERLAY_QUAD],
+  );
 
   gl.clearColor(1, 1, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -107,10 +119,11 @@ export function initializeModel<T extends ShaderProgramType>(
   let jointsCount: number | undefined;
 
   for (const programType of programTypes) {
-    // TODO: FIX
+    // TODO: !!! FIX
     if (
       programType !== ShaderProgramType.DEFAULT &&
-      programType !== ShaderProgramType.DEFAULT_SHADOW_MAP
+      programType !== ShaderProgramType.DEFAULT_SHADOW_MAP &&
+      programType !== ShaderProgramType.OVERLAY_QUAD
     ) {
       continue;
     }
@@ -157,16 +170,16 @@ function checkIfModelMatchShader(
   shaderProgramType: ShaderProgramType,
   texturesCount: number,
 ): void {
-  // switch (shaderProgramType) {
-  // case ShaderProgramType.SKIN:
-  // case ShaderProgramType.HEIGHT_MAP_INSTANCED:
-  if (texturesCount === 0) {
-    console.error(
-      `Model "${modelName}" does not have textures for shader ${shaderProgramType}`,
-    );
+  if (
+    shaderProgramType !== ShaderProgramType.OVERLAY_QUAD &&
+    shaderProgramType !== ShaderProgramType.DEFAULT_SHADOW_MAP
+  ) {
+    if (texturesCount === 0) {
+      console.error(
+        `Model "${modelName}" does not have textures for shader ${shaderProgramType}`,
+      );
+    }
   }
-  // break;
-  // }
 
   if (
     (modelType === ModelType.HEIGHT_MAP) !==

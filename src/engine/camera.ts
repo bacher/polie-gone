@@ -25,8 +25,7 @@ export type CameraDirection = {
 
 const zeroVec = vec3.create();
 
-export function initCamera(): Camera {
-  const ratio = 600 / 400;
+export function initCamera(ratio: number): Camera {
   const verticalFov = Math.PI / 2;
   const verticalHalfFov = verticalFov / 2;
   const verticalHalfFovTan = Math.tan(verticalHalfFov);

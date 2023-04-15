@@ -3,6 +3,7 @@ import { mat4, vec3 } from 'gl-matrix';
 import type { BoundBox, BoundSphere } from '../types/core';
 import { convertTransformsToMat4 } from '../utils/transforms';
 import { ShaderProgramType } from '../shaderPrograms/types';
+import { ShadersCollection } from '../shaderPrograms/programs';
 
 import type { GlContext } from './glContext';
 import type {
@@ -10,7 +11,6 @@ import type {
   ModelInstance,
   Scene,
   SceneInitOptions,
-  ShadersCollection,
 } from './sceneInterface';
 import { initCamera } from './camera';
 import { initShadowMapContext } from './shadowMap';
@@ -27,13 +27,19 @@ export function setupScene({
   shaderPrograms,
   initOptions,
 }: SceneSetupParams): Scene {
-  const camera = initCamera();
+  const viewport = {
+    width: 600,
+    height: 400,
+  };
+
+  const camera = initCamera(viewport.width / viewport.height);
   const light = initLight();
 
   const scene: Scene = {
     gl: glContext.gl,
     glContext,
     initOptions,
+    viewport,
     isRenderLoop: false,
     camera,
     light,

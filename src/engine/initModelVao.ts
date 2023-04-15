@@ -184,7 +184,7 @@ type FeatureData = {
   featureName: keyof VertexBufferObjectCollection;
 };
 
-export function processFeature(
+function processFeature(
   gl: WebGL2RenderingContext,
   {
     modelName,
@@ -214,9 +214,11 @@ export function processFeature(
       `Model "${modelName}" does not have ${featureName} buffer for shader ${shaderProgramType}`,
     );
   } else {
-    console.error(
-      `Model "${modelName}" have unused ${featureName} buffer with shader ${shaderProgramType}`,
-    );
+    if (shaderProgramType !== ShaderProgramType.DEFAULT_SHADOW_MAP) {
+      console.error(
+        `Model "${modelName}" have unused ${featureName} buffer with shader ${shaderProgramType}`,
+      );
+    }
   }
 
   return false;

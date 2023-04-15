@@ -127,8 +127,6 @@ export function renderScene(scene: Scene): void {
       camera = scene.light;
 
       scene.shadowMapContext.frameBuffer.use();
-      // TODO: Delete ->>
-      gl.enable(gl.DEPTH_TEST);
 
       // TODO: reset gl.viewport
       gl.viewport(0, 0, 1024, 1024);
@@ -137,7 +135,7 @@ export function renderScene(scene: Scene): void {
     } else {
       glContext.resetFrameBuffer();
       // TODO: reset gl.viewport
-      gl.viewport(0, 0, 600, 400);
+      gl.viewport(0, 0, scene.viewport.width, scene.viewport.height);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       camera = scene.camera;
@@ -194,21 +192,26 @@ export function renderScene(scene: Scene): void {
 
       shaderProgram.use();
 
-      // TODO: Don't update if nothing was changed
-      // TODO: Rename uniform name to projectionView
-      shaderProgram.uniforms.projection(camera.mat);
-      shaderProgram.uniforms.model(model.modelMat);
+      if (shaderProgram.type !== ShaderProgramType.OVERLAY_QUAD) {
+        // TODO: Don't update if nothing was changed
+        // TODO: Rename uniform name to projectionView
+        shaderProgram.uniforms.projection(camera.mat);
+        shaderProgram.uniforms.model(model.modelMat);
+      }
 
       if (renderPhase === RenderPhase.REGULAR) {
         // TODO: It's better to use some feature detector here:
         if (shaderProgram.type !== ShaderProgramType.DEFAULT_SHADOW_MAP) {
-          shaderProgram.uniforms.lightDirection(scene.light.direction);
+          if (shaderProgram.type !== ShaderProgramType.OVERLAY_QUAD) {
+            shaderProgram.uniforms.lightDirection(scene.light.direction);
+          }
           shaderProgram.uniforms.diffuseTexture(0);
           if (shaderProgram.type === ShaderProgramType.DEFAULT) {
             shaderProgram.uniforms.lightSpace(scene.light.mat);
             // TODO: Optimize
-            scene.shadowMapContext?.texture.use(1);
-            shaderProgram.uniforms.shadowMapTexture(1);
+            //       Once set texture to 5th slot and don't reset
+            scene.shadowMapContext?.texture.use(5);
+            shaderProgram.uniforms.shadowMapTexture(5);
           }
         }
       }
@@ -227,8 +230,7 @@ export function renderScene(scene: Scene): void {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    // TODO: !!! FIX
-    // sceneRenderDebugOverlay(scene);
+    sceneRenderDebugOverlay(scene);
   }
 }
 

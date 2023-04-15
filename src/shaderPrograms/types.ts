@@ -11,6 +11,7 @@ export const enum ShaderProgramType {
   MODERN = 'MODERN',
   HEIGHT_MAP = 'HEIGHT_MAP',
   HEIGHT_MAP_INSTANCED = 'HEIGHT_MAP_INSTANCED',
+  OVERLAY_QUAD = 'OVERLAY_QUAD',
 }
 
 export type ProgramInit<

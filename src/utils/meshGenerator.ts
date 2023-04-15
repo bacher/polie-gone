@@ -125,7 +125,7 @@ export function generateHeightMapInstanced({
 }: {
   size: number;
 }): HeightMapLoadedModel {
-  // clockwise because in mixing axis in shader
+  // clockwise because mixing axis in shader
   const quadModelData = generateQuad({ clockwise: true });
 
   const count = size ** 2;
@@ -155,7 +155,6 @@ export function generateHeightMapInstanced({
       },
     },
     bounds: {
-      // min: [-0.5, -0.5, -0.5],
       // min: [-0.5, -0.5, -0.5],
       min: [0, 0, 0],
       max: [1, 1, 0],
