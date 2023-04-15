@@ -27,10 +27,7 @@ export function setupScene({
   shaderPrograms,
   initOptions,
 }: SceneSetupParams): Scene {
-  const viewport = {
-    width: 600,
-    height: 400,
-  };
+  const viewport = initOptions.viewportSize;
 
   const camera = initCamera(viewport.width / viewport.height);
   const light = initLight();

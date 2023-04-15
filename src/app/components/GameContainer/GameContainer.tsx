@@ -13,6 +13,21 @@ import styles from './GameContainer.module.scss';
 export function GameContainer() {
   const forceUpdate = useForceUpdate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const canvasSize = useMemo(() => {
+    if (location.hash.substring(1).split('&').includes('big')) {
+      return {
+        width: 1000,
+        height: 600,
+      }
+    }
+
+    return {
+      width: 600,
+      height: 400,
+    }
+  }, []);
+
   const state = useMemo<{
     game: Game | undefined;
     cancelLoop: (() => void) | undefined;
@@ -63,7 +78,7 @@ export function GameContainer() {
           }
         }}
       >
-        <canvas ref={canvasRef} width={600} height={400} />
+        <canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height} />
       </div>
       {state.game && <Controls game={state.game} />}
     </div>

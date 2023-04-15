@@ -79,6 +79,10 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     } as any,
     initOptions: {
       renderShadows: true,
+      viewportSize: {
+        width: canvasElement.width,
+        height: canvasElement.height,
+      },
     },
   });
 

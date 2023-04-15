@@ -33,6 +33,7 @@ export type Scene = {
 
 export type SceneInitOptions = {
   renderShadows: boolean;
+  viewportSize: { width: number; height: number };
 };
 
 export type AddDrawObjectParams = {
