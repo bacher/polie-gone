@@ -1,7 +1,7 @@
 import { mat4, vec3 } from 'gl-matrix';
 
 import { PI2 } from '../utils/math';
-import { BoundSphere } from '../types/model';
+import type { BoundSphere } from '../types/core';
 import { debugVec } from '../utils/debug';
 
 export type Camera = {

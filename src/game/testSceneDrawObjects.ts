@@ -31,9 +31,10 @@ export function addTestSceneDrawObjects(
 ) {
   addMen(scene, manModelData);
   addToilet(scene, toiletModelData);
-  addTerrain(scene, noiseTextureImage);
+  // TODO: !!! Restore
+  // addTerrain(scene, noiseTextureImage);
 
-  addUnitSphere(scene, unitSphereModelData);
+  // addUnitSphere(scene, unitSphereModelData);
 }
 
 function addMen(scene: Scene, manModelData: LoadedModel) {
@@ -41,6 +42,7 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
 
   const manModel = initializeModel(glContext, scene, manModelData, [
     ShaderProgramType.DEFAULT,
+    ShaderProgramType.DEFAULT_SHADOW_MAP,
     ShaderProgramType.SKIN,
   ]);
 
@@ -51,6 +53,9 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });
+
+  // TODO: !!! Restore
+  return;
 
   const man2 = scene.addDrawObject({
     model: manModel,
@@ -96,12 +101,13 @@ function addToilet(scene: Scene, toiletModelData: LoadedModel) {
 
   const toiletModel = initializeModel(glContext, scene, toiletModelData, [
     ShaderProgramType.DEFAULT,
+    ShaderProgramType.DEFAULT_SHADOW_MAP,
   ]);
 
   const toilet = scene.addDrawObject({
     model: toiletModel,
     transforms: {
-      translation: [-0.9, -1, -1.5],
+      translation: [0.8, -1, -1.5],
       scale: [0.6, 0.6, 0.6],
       rotation: fromEuler(0, 0.01, 0),
     },

@@ -1,7 +1,5 @@
-import type { mat4, quat, vec3 } from 'gl-matrix';
-
-import type { Animation } from '../utils/loadGltf';
-
+import type { BoundBox } from './core';
+import type { Animation, JointInfo } from './animation';
 import type { BufferTarget, ComponentType } from './webgl';
 
 export const enum ModelType {
@@ -19,16 +17,6 @@ export type DataBuffer = {
   elementsCount: number;
   dataArray: Uint8Array | Uint16Array | Float32Array;
   divisor?: number;
-};
-
-export type BoundBox = {
-  min: vec3;
-  max: vec3;
-};
-
-export type BoundSphere = {
-  center: vec3;
-  radius: number;
 };
 
 type LoadedModelBase = {
@@ -71,19 +59,6 @@ export type HeightMapLoadedModel = LoadedModelBase & {
     position: DataBuffer;
     offset: DataBuffer;
   };
-};
-
-export type Transforms = {
-  rotation: quat;
-  translation: vec3;
-  scale: vec3;
-};
-
-export type JointInfo = {
-  nodeIndex: number;
-  children: number[] | undefined;
-  transforms: Partial<Transforms>;
-  inverseMat: mat4;
 };
 
 export type SkinnedLoadedModel = LoadedModelBase & {

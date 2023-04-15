@@ -1,6 +1,6 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import type { BoundBox, BoundSphere } from '../types/model';
+import type { BoundBox, BoundSphere } from '../types/core';
 import { convertTransformsToMat4 } from '../utils/transforms';
 import { ShaderProgramType } from '../shaderPrograms/types';
 
@@ -9,49 +9,47 @@ import type {
   AddDrawObjectParams,
   ModelInstance,
   Scene,
+  SceneInitOptions,
   ShadersCollection,
 } from './sceneInterface';
 import { initCamera } from './camera';
+import { initShadowMapContext } from './shadowMap';
+import { initLight } from './light';
 
 type SceneSetupParams = {
   glContext: GlContext;
   shaderPrograms: ShadersCollection;
+  initOptions: SceneInitOptions;
 };
 
 export function setupScene({
   glContext,
   shaderPrograms,
+  initOptions,
 }: SceneSetupParams): Scene {
   const camera = initCamera();
-
-  const lightDirection = vec3.fromValues(-5, 10, 4);
-  vec3.normalize(lightDirection, lightDirection);
+  const light = initLight();
 
   const scene: Scene = {
     gl: glContext.gl,
     glContext,
+    initOptions,
     isRenderLoop: false,
     camera,
-    lightDirection,
+    light,
     shaderPrograms,
     models: [],
+    shadowMapContext: initOptions.renderShadows
+      ? initShadowMapContext(glContext)
+      : undefined,
     debug: {
       models: {},
       overlay: [],
     },
-    setGlobalLightDirection: (...args) =>
-      sceneSetGlobalLightDirection(scene, ...args),
     addDrawObject: (...args) => sceneAddDrawObject(scene, ...args),
   };
 
   return scene;
-}
-
-export function sceneSetGlobalLightDirection(
-  scene: Scene,
-  direction: vec3,
-): void {
-  scene.lightDirection = direction;
 }
 
 function sceneAddDrawObject(
@@ -85,13 +83,26 @@ function sceneAddDrawObject(
     });
   }
 
+  const shadowMapVao = model.vaos[ShaderProgramType.DEFAULT_SHADOW_MAP];
+
   const modelInstance: ModelInstance = {
-    shaderProgram,
     modelMat: convertTransformsToMat4(transforms),
-    modelVao: defaultVao,
     boundInfo: getSphereBound(bounds),
     jointsDataArray,
     beforeDraw,
+    renderTypes: {
+      regular: {
+        shaderProgram,
+        modelVao: defaultVao,
+      },
+      shadowMap: shadowMapVao
+        ? {
+            shaderProgram:
+              scene.shaderPrograms[ShaderProgramType.DEFAULT_SHADOW_MAP],
+            modelVao: shadowMapVao,
+          }
+        : undefined,
+    },
   };
 
   scene.models.push(modelInstance);

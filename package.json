@@ -22,7 +22,6 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/gl-matrix": "^3.2.0",
     "@types/lodash": "^4.14.191",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",

@@ -1,6 +1,6 @@
 import { mat4, quat, vec3 } from 'gl-matrix';
 
-import type { Transforms } from '../types/model';
+import type { Transforms } from '../types/core';
 
 export function createIdentifyTransforms(): Transforms {
   return {

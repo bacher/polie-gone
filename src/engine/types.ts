@@ -1,5 +1,7 @@
-import type { BoundBox } from '../types/model';
-import type { Animation } from '../utils/loadGltf';
+import type { mat4, vec3 } from 'gl-matrix';
+
+import type { BoundBox, BoundSphere } from '../types/core';
+import type { Animation } from '../types/animation';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -10,6 +12,7 @@ export type ModelVao = {
 export type Texture = {
   glTexture: WebGLTexture;
   use: (slotIndex: number) => void;
+  bind: () => void;
 };
 
 export type VertexBufferObject = {
@@ -21,4 +24,16 @@ export type Model<T extends string> = {
   bounds: BoundBox;
   jointsCount?: number;
   animations: Animation[] | undefined;
+};
+
+export type FrameBuffer = {
+  glFrameBuffer: WebGLFramebuffer;
+  use: () => void;
+  dispose: () => void;
+};
+
+export type Light = {
+  direction: vec3;
+  mat: mat4;
+  isSphereBoundVisible: (boundSphere: BoundSphere) => boolean;
 };

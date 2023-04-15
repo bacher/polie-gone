@@ -1,14 +1,12 @@
-import { mat4 } from 'gl-matrix';
-
-import type { LoadedModel } from '../types/model';
-import { ModelType, SkinnedLoadedModel } from '../types/model';
-import type { Animation } from '../utils/loadGltf';
+import { ModelType, LoadedModel, SkinnedLoadedModel } from '../types/model';
+import type { Animation } from '../types/animation';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram, SkinProgram } from '../shaderPrograms/skinProgram';
 import { initModernProgram } from '../shaderPrograms/modernProgram';
 import { initHeightMapProgram } from '../shaderPrograms/heightMapProgram';
 import { ShaderProgramType } from '../shaderPrograms/types';
 import { initHeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
+import { initDefaultShadowMapProgram } from '../shaderPrograms/defaultShadowMapProgram';
 
 import type { Model, ModelVao, Texture } from './types';
 import { initModelVao } from './initModelVao';
@@ -17,7 +15,7 @@ import type { Scene } from './sceneInterface';
 import { initVertexBufferObjects } from './initVertextBuffer';
 import { createShadersManager } from './shaders/shaderManager';
 import { createGlContext, GlContext } from './glContext';
-import { initTexture } from './texture';
+import { initTextureByImageData } from './texture';
 
 export type InitResults = {
   glContext: GlContext;
@@ -39,6 +37,13 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   const shaderManager = createShadersManager(gl);
 
   const defaultProgram = initDefaultProgram(glContext, shaderManager);
+  const defaultShadowMapProgram = initDefaultShadowMapProgram(
+    glContext,
+    shaderManager,
+  );
+
+  /*
+    TODO: !!! Restore
   const skinProgram = initSkinProgram(glContext, shaderManager);
   const modernProgram = initModernProgram(glContext, shaderManager);
   const heightMapProgram = initHeightMapProgram(glContext, shaderManager);
@@ -46,6 +51,7 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     glContext,
     shaderManager,
   );
+   */
 
   // After creation of all shader programs we can clear shader cache
   shaderManager.disposeAll();
@@ -57,10 +63,17 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     glContext,
     shaderPrograms: {
       [defaultProgram.type]: defaultProgram,
+      [defaultShadowMapProgram.type]: defaultShadowMapProgram,
+      /*
+        TODO: !!! Restore
       [skinProgram.type]: skinProgram,
       [modernProgram.type]: modernProgram,
       [heightMapProgram.type]: heightMapProgram,
       [heightMapInstancedProgram.type]: heightMapInstancedProgram,
+       */
+    } as any,
+    initOptions: {
+      renderShadows: true,
     },
   });
 
@@ -86,7 +99,7 @@ export function initializeModel<T extends ShaderProgramType>(
   const textures: Texture[] = [];
 
   if (modelData.texture) {
-    textures.push(initTexture(glContext, modelData.texture));
+    textures.push(initTextureByImageData(glContext, modelData.texture));
   }
 
   const vaos = {} as Record<T, ModelVao>;
@@ -94,6 +107,14 @@ export function initializeModel<T extends ShaderProgramType>(
   let jointsCount: number | undefined;
 
   for (const programType of programTypes) {
+    // TODO: FIX
+    if (
+      programType !== ShaderProgramType.DEFAULT &&
+      programType !== ShaderProgramType.DEFAULT_SHADOW_MAP
+    ) {
+      continue;
+    }
+
     const shaderProgram = scene.shaderPrograms[programType];
 
     checkIfModelMatchShader(

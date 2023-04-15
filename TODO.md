@@ -39,6 +39,7 @@ Optimizations:
   - [ ] Adapt shader to know how many joints should be used
   - [ ] Visualize weights distribution
 - [ ] Allow change antialias
+- [ ] Use less detailed model for shadow map generating
 
 Refactoring:
 

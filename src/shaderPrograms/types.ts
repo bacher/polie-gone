@@ -2,10 +2,11 @@ import type {
   FragmentShaderInitFunc,
   VertexShaderInitFunc,
 } from '../engine/shaders/types';
-import type { BoundBox } from '../types/model';
+import type { BoundBox } from '../types/core';
 
 export const enum ShaderProgramType {
   DEFAULT = 'DEFAULT',
+  DEFAULT_SHADOW_MAP = 'DEFAULT_SHADOW_MAP',
   SKIN = 'SKIN',
   MODERN = 'MODERN',
   HEIGHT_MAP = 'HEIGHT_MAP',

@@ -1,6 +1,6 @@
 import { mat4 } from 'gl-matrix';
 
-import type { Animation } from '../utils/loadGltf';
+import type { Animation } from '../types/animation';
 
 export function applyAnimationFrame({
   jointsDataArray,

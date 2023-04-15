@@ -20,8 +20,11 @@ export function sceneRenderDebugOverlay(scene: Scene): void {
       shaderProgram.use();
 
       shaderProgram.uniforms.projection(scene.camera.mat);
-      shaderProgram.uniforms.lightDirection(scene.lightDirection);
-      shaderProgram.uniforms.diffuseTexture(0);
+
+      if (shaderProgram.type !== ShaderProgramType.DEFAULT_SHADOW_MAP) {
+        shaderProgram.uniforms.lightDirection(scene.light.direction);
+        shaderProgram.uniforms.diffuseTexture(0);
+      }
 
       for (const figure of scene.debug.overlay) {
         // TODO: Use static buffer

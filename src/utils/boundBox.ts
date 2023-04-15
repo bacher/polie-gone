@@ -1,6 +1,6 @@
 import { vec3 } from 'gl-matrix';
 
-import type { BoundBox, BoundSphere } from '../types/model';
+import type { BoundBox, BoundSphere } from '../types/core';
 
 export function makeBoundBoxFromSphere({
   center,

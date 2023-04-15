@@ -6,6 +6,7 @@ export type GlContext = {
   useProgram: (program: ShaderInterface) => void;
   useVao: (vao: ModelVao) => void;
   useTexture: (texture: Texture, slotIndex: number) => void;
+  resetFrameBuffer: () => void;
   reset: () => void;
 };
 
@@ -39,6 +40,9 @@ export function createGlContext(gl: WebGL2RenderingContext): GlContext {
         gl.bindTexture(gl.TEXTURE_2D, texture.glTexture);
         currentTextures[slotIndex] = texture.glTexture;
       }
+    },
+    resetFrameBuffer: (): void => {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     },
     reset: (): void => {
       gl.useProgram(null);

@@ -2,16 +2,17 @@ import { vec3 } from 'gl-matrix';
 import isNil from 'lodash/isNil';
 import { GltfLoader, gltf, GltfAsset } from 'gltf-loader-ts';
 
+import type { BoundBox } from '../types/core';
 import {
   ModelType,
   DataBuffer,
   RegularLoadedModel,
   SkinnedLoadedModel,
-  JointInfo,
   LoadedModel,
-  BoundBox,
 } from '../types/model';
+import type { JointInfo } from '../types/animation';
 import { BufferTarget, ComponentType } from '../types/webgl';
+import type { Animation, Sampler } from '../types/animation';
 import { MAX_JOINTS } from '../engine/constants';
 
 const enum BufferType {
@@ -107,23 +108,6 @@ type AnimationTemp = {
     };
     sampler: Sampler;
   }[];
-};
-
-export type Animation = {
-  name: string;
-  joints: {
-    joint: JointInfo;
-    mutations: {
-      path: 'translation' | 'rotation' | 'scale';
-      sampler: Sampler;
-    }[];
-  }[];
-};
-
-type Sampler = {
-  interpolation: 'LINEAR' | 'STEP' | 'CUBICSPLINE';
-  input: Accessor;
-  output: Accessor;
 };
 
 export async function loadGltf<T extends { loadSkin?: boolean }>(

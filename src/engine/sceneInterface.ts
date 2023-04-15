@@ -1,28 +1,34 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import type { Transforms, BoundSphere } from '../types/model';
+import type { Transforms, BoundSphere } from '../types/core';
 import type { ShaderProgram } from '../shaderPrograms/programs';
 import type { ShaderProgramType } from '../shaderPrograms/types';
 
-import type { Model, ModelVao } from './types';
+import type { Light, Model, ModelVao } from './types';
 import type { GlContext } from './glContext';
 import type { Camera } from './camera';
 import type { DebugFigure } from './debug/types';
+import type { ShadowMapContext } from './shadowMap';
 
 export type Scene = {
   gl: GL;
   glContext: GlContext;
+  initOptions: SceneInitOptions;
   isRenderLoop: boolean;
   shaderPrograms: ShadersCollection;
   camera: Camera;
-  lightDirection: vec3;
+  light: Light;
   models: ModelInstance[];
+  shadowMapContext: ShadowMapContext | undefined;
   debug: {
     models: Record<string, Model<any>>;
     overlay: DebugFigure[];
   };
-  setGlobalLightDirection: (vec: vec3) => void;
   addDrawObject: (params: AddDrawObjectParams) => ModelInstance;
+};
+
+export type SceneInitOptions = {
+  renderShadows: boolean;
 };
 
 export type ShadersCollection = Record<ShaderProgramType, ShaderProgram>;
@@ -35,12 +41,20 @@ export type AddDrawObjectParams = {
 };
 
 export type ModelInstance = {
-  shaderProgram: ShaderProgram;
   modelMat: mat4;
-  modelVao: ModelVao;
   boundInfo: BoundSphere;
   jointsDataArray?: Float32Array;
   beforeDraw?: BeforeDrawHandler;
+  renderTypes: {
+    regular: {
+      shaderProgram: ShaderProgram;
+      modelVao: ModelVao;
+    };
+    shadowMap?: {
+      shaderProgram: ShaderProgram;
+      modelVao: ModelVao;
+    };
+  };
 };
 
 export type BeforeDrawHandler = (
