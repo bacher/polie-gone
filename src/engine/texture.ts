@@ -29,20 +29,17 @@ function initTexture(glContext: GlContext, params: TextureInitParams): Texture {
 
   if (!params.mipmaps) {
     // TODO: Make some experiments with filtering
+    // TODO: Change these params for shadowmap
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
-  gl.texParameteri(
-    gl.TEXTURE_2D,
-    gl.TEXTURE_WRAP_S,
-    params.wrapS === 'clamp' ? gl.CLAMP_TO_EDGE : gl.REPEAT,
-  );
-  gl.texParameteri(
-    gl.TEXTURE_2D,
-    gl.TEXTURE_WRAP_T,
-    params.wrapT === 'clamp' ? gl.CLAMP_TO_EDGE : gl.REPEAT,
-  );
+  if (params.wrapS === 'clamp') {
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  }
+  if (params.wrapT === 'clamp') {
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  }
 
   return texture;
 }

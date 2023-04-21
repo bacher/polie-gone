@@ -165,6 +165,8 @@ export function createCameraController({
           position,
         });
 
+        scene.light.adaptToCamera(scene.camera);
+
         isDirty = false;
       }
     },

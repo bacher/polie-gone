@@ -2,6 +2,7 @@ import type { mat4, vec3 } from 'gl-matrix';
 
 import type { BoundBox, BoundSphere } from '../types/core';
 import type { Animation } from '../types/animation';
+import type { Camera } from './camera';
 
 export type ModelVao = {
   glVao: WebGLVertexArrayObject;
@@ -36,4 +37,5 @@ export type Light = {
   direction: vec3;
   mat: mat4;
   isSphereBoundVisible: (boundSphere: BoundSphere) => boolean;
+  adaptToCamera: (camera: Camera) => void;
 };

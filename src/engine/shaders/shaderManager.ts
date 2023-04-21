@@ -1,8 +1,10 @@
+import calcShadowSource from '../../shaders/functions/calcShadow.glsl?raw';
+
 import type { VertexShaderInitParams, FragmentShaderInitParams } from './types';
 
 export type ShadersManager = {
-  getVertexShader: (info: VertexShaderInitParams) => any;
-  getFragmentShader: (info: FragmentShaderInitParams) => any;
+  getVertexShader: (info: VertexShaderInitParams) => ShaderInstance;
+  getFragmentShader: (info: FragmentShaderInitParams) => ShaderInstance;
   disposeAll: () => void;
 };
 
@@ -31,7 +33,11 @@ export function createShadersManager(gl: GL): ShadersManager {
       let shader = fragmentShaders.get(info);
 
       if (!shader) {
-        shader = createShader(gl, gl.FRAGMENT_SHADER, info.source);
+        shader = createShader(
+          gl,
+          gl.FRAGMENT_SHADER,
+          processIncludes(info.source),
+        );
         fragmentShaders.set(info, shader);
       }
       return shader;
@@ -47,6 +53,10 @@ export function createShadersManager(gl: GL): ShadersManager {
       fragmentShaders.clear();
     },
   };
+}
+
+function processIncludes(code: string): string {
+  return code.replace('#include calcShadow', calcShadowSource);
 }
 
 function createShader(gl: GL, type: GLenum, source: string): ShaderInstance {

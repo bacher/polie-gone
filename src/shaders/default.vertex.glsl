@@ -9,7 +9,7 @@ in vec2 a_texcoord;
 
 out vec3 v_normal;
 out vec2 v_texcoord;
-out vec4 v_posInLightSpace;
+out vec3 v_posInLightSpace;
 
 void main() {
   // TODO: It's error to multiply on model matrix,
@@ -19,7 +19,13 @@ void main() {
   vec4 pos = u_model * a_position;
 
   v_texcoord = a_texcoord;
-  v_posInLightSpace = u_lightSpace * pos;
+
+  vec4 posInLightSpace = u_lightSpace * pos;
+
+  // Use this line for point lights
+  // v_posInLightSpace = posInLightSpace.xyz / posInLightSpace.w;
+  v_posInLightSpace = posInLightSpace.xyz;
+
   // TODO: Should we use vec4(a_position, 1.0) instead?
   gl_Position = u_projection * pos;
   // gl_Position = u_lightSpace * pos;

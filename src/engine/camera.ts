@@ -4,12 +4,15 @@ import { PI2 } from '../utils/math';
 import type { BoundSphere } from '../types/core';
 import { debugVec } from '../utils/debug';
 
+const SHADOW_DISTANCE = 20;
+
 export type Camera = {
   mat: mat4;
   // inverseMat using only in getCameraViewBoundBox,
   // currently getCameraViewBoundBox is disabled and inverseMat was commented
   // inverseMat: mat4;
   position: vec3;
+  boundSphere: BoundSphere;
   setOrientation: (params: {
     position: vec3;
     direction: CameraDirection;
@@ -31,7 +34,7 @@ export function initCamera(ratio: number): Camera {
   const verticalHalfFovTan = Math.tan(verticalHalfFov);
   // sec = Secant (1/cos)
   const verticalHalfFovSec = 1 / Math.cos(verticalHalfFov);
-  const maxDistance = 1000;
+  const maxDistance = 100;
   const horizontalFov = Math.atan(verticalHalfFovTan * ratio) * 2;
   const horizontalHalfFov = horizontalFov / 2;
   const horizontalHalfFovTan = Math.tan(horizontalHalfFov);
@@ -39,6 +42,19 @@ export function initCamera(ratio: number): Camera {
 
   const halfHeight = maxDistance * verticalHalfFovTan;
   const halfWidth = maxDistance * horizontalHalfFovTan;
+
+  let radius: number;
+
+  if (SHADOW_DISTANCE) {
+    radius = SHADOW_DISTANCE / 2;
+  } else {
+    const ratioAngle = Math.atan(1 / ratio);
+    const diagonalHalf = halfWidth / Math.cos(ratioAngle); // TODO: Vise versa?
+    const angle = Math.atan(diagonalHalf / maxDistance); // TODO: Vise versa?
+    const mainDiagonal = Math.cos(angle) * diagonalHalf;
+    radius = mainDiagonal / 2 / Math.cos(angle); // TODO: / 2 => * 0.5 ???
+    console.log('radius:', radius);
+  }
 
   // TODO: Actualize ratio on resizes
   const perspectiveMat = mat4.perspective(
@@ -59,20 +75,32 @@ export function initCamera(ratio: number): Camera {
     yaw: 0,
   };
 
+  // TODO: Check direction
+  const boundSphereCenter = vec3.fromValues(0, 0, -radius);
+
   const camera: Camera = {
     mat,
     // inverseMat,
     position: currentPosition,
+    boundSphere: { center: boundSphereCenter, radius },
     setOrientation: ({ position, direction }) => {
       vec3.copy(currentPosition, position);
-      vec3.scale(invertedCurrentPosition, currentPosition, -1);
+      vec3.negate(invertedCurrentPosition, currentPosition);
       currentDirection.yaw = direction.yaw;
       currentDirection.pitch = direction.pitch;
 
+      const pitchRad = currentDirection.pitch * PI2;
+      const yawRad = currentDirection.yaw * PI2;
+
       mat4.copy(mat, perspectiveMat);
-      mat4.rotateX(mat, mat, -currentDirection.pitch * PI2);
-      mat4.rotateY(mat, mat, -currentDirection.yaw * PI2);
+      mat4.rotateX(mat, mat, -pitchRad);
+      mat4.rotateY(mat, mat, -yawRad);
       mat4.translate(mat, mat, invertedCurrentPosition);
+
+      vec3.set(boundSphereCenter, 0, 0, -radius);
+      vec3.rotateY(boundSphereCenter, boundSphereCenter, zeroVec, yawRad);
+      vec3.rotateX(boundSphereCenter, boundSphereCenter, zeroVec, pitchRad);
+      vec3.add(boundSphereCenter, boundSphereCenter, currentPosition);
 
       // mat4.invert(inverseMat, mat);
     },

@@ -31,6 +31,7 @@ export function setupScene({
 
   const camera = initCamera(viewport.width / viewport.height);
   const light = initLight();
+  light.adaptToCamera(camera);
 
   const scene: Scene = {
     gl: glContext.gl,

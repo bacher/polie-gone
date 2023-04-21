@@ -32,7 +32,7 @@ Optimizations:
 
 - [x] Add out of view render optimization
 - [x] Add out of view render optimization base on camera frustum
-- [ ] Optimize out of view optimization (use camera's angles)
+- [x] Optimize out of view optimization (use camera's angles)
 - [ ] Add dynamic LOD optimization
 - [ ] Use fewer joints to skinning
   - [ ] Optimize model (remove unnecessary joint weights)
@@ -40,6 +40,7 @@ Optimizations:
   - [ ] Visualize weights distribution
 - [ ] Allow change antialias
 - [ ] Use less detailed model for shadow map generating
+- [ ] Sort objects to reduce fragment shader work
 
 Refactoring:
 
