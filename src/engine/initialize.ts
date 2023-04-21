@@ -49,11 +49,11 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
   const skinProgram = initSkinProgram(glContext, shaderManager);
   const modernProgram = initModernProgram(glContext, shaderManager);
   const heightMapProgram = initHeightMapProgram(glContext, shaderManager);
+   */
   const heightMapInstancedProgram = initHeightMapInstancedProgram(
     glContext,
     shaderManager,
   );
-   */
 
   const overlayQuadProgram = initOverlayQuadProgram(glContext, shaderManager);
 
@@ -73,8 +73,8 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
       [skinProgram.type]: skinProgram,
       [modernProgram.type]: modernProgram,
       [heightMapProgram.type]: heightMapProgram,
-      [heightMapInstancedProgram.type]: heightMapInstancedProgram,
        */
+      [heightMapInstancedProgram.type]: heightMapInstancedProgram,
       [overlayQuadProgram.type]: overlayQuadProgram,
     } as any,
     initOptions: {
@@ -127,7 +127,8 @@ export function initializeModel<T extends ShaderProgramType>(
     if (
       programType !== ShaderProgramType.DEFAULT &&
       programType !== ShaderProgramType.DEFAULT_SHADOW_MAP &&
-      programType !== ShaderProgramType.OVERLAY_QUAD
+      programType !== ShaderProgramType.OVERLAY_QUAD &&
+      programType !== ShaderProgramType.HEIGHT_MAP_INSTANCED
     ) {
       continue;
     }

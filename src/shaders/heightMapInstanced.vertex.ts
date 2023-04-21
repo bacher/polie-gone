@@ -15,6 +15,7 @@ export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
       model: makeUniformMat4Setter(gl, glProgram, 'u_model'),
       heightMap: makeUniformSamplerSetter(gl, glProgram, 'u_heightMap'),
       cellSize: makeUniformVec2Setter(gl, glProgram, 'u_cellSize'),
+      lightSpace: makeUniformMat4Setter(gl, glProgram, 'u_lightSpace'),
     },
     attributeLocations: extractAttributes(gl, glProgram, [
       'position',

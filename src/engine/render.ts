@@ -206,7 +206,10 @@ export function renderScene(scene: Scene): void {
             shaderProgram.uniforms.lightDirection(scene.light.direction);
           }
           shaderProgram.uniforms.diffuseTexture(0);
-          if (shaderProgram.type === ShaderProgramType.DEFAULT) {
+          if (
+            shaderProgram.type === ShaderProgramType.DEFAULT ||
+            shaderProgram.type === ShaderProgramType.HEIGHT_MAP_INSTANCED
+          ) {
             shaderProgram.uniforms.lightSpace(scene.light.mat);
             // TODO: Optimize
             //       Once set texture to 5th slot and don't reset

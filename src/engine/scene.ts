@@ -68,7 +68,7 @@ function sceneAddDrawObject(
   const defaultVao = model.vaos[defaultShaderProgramType];
 
   if (!defaultVao) {
-    throw new Error('Model do not have needed vao type');
+    throw new Error(`Model do not have ${defaultShaderProgramType} vao type`);
   }
 
   const shaderProgram = scene.shaderPrograms[defaultShaderProgramType];

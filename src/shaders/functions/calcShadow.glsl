@@ -21,7 +21,7 @@ float calcShadow(sampler2D shadowMapTexture, vec3 point) {
     //   (currentDepth > closestDepth2 ? 0.25 : 0.0) +
     //   (currentDepth > closestDepth3 ? 0.25 : 0.0);
 
-    return (currentDepth > closestDepth ? 1.0 : 0.0);
+    return (closestDepth < 1.0 && currentDepth > closestDepth) ? 1.0 : 0.0;
 
     // return closestDepth;
     // return currentDepth * 12.0 - 0.7; // for debugging (display depth on model);

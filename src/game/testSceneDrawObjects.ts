@@ -31,9 +31,9 @@ export function addTestSceneDrawObjects(
 ) {
   addMen(scene, manModelData);
   addToilet(scene, toiletModelData);
-  // TODO: !!! Restore
-  // addTerrain(scene, noiseTextureImage);
+  addTerrain(scene, noiseTextureImage);
 
+  // TODO: !!! Restore
   // addUnitSphere(scene, unitSphereModelData);
 }
 
