@@ -12,9 +12,11 @@ out vec2 v_texcoord;
 out vec3 v_posInLightSpace;
 
 void main() {
-  // TODO: It's error to multiply on model matrix,
-  //       we should only rotate.
-  v_normal = (u_model * vec4(a_normal, 0.0)).xyz;
+  // v_normal = (u_model * vec4(a_normal, 0.0)).xyz;
+  // TODO: or
+  v_normal = mat3(u_model) * a_normal;
+  // or if we have non uniform scale
+  // v_normal = transpose(inverse(mat3(u_model))) * a_normal;
 
   vec4 pos = u_model * a_position;
 

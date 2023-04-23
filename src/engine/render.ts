@@ -210,7 +210,7 @@ export function renderScene(scene: Scene): void {
             shaderProgram.type === ShaderProgramType.DEFAULT ||
             shaderProgram.type === ShaderProgramType.HEIGHT_MAP_INSTANCED
           ) {
-            shaderProgram.uniforms.lightSpace(scene.light.mat);
+            shaderProgram.uniforms.lightSpace(scene.light.textureSpaceMat);
             // TODO: Optimize
             //       Once set texture to 5th slot and don't reset
             scene.shadowMapContext?.texture.use(5);
@@ -233,7 +233,8 @@ export function renderScene(scene: Scene): void {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    sceneRenderDebugOverlay(scene);
+    // TODO (!!!)
+    // sceneRenderDebugOverlay(scene);
   }
 }
 

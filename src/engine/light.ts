@@ -17,9 +17,15 @@ const newCenterTemp = vec3.create();
 const towardBoundTemp = vec3.create();
 
 export function initLight(): Light {
+  const toTextureSpaceMat = mat4.create();
+  mat4.fromScaling(toTextureSpaceMat, [0.5, 0.5, 0.5]);
+  mat4.translate(toTextureSpaceMat, toTextureSpaceMat, [1.0, 1.0, 1.0]);
+
   const mat = mat4.create();
+  const textureSpaceMat = mat4.create();
   const halfSizeX = SIZE_X / 2;
   const halfSizeY = SIZE_Y / 2;
+
   mat4.ortho(mat, -halfSizeX, halfSizeX, -halfSizeY, halfSizeY, NEAR, FAR);
 
   const position = vec3.fromValues(-5, 10, 4);
@@ -29,9 +35,11 @@ export function initLight(): Light {
   mat4.lookAt(viewMat, position, [0, 0, 0], [0, 1, 0]);
 
   mat4.mul(mat, mat, viewMat);
+  mat4.mul(textureSpaceMat, toTextureSpaceMat, mat);
 
   return {
     mat,
+    textureSpaceMat,
     direction,
     isSphereBoundVisible: ({ center, radius }): boolean => {
       vec3.transformMat4(newCenterTemp, center, mat);
@@ -64,6 +72,7 @@ export function initLight(): Light {
       mat4.lookAt(viewMat, position, center, [0, 1, 0]);
 
       mat4.mul(mat, mat, viewMat);
+      mat4.mul(textureSpaceMat, toTextureSpaceMat, mat);
     },
   };
 }

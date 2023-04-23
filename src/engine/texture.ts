@@ -87,6 +87,13 @@ export function initDepthMapTexture(glContext: GlContext) {
 
   texture.bind();
 
+  // Need for using sampler2DShadow
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_COMPARE_MODE,
+    gl.COMPARE_REF_TO_TEXTURE,
+  );
+
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,

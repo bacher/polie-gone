@@ -41,6 +41,7 @@ Optimizations:
 - [ ] Allow change antialias
 - [ ] Use less detailed model for shadow map generating
 - [ ] Sort objects to reduce fragment shader work
+- [ ] Try calculate MVP matrix before shader run
 
 Refactoring:
 

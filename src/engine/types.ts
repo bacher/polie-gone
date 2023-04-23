@@ -36,6 +36,7 @@ export type FrameBuffer = {
 export type Light = {
   direction: vec3;
   mat: mat4;
+  textureSpaceMat: mat4;
   isSphereBoundVisible: (boundSphere: BoundSphere) => boolean;
   adaptToCamera: (camera: Camera) => void;
 };
