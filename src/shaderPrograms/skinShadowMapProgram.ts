@@ -2,23 +2,23 @@ import type { ShadersManager } from '../engine/shaders/shaderManager';
 import { initShaderProgram } from '../engine/shaders/initShaderProgram';
 import type { GlContext } from '../engine/glContext';
 
-import { initVertex, vertexSource } from '../shaders/default.shadowmap.vertex';
+import { initVertex, vertexSource } from '../shaders/skin.shadowmap.vertex';
 import { initFragment, fragmentSource } from '../shaders/empty.fragment';
 
 import { ProgramInit, ShaderProgramType } from './types';
 
-export type DefaultShadowMapProgram = ProgramInit<
-  ShaderProgramType.DEFAULT_SHADOW_MAP,
+export type SkinShadowMapProgram = ProgramInit<
+  ShaderProgramType.SKIN_SHADOW_MAP,
   typeof initVertex,
   typeof initFragment
 >;
 
-export function initDefaultShadowMapProgram(
+export function initSkinShadowMapProgram(
   glContext: GlContext,
   shadersManager: ShadersManager,
-): DefaultShadowMapProgram {
+): SkinShadowMapProgram {
   return initShaderProgram(glContext, shadersManager, {
-    type: ShaderProgramType.DEFAULT_SHADOW_MAP,
+    type: ShaderProgramType.SKIN_SHADOW_MAP,
     vertex: {
       source: vertexSource,
       init: initVertex,
@@ -27,5 +27,5 @@ export function initDefaultShadowMapProgram(
       source: fragmentSource,
       init: initFragment,
     },
-  }) as DefaultShadowMapProgram;
+  }) as SkinShadowMapProgram;
 }

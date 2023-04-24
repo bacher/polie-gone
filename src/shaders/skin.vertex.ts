@@ -18,6 +18,7 @@ export function initVertex(gl: GL, { glProgram }: ShaderProgramInitial) {
         'u_jointMatrices',
         20,
       ),
+      lightSpace: makeUniformMat4Setter(gl, glProgram, 'u_lightSpace'),
     },
     attributeLocations: extractAttributes(gl, glProgram, [
       'position',

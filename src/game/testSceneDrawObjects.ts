@@ -44,6 +44,7 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
     ShaderProgramType.DEFAULT,
     ShaderProgramType.DEFAULT_SHADOW_MAP,
     ShaderProgramType.SKIN,
+    ShaderProgramType.SKIN_SHADOW_MAP,
   ]);
 
   const man1 = scene.addDrawObject({
@@ -54,9 +55,6 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
   });
 
-  // TODO: !!! Restore
-  return;
-
   const man2 = scene.addDrawObject({
     model: manModel,
     transforms: {
@@ -64,7 +62,10 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
     },
     defaultShaderProgramType: ShaderProgramType.SKIN,
     beforeDraw: (model, shaderProgram) => {
-      if (shaderProgram.type === ShaderProgramType.SKIN) {
+      if (
+        shaderProgram.type === ShaderProgramType.SKIN ||
+        shaderProgram.type === ShaderProgramType.SKIN_SHADOW_MAP
+      ) {
         const frameIndex = Math.floor((Date.now() % 1000) / (1000 / 25));
         applyAnimationFrame({
           jointsDataArray: model.jointsDataArray!,
@@ -84,7 +85,10 @@ function addMen(scene: Scene, manModelData: LoadedModel) {
     },
     defaultShaderProgramType: ShaderProgramType.SKIN,
     beforeDraw: (model, shaderProgram) => {
-      if (shaderProgram.type === ShaderProgramType.SKIN) {
+      if (
+        shaderProgram.type === ShaderProgramType.SKIN ||
+        shaderProgram.type === ShaderProgramType.SKIN_SHADOW_MAP
+      ) {
         const frameIndex = 24 - Math.floor((Date.now() % 2000) / (2000 / 25));
         applyAnimationFrame({
           jointsDataArray: model.jointsDataArray!,

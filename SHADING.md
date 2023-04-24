@@ -8,6 +8,7 @@
 6. Look at https://ogldev.org/www/tutorial23/tutorial23.html
 7. Use less detailed model for shadow map generating
 8. [x] Try sampler2DShadow http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#pcf
+9. Use same vao for shadowmap and regular render (reduce vao count twice)
 
 Resources:
 

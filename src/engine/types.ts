@@ -25,6 +25,7 @@ export type Model<T extends string> = {
   bounds: BoundBox;
   jointsCount?: number;
   animations: Animation[] | undefined;
+  debugName: string;
 };
 
 export type FrameBuffer = {

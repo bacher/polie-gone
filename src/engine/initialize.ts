@@ -2,6 +2,10 @@ import { ModelType, LoadedModel, SkinnedLoadedModel } from '../types/model';
 import type { Animation } from '../types/animation';
 import { initDefaultProgram } from '../shaderPrograms/defaultProgram';
 import { initSkinProgram, SkinProgram } from '../shaderPrograms/skinProgram';
+import {
+  initSkinShadowMapProgram,
+  SkinShadowMapProgram,
+} from '../shaderPrograms/skinShadowMapProgram';
 import { initModernProgram } from '../shaderPrograms/modernProgram';
 import { initHeightMapProgram } from '../shaderPrograms/heightMapProgram';
 import { ShaderProgramType } from '../shaderPrograms/types';
@@ -44,9 +48,13 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     shaderManager,
   );
 
+  const skinProgram = initSkinProgram(glContext, shaderManager);
+  const skinShadowMapProgram = initSkinShadowMapProgram(
+    glContext,
+    shaderManager,
+  );
   /*
     TODO: !!! Restore
-  const skinProgram = initSkinProgram(glContext, shaderManager);
   const modernProgram = initModernProgram(glContext, shaderManager);
   const heightMapProgram = initHeightMapProgram(glContext, shaderManager);
    */
@@ -68,9 +76,10 @@ export function initialize(canvasElement: HTMLCanvasElement): InitResults {
     shaderPrograms: {
       [defaultProgram.type]: defaultProgram,
       [defaultShadowMapProgram.type]: defaultShadowMapProgram,
+      [skinProgram.type]: skinProgram,
+      [skinShadowMapProgram.type]: skinShadowMapProgram,
       /*
         TODO: !!! Restore
-      [skinProgram.type]: skinProgram,
       [modernProgram.type]: modernProgram,
       [heightMapProgram.type]: heightMapProgram,
        */
@@ -128,7 +137,9 @@ export function initializeModel<T extends ShaderProgramType>(
       programType !== ShaderProgramType.DEFAULT &&
       programType !== ShaderProgramType.DEFAULT_SHADOW_MAP &&
       programType !== ShaderProgramType.OVERLAY_QUAD &&
-      programType !== ShaderProgramType.HEIGHT_MAP_INSTANCED
+      programType !== ShaderProgramType.HEIGHT_MAP_INSTANCED &&
+      programType !== ShaderProgramType.SKIN &&
+      programType !== ShaderProgramType.SKIN_SHADOW_MAP
     ) {
       continue;
     }
@@ -166,6 +177,7 @@ export function initializeModel<T extends ShaderProgramType>(
     bounds: modelData.bounds,
     jointsCount,
     animations,
+    debugName: modelData.modelName,
   };
 }
 
@@ -197,7 +209,8 @@ function checkIfModelMatchShader(
 
   if (
     modelType === ModelType.SKINNED &&
-    shaderProgramType !== ShaderProgramType.SKIN
+    shaderProgramType !== ShaderProgramType.SKIN &&
+    shaderProgramType !== ShaderProgramType.SKIN_SHADOW_MAP
   ) {
     console.error(
       `Model "${modelName}" have joints but uses shader ${shaderProgramType}`,

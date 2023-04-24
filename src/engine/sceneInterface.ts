@@ -49,15 +49,14 @@ export type ModelInstance = {
   jointsDataArray?: Float32Array;
   beforeDraw?: BeforeDrawHandler;
   renderTypes: {
-    regular: {
-      shaderProgram: ShaderProgram;
-      modelVao: ModelVao;
-    };
-    shadowMap?: {
-      shaderProgram: ShaderProgram;
-      modelVao: ModelVao;
-    };
+    regular: Renderer;
+    shadowMap?: Renderer;
   };
+};
+
+export type Renderer = {
+  shaderProgram: ShaderProgram;
+  modelVao: ModelVao;
 };
 
 export type BeforeDrawHandler = (

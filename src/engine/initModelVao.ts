@@ -9,6 +9,7 @@ import type { ModelVao, Texture, VertexBufferObject } from './types';
 import type { GlContext } from './glContext';
 import type { VertexBufferObjectCollection } from './initVertextBuffer';
 
+// TODO: !!! Use same vao for shadowmap and regular render (reduce vao count twice)
 export function initModelVao(
   glContext: GlContext,
   shaderProgram: ShaderProgram,
@@ -29,17 +30,23 @@ export function initModelVao(
     glBindBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, vertexBuffers.index);
   }
 
-  const features: (keyof VertexBufferObjectCollection)[] = [
-    'position',
-    'normal',
-    'texcoord',
-  ];
+  const features: (keyof VertexBufferObjectCollection)[] = ['position'];
 
   if (
-    gltfModel.type === ModelType.SKINNED &&
-    shaderProgram.type === ShaderProgramType.SKIN
+    shaderProgram.type !== ShaderProgramType.DEFAULT_SHADOW_MAP &&
+    shaderProgram.type !== ShaderProgramType.SKIN_SHADOW_MAP
   ) {
-    features.push('joints', 'weights');
+    features.push('normal', 'texcoord');
+  }
+
+  if (gltfModel.type === ModelType.SKINNED) {
+    if (shaderProgram.type === ShaderProgramType.SKIN) {
+      features.push('joints', 'weights');
+    }
+
+    if (shaderProgram.type === ShaderProgramType.SKIN_SHADOW_MAP) {
+      features.push('joints');
+    }
   }
 
   if (

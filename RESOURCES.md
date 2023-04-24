@@ -1,0 +1,4 @@
+- https://learnopengl.com/
+- http://www.opengl-tutorial.org/
+- OpenGL Tutorials (Youtube) https://www.youtube.com/watch?v=XpBGwZNyUh0&list=PLPaoO-vpZnumdcb4tZc4x5Q-v7CkrQ6M-&index=1&ab_channel=VictorGordan
+- WebGL 2.0 API Quick Reference Guide (PDF) https://www.khronos.org/files/webgl20-reference-guide.pdf

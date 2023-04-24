@@ -201,13 +201,18 @@ export function renderScene(scene: Scene): void {
 
       if (renderPhase === RenderPhase.REGULAR) {
         // TODO: It's better to use some feature detector here:
-        if (shaderProgram.type !== ShaderProgramType.DEFAULT_SHADOW_MAP) {
+        if (
+          shaderProgram.type !== ShaderProgramType.DEFAULT_SHADOW_MAP &&
+          shaderProgram.type !== ShaderProgramType.SKIN_SHADOW_MAP
+        ) {
           if (shaderProgram.type !== ShaderProgramType.OVERLAY_QUAD) {
             shaderProgram.uniforms.lightDirection(scene.light.direction);
           }
           shaderProgram.uniforms.diffuseTexture(0);
+          // TODO: Optimize condition
           if (
             shaderProgram.type === ShaderProgramType.DEFAULT ||
+            shaderProgram.type === ShaderProgramType.SKIN ||
             shaderProgram.type === ShaderProgramType.HEIGHT_MAP_INSTANCED
           ) {
             shaderProgram.uniforms.lightSpace(scene.light.textureSpaceMat);
@@ -219,7 +224,10 @@ export function renderScene(scene: Scene): void {
         }
       }
 
-      if (shaderProgram.type === ShaderProgramType.SKIN) {
+      if (
+        shaderProgram.type === ShaderProgramType.SKIN ||
+        shaderProgram.type === ShaderProgramType.SKIN_SHADOW_MAP
+      ) {
         // TODO: Use more strict check (instead of !)
         shaderProgram.uniforms.jointMatrices(model.jointsDataArray!);
       }
