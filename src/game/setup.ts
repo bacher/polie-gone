@@ -37,6 +37,8 @@ type SetupGameParams = {
 export async function setupGame({
   canvasElement,
 }: SetupGameParams): Promise<Game> {
+  const prefix = import.meta.env.BASE_URL;
+
   const [
     manModelData,
     toiletModelData,
@@ -44,13 +46,13 @@ export async function setupGame({
     manTextureImage,
     noiseTextureImage,
   ] = await Promise.all([
-    loadGltf('/models/man/man.gltf', {
+    loadGltf(`${prefix}models/man/man.gltf`, {
       loadSkin: true,
     }),
-    loadGltf('/models/toilet/toilet.gltf'),
-    loadGltf('/models/unit-sphere/unit-sphere.gltf'),
-    loadTexture('/models/man/man.png'),
-    loadTexture('/textures/noise.png'),
+    loadGltf(`${prefix}models/toilet/toilet.gltf`),
+    loadGltf(`${prefix}models/unit-sphere/unit-sphere.gltf`),
+    loadTexture(`${prefix}models/man/man.png`),
+    loadTexture(`${prefix}textures/noise.png`),
   ]);
 
   manModelData.texture = manTextureImage;

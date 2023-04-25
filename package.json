@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "gh-pages": "npm run build && GH=\"$(pwd)/../polie-gone-gh\" && git -C $GH rm -rq 'assets' && git -C $GH rm -rq 'models' && git -C $GH rm -rq 'textures' && cp -r dist/* $GH",
     "preview": "vite preview",
     "test": "run-p test:*",
     "test:types": "tsc --noEmit",
