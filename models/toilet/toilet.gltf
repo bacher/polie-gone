@@ -1,0 +1,93 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v3.4.50",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [0]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "Toilet Bowl",
+      "scale": [1, 1, 1.3595399856567383],
+      "translation": [
+        -0.17775678634643555, -1.4000062942504883, -0.023540258407592773
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "toilet tank",
+      "pbrMetallicRoughness": {}
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Circle",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 2696,
+      "max": [1.3800687789916992, 2.2613847255706787, 1.0788757801055908],
+      "min": [-1.3789044618606567, -1.5862637758255005, -2.1658451557159424],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 2696,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5123,
+      "count": 15150,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 32352,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 32352,
+      "byteOffset": 32352,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 30300,
+      "byteOffset": 64704,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 95004,
+      "uri": "toilet.bin"
+    }
+  ]
+}
