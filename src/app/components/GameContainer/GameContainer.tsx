@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import cn from 'classnames';
 
 import { Game, setupGame } from '../../../game/setup';
@@ -14,18 +14,23 @@ export function GameContainer() {
   const forceUpdate = useForceUpdate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const flags = useMemo(
+    () => new Set(location.search.substring(1).split('&')),
+    [],
+  );
+
   const canvasSize = useMemo(() => {
-    if (location.hash.substring(1).split('&').includes('big')) {
+    if (flags.has('small')) {
       return {
-        width: 1000,
-        height: 600,
-      }
+        width: 600,
+        height: 400,
+      };
     }
 
     return {
-      width: 600,
-      height: 400,
-    }
+      width: 1000,
+      height: 600,
+    };
   }, []);
 
   const state = useMemo<{
@@ -39,6 +44,13 @@ export function GameContainer() {
     [],
   );
 
+  const startRenderLoop = useCallback(() => {
+    if (state.game && !state.game.scene.isRenderLoop) {
+      state.cancelLoop = state.game.startRenderLoop();
+      forceUpdate();
+    }
+  }, []);
+
   useOnlyOnce(async () => {
     if (!canvasRef.current) {
       throw new Error('No canvas');
@@ -47,15 +59,14 @@ export function GameContainer() {
     state.game = await setupGame({ canvasElement: canvasRef.current });
     state.game.render();
 
+    if (!flags.has('pause')) {
+      startRenderLoop();
+    }
+
     forceUpdate();
   });
 
-  useWindowEvent('mousedown', () => {
-    if (state.game && !state.game.scene.isRenderLoop) {
-      state.cancelLoop = state.game.startRenderLoop();
-      forceUpdate();
-    }
-  });
+  useWindowEvent('mousedown', startRenderLoop);
 
   useWindowEvent('keydown', (event) => {
     if (event.code === 'Space') {
@@ -78,7 +89,11 @@ export function GameContainer() {
           }
         }}
       >
-        <canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height} />
+        <canvas
+          ref={canvasRef}
+          width={canvasSize.width}
+          height={canvasSize.height}
+        />
       </div>
       {state.game && <Controls game={state.game} />}
     </div>
