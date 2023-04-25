@@ -14,26 +14,44 @@ The main goals:
 
 ## Features
 
+- [x] Texturing
 - [x] Shadows
 - [x] Skeletal animation
 - [x] glTF models loader
 - [x] Heightmap based terrains
+- [ ] Skybox support
 
 ## Demonstration
 
+- v0.1
+
 ![v0.1](./screenshots/v0.1_white.png)
+
+- v0.2
 
 ![v0.2](./screenshots/v0.2_style.png)
 
+- v0.3
+
 ![v0.3](./screenshots/v0.3.png)
+
+- v0.4
 
 ![v0.4](./screenshots/v0.4.png)
 
+- v0.5
+
 ![v0.5](./screenshots/v0.5.png)
+
+- v0.6
 
 ![v0.6](./screenshots/v0.6.png)
 
+- v0.7
+
 ![v0.7](./screenshots/v0.7.png)
+
+- v0.8
 
 ![v0.8](./screenshots/v0.8.png)
 

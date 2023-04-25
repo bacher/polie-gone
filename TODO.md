@@ -23,10 +23,11 @@
 - [ ] Use material specular modifier (look at https://github.com/tparisi/webgl-lessons/tree/master/lesson15)
 - [ ] Add possibility to use specular textures
 - [ ] Add possibility to use bump textures
-- [ ] Add shadows
+- [x] Add shadows
 - [ ] Add fullscreen mode
 - [ ] Game should be paused when window lose focus?
       (problem with to big deltas in logic loop)
+- [ ] Add cube textures for Skyboxes
 
 Optimizations:
 
