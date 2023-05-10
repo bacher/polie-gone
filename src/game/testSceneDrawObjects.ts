@@ -1,4 +1,4 @@
-import { vec2 } from 'gl-matrix';
+import { quat, vec2 } from 'gl-matrix';
 
 import {
   DataBuffer,
@@ -9,7 +9,11 @@ import {
 } from '../types/model';
 import { BufferTarget, ComponentType } from '../types/webgl';
 import type { Scene } from '../engine/sceneInterface';
-import { generateHeightMapInstanced } from '../utils/meshGenerator';
+import {
+  generateHeightMapInstanced,
+  generateIcosphere,
+  generateIcosphere2,
+} from '../utils/meshGenerator';
 import { initializeModel } from '../engine/initialize';
 import { ShaderProgramType } from '../shaderPrograms/types';
 import type { HeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
@@ -29,12 +33,12 @@ export function addTestSceneDrawObjects(
     textureImages: { noiseTextureImage },
   }: Params,
 ) {
-  addMen(scene, manModelData);
-  addToilet(scene, toiletModelData);
+  // addMen(scene, manModelData);
+  // addToilet(scene, toiletModelData);
   addTerrain(scene, noiseTextureImage);
-
-  // TODO: !!! Restore
   // addUnitSphere(scene, unitSphereModelData);
+
+  addIcosphere(scene);
 }
 
 function addMen(scene: Scene, manModelData: LoadedModel) {
@@ -276,9 +280,56 @@ function addUnitSphere(scene: Scene, modelData: LoadedModel): void {
 
   scene.debug.models['unitSphere'] = wireframeModel;
 
-  // const sphere = scene.addDrawObject({
-  //   model: wireframeModel,
-  //   transforms: {},
-  //   defaultShaderProgramType: ShaderProgramType.DEFAULT,
-  // });
+  const sphere = scene.addDrawObject({
+    model: wireframeModel,
+    transforms: {},
+    defaultShaderProgramType: ShaderProgramType.DEFAULT,
+  });
+}
+
+function addIcosphere(scene: Scene) {
+  addIcosphere1(scene);
+  addIcosphere2(scene);
+}
+
+function addIcosphere1(scene: Scene) {
+  const { glContext } = scene;
+
+  const icosphereModelData = generateIcosphere2(10);
+
+  const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
+    ShaderProgramType.DEFAULT,
+  ]);
+
+  scene.addDrawObject({
+    model: icosphereModel,
+    transforms: {
+      translation: [0, 0, -0.5],
+      scale: [2, 2, 2],
+      // rotation: quat.fromEuler(quat.create(), 0, 180, 0),
+    },
+    defaultShaderProgramType: ShaderProgramType.DEFAULT,
+    // beforeDraw: (model, program) => {},
+  });
+}
+
+function addIcosphere2(scene: Scene) {
+  const { glContext } = scene;
+
+  const icosphereModelData = generateIcosphere(10);
+
+  const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
+    ShaderProgramType.DEFAULT,
+  ]);
+
+  scene.addDrawObject({
+    model: icosphereModel,
+    transforms: {
+      translation: [0, 0, -0.5],
+      scale: [2, 2, 2],
+      // rotation: quat.fromEuler(quat.create(), 0, 180, 0),
+    },
+    defaultShaderProgramType: ShaderProgramType.DEFAULT,
+    // beforeDraw: (model, program) => {},
+  });
 }

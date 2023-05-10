@@ -241,8 +241,7 @@ export function renderScene(scene: Scene): void {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    // TODO (!!!)
-    // sceneRenderDebugOverlay(scene);
+    sceneRenderDebugOverlay(scene);
   }
 }
 

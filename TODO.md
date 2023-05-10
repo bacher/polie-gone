@@ -28,6 +28,9 @@
 - [ ] Game should be paused when window lose focus?
       (problem with to big deltas in logic loop)
 - [ ] Add cube textures for Skyboxes
+- [ ] Add depth texture sampling
+- [ ] Add bump texture sampling
+- [ ] Add cubemaps support
 
 Optimizations:
 
@@ -43,6 +46,11 @@ Optimizations:
 - [ ] Use less detailed model for shadow map generating
 - [ ] Sort objects to reduce fragment shader work
 - [ ] Try calculate MVP matrix before shader run
+- [ ] Check that I don't use some extensive blend-mode by default
+- [ ] Load texture mipmaps separately (load hi-res textures only on-demand)
+      http://tomforsyth1000.github.io/blog.wiki.html#%5B%5BKnowing%20which%20mipmap%20levels%20are%20needed%5D%5D
+- [ ] Use splitted gl-matrix version https://github.com/stackgl/gl-mat4
+- [ ] Hardcore frustum culling optimizations: https://fgiesen.wordpress.com/2010/10/17/view-frustum-culling/
 
 Refactoring:
 
@@ -58,3 +66,11 @@ Bugs:
 
 - [x] Fix camera position and orientation
 - [x] Fix bounding sphere size, r = (maxSide/2) \* sqrt(2)
+
+Ideas:
+
+- [ ] Add mechanism for matrix frustrum capturing and dysplaying as wireframe
+- [ ] Add logic for tweaking intermideate matrices (after model, after world, after view, after perspective transformation applying)
+- [ ] Display world via perspective matrix
+- [ ] Idea for menu - add animation where active game screen is moving away like a display in real life and showing menu items as items in this workd, after resuming camera is moving up and start to display same world as before menu was activated.
+- [ ] The menu room is adapting to age/epoch in current game. For example in stone age we have room in a rock.

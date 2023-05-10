@@ -8,7 +8,7 @@ import { DebugFigureType } from './types';
 export function sceneRenderDebugOverlay(scene: Scene): void {
   // TODO: !!! FIX
   // renderBoundSpheres(scene);
-  renderOverlayQuad(scene);
+  // renderOverlayQuad(scene);
 }
 
 function renderBoundSpheres(scene: Scene): void {

@@ -4,7 +4,13 @@ import {
   HeightMapLoadedModel,
   ModelType,
   RegularLoadedModel,
+  WireframeLoadedModel,
 } from '../types/model';
+
+export {
+  generateIcosphere,
+  generateIcosphere2,
+} from './meshGenerators/icosphere';
 
 export function generatePlain({
   dimension,
@@ -158,6 +164,80 @@ export function generateHeightMapInstanced({
       // min: [-0.5, -0.5, -0.5],
       min: [0, 0, 0],
       max: [1, 1, 0],
+    },
+  };
+}
+
+// TODO: This is just an example, so it better to move to documentation page
+export function generateIndexedTriangle(): RegularLoadedModel {
+  const useUint16 = true;
+  const indexData = new Uint16Array(3);
+  const dataArray = new Float32Array(9);
+
+  indexData.set([0, 1, 2], 0);
+  dataArray.set([0, 0, 0, 0, 1, 0, -1, 0, 0], 0);
+
+  return {
+    modelName: 'indexed-triangle',
+    type: ModelType.REGULAR,
+    dataBuffers: {
+      indices: {
+        bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
+        componentDimension: 1,
+        componentType: useUint16
+          ? ComponentType.UNSIGNED_SHORT
+          : ComponentType.UNSIGNED_BYTE,
+        elementsCount: indexData.length,
+        dataArray: indexData,
+      },
+      position: {
+        bufferTarget: BufferTarget.ARRAY_BUFFER,
+        componentDimension: 3,
+        componentType: ComponentType.FLOAT,
+        elementsCount: dataArray.length / 2,
+        dataArray: dataArray,
+      },
+    },
+    bounds: {
+      min: [-1, 0, 0],
+      max: [0, 1, 0],
+    },
+  };
+}
+
+// TODO: This is just an example, so it better to move to documentation page
+export function generateIndexedTriangleWireframe(): WireframeLoadedModel {
+  const useUint16 = true;
+  const indexData = new Uint16Array(6);
+  const dataArray = new Float32Array(9);
+
+  indexData.set([0, 1, 0, 2, 1, 2], 0);
+  dataArray.set([0, 0, 0, 0, 1, 0, -1, 0, 0], 0);
+
+  return {
+    modelName: 'indexed-triangle-wireframe',
+    type: ModelType.WIREFRAME,
+    dataBuffers: {
+      indices: {
+        bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
+        componentDimension: 1,
+        componentType: useUint16
+          ? ComponentType.UNSIGNED_SHORT
+          : ComponentType.UNSIGNED_BYTE,
+        elementsCount: indexData.length,
+        dataArray: indexData,
+      },
+      position: {
+        bufferTarget: BufferTarget.ARRAY_BUFFER,
+        componentDimension: 3,
+        componentType: ComponentType.FLOAT,
+        elementsCount: dataArray.length / 2,
+        dataArray: dataArray,
+      },
+    },
+    bounds: {
+      min: [-1, 0, 0],
+      max: [0, 1, 0],
     },
   };
 }
