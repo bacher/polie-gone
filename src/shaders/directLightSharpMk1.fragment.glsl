@@ -21,8 +21,4 @@ void main() {
   float lightFactor = clamp(dot(normalize(v_normal), lightSizeFactor * u_lightDirection), 0.0, 1.0);
 
   outColor = vec4(baseColor * (0.5 + (lightFactor * 0.5 * shadowFactor)));
-
-  float mod = gl_FragCoord.z * 0.5 - 0.2;
-
-  outColor = vec4(mod, mod, mod, 1);
 }

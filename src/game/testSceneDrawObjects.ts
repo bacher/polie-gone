@@ -288,14 +288,14 @@ function addUnitSphere(scene: Scene, modelData: LoadedModel): void {
 }
 
 function addIcosphere(scene: Scene) {
-  addIcosphere1(scene);
+  // addIcosphere1(scene);
   addIcosphere2(scene);
 }
 
 function addIcosphere1(scene: Scene) {
   const { glContext } = scene;
 
-  const icosphereModelData = generateIcosphere2(10);
+  const icosphereModelData = generateIcosphere2();
 
   const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
     ShaderProgramType.DEFAULT,
@@ -316,7 +316,7 @@ function addIcosphere1(scene: Scene) {
 function addIcosphere2(scene: Scene) {
   const { glContext } = scene;
 
-  const icosphereModelData = generateIcosphere(10);
+  const icosphereModelData = generateIcosphere(8);
 
   const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
     ShaderProgramType.DEFAULT,

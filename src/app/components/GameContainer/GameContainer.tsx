@@ -15,7 +15,7 @@ export function GameContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const flags = useMemo(
-    () => new Set(location.search.substring(1).split('&')),
+    () => new Set(new URLSearchParams(location.search).keys()),
     [],
   );
 

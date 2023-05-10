@@ -1,5 +1,3 @@
-import { vec3 } from 'gl-matrix';
-
 import { ModelType, WireframeLoadedModel } from '../../types/model';
 import { BufferTarget, ComponentType } from '../../types/webgl';
 
@@ -28,13 +26,15 @@ function getIcosphereIndexedTriangles() {
     icoTriangs.push([0, i + 1, ((i + 1) % 5) + 1]);
   }
   for (let i = 0; i < 5; i += 1) {
+    // icoTriangs.push([i + 1, ((i + 1) % 5) + 1, ((7 - i) % 5) + 7]);
+    icoTriangs.push([i + 1, ((7 - i) % 5) + 7, ((i + 1) % 5) + 1]);
+  }
+  for (let i = 0; i < 5; i += 1) {
+    // icoTriangs.push([i + 1, ((7 - i) % 5) + 7, ((8 - i) % 5) + 7]);
+    icoTriangs.push([i + 1, ((8 - i) % 5) + 7, ((7 - i) % 5) + 7]);
+  }
+  for (let i = 0; i < 5; i += 1) {
     icoTriangs.push([6, i + 7, ((i + 1) % 5) + 7]);
-  }
-  for (let i = 0; i < 5; i += 1) {
-    icoTriangs.push([i + 1, ((i + 1) % 5) + 1, ((7 - i) % 5) + 7]);
-  }
-  for (let i = 0; i < 5; i += 1) {
-    icoTriangs.push([i + 1, ((7 - i) % 5) + 7, ((8 - i) % 5) + 7]);
   }
 
   return icoTriangs;
@@ -150,13 +150,396 @@ const mixFactor =
 //   p12 = slerp(s1,s2,l2s)
 //   return slerp(p12,s3,l3)
 
+const enum EdgeType {
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+  BOTTOM = 'BOTTOM',
+}
+
+type TriangleStitchDefinition = {
+  triangleIndex: number;
+  edgeType: EdgeType;
+  reversed: boolean;
+};
+
+const stitchMap: {
+  tri1: TriangleStitchDefinition;
+  tri2: TriangleStitchDefinition;
+}[] = [
+  {
+    tri1: {
+      triangleIndex: 0,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 1,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 1,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 2,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 2,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 3,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 3,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 4,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 4,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 0,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+
+  // BOTTOM HALF-SPHERE
+  {
+    tri1: {
+      triangleIndex: 15,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 16,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 16,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 17,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 17,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 18,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 18,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 19,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 19,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 15,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  // INNER
+  {
+    tri1: {
+      triangleIndex: 10,
+      edgeType: EdgeType.LEFT,
+      reversed: true,
+    },
+    tri2: {
+      triangleIndex: 5,
+      edgeType: EdgeType.BOTTOM,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 5,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 11,
+      edgeType: EdgeType.BOTTOM,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 11,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 6,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 6,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 12,
+      edgeType: EdgeType.BOTTOM,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 12,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 7,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 7,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 13,
+      edgeType: EdgeType.BOTTOM,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 13,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 8,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 8,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 14,
+      edgeType: EdgeType.BOTTOM,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 14,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 9,
+      edgeType: EdgeType.BOTTOM,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 9,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 10,
+      edgeType: EdgeType.BOTTOM,
+      reversed: false,
+    },
+  },
+  // TOP AND INNER
+  {
+    tri1: {
+      triangleIndex: 0,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 5,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 1,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 6,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 2,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 7,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 3,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 8,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 4,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 9,
+      edgeType: EdgeType.LEFT,
+      reversed: false,
+    },
+  },
+  // BOTTOM AND INNER
+  {
+    tri1: {
+      triangleIndex: 15,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 12,
+      edgeType: EdgeType.RIGHT,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 16,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 11,
+      edgeType: EdgeType.RIGHT,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 17,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 10,
+      edgeType: EdgeType.RIGHT,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 18,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 14,
+      edgeType: EdgeType.RIGHT,
+      reversed: true,
+    },
+  },
+  {
+    tri1: {
+      triangleIndex: 19,
+      edgeType: EdgeType.RIGHT,
+      reversed: false,
+    },
+    tri2: {
+      triangleIndex: 13,
+      edgeType: EdgeType.RIGHT,
+      reversed: true,
+    },
+  },
+];
+
 const tan = Math.tan(Math.PI / 6);
 const m2 = 1 / Math.sin(Math.PI / 3);
 
-export function generateIcosphere(level: number): WireframeLoadedModel {
+export function generateIcosphere(maxLevel: number): WireframeLoadedModel {
   const useUint16 = true;
 
-  const cellWidth = 1 / (level + 1);
+  const cellWidth = 1 / (maxLevel + 1);
   const halfWidth = cellWidth * 0.5;
   const side = halfWidth * m2;
   const halfSide = side * 0.5;
@@ -164,16 +547,16 @@ export function generateIcosphere(level: number): WireframeLoadedModel {
   const vertices: number[][] = [];
   const edges: number[][] = [];
 
-  for (let i = 0; i <= level; i += 1) {
+  for (let i = 0; i <= maxLevel; i += 1) {
     const downRow = [];
 
-    for (let j = level - i; j <= level + i; j += 2) {
-      const x = (j - level) * halfWidth;
-      const y = (level - i) * rowHeight + halfSide;
+    for (let j = maxLevel - i; j <= maxLevel + i; j += 2) {
+      const x = (j - maxLevel) * halfWidth;
+      const y = (maxLevel - i) * rowHeight + halfSide;
 
       vertices.push([x, y, 0]);
 
-      if (i < level) {
+      if (i < maxLevel) {
         downRow.push([x, y - side, 0]);
       }
     }
@@ -193,7 +576,7 @@ export function generateIcosphere(level: number): WireframeLoadedModel {
   let prevV1 = 0;
   let prevV2 = 0;
 
-  for (let i = 0; i < level; i += 1) {
+  for (let i = 0; i < maxLevel; i += 1) {
     const v1 = prevV1 + (i + 1) * 2;
     const v2 = prevV2 + (i * 2 + 1);
     prevV1 = v1;
@@ -228,10 +611,10 @@ export function generateIcosphere(level: number): WireframeLoadedModel {
   // const x = 0.5 * Math.tan(Math.PI / 3) * Math.cos(Math.PI / 6) - 0.5;
   // vertices.push([0, 0, 0], [-x, h, 0], [x, h, 0]);
 
-  const x1 = 0.25;
-  const y1 = (0.5 * Math.tan(Math.PI / 3)) / 6;
-  const y2 = 0.5 * Math.tan(Math.PI / 3) * (2 / 3);
-  vertices.push([0, y2, 0], [x1, y1, 0], [-x1, y1, 0]);
+  //   const x1 = 0.25;
+  //   const y1 = (0.5 * Math.tan(Math.PI / 3)) / 6;
+  //   const y2 = 0.5 * Math.tan(Math.PI / 3) * (2 / 3);
+  //   vertices.push([0, y2, 0], [x1, y1, 0], [-x1, y1, 0]);
 
   edges.push([shift, shift + 1], [shift, shift + 2], [shift + 1, shift + 2]);
 
@@ -243,6 +626,96 @@ export function generateIcosphere(level: number): WireframeLoadedModel {
 
   const usePlain = false;
 
+  const offset = maxLevel * (maxLevel + 2) + 1; // 121
+
+  const hexagonsPerTriangle: number[][][] = [];
+  const baseHexagons: number[][] = [];
+
+  const baseEdgeHalfHexagons: Record<EdgeType, number[][]> = {
+    [EdgeType.LEFT]: [],
+    [EdgeType.RIGHT]: [],
+    [EdgeType.BOTTOM]: [],
+  };
+
+  for (let l = 0; l < maxLevel - 1; l += 1) {
+    const lRowStart = (l + 1) ** 2;
+    const l1 = l + 1;
+    const l2 = l + 2;
+    const l3 = l + 3;
+
+    for (let i = 0; i <= l; i += 1) {
+      const lStart = lRowStart + i;
+
+      baseHexagons.push([
+        lStart,
+        lStart + l1 + 1,
+        lStart + l1 + l2 + 1,
+        lStart + l1 + l2 + l3,
+        lStart + l1 + l2,
+        lStart + l1,
+      ]);
+    }
+  }
+
+  for (let l = 0; l < maxLevel; l += 1) {
+    const lStart = l ** 2;
+    const l1 = lStart + l;
+    const l2 = lStart + 2 * l + 1;
+    const l3 = lStart + 3 * l + 2;
+
+    baseEdgeHalfHexagons[EdgeType.LEFT].push([l1, l2, l3]);
+  }
+
+  for (let l = 0; l < maxLevel; l += 1) {
+    const lStart = l ** 2;
+    const l1 = lStart + 4 * l + 3;
+    const l2 = lStart + 3 * l + 1;
+    const l3 = lStart + 2 * l;
+
+    baseEdgeHalfHexagons[EdgeType.RIGHT].push([l1, l2, l3]);
+  }
+
+  for (let l = 0; l < maxLevel; l += 1) {
+    const lStart = maxLevel * maxLevel;
+    const l1 = lStart + maxLevel + l;
+    const l2 = lStart + l;
+    const l3 = lStart + maxLevel + l + 1;
+
+    baseEdgeHalfHexagons[EdgeType.BOTTOM].push([l1, l2, l3]);
+  }
+
+  const joint: number[][] = [];
+
+  function getStitchPart(tri: TriangleStitchDefinition) {
+    const base = baseEdgeHalfHexagons[tri.edgeType];
+
+    if (tri.reversed) {
+      return [...base].reverse();
+    }
+
+    return base;
+  }
+
+  for (const { tri1, tri2 } of stitchMap) {
+    const basePart1 = getStitchPart(tri1);
+    const basePart2 = getStitchPart(tri2);
+
+    for (let i = 0; i < maxLevel; i += 1) {
+      const part1 = basePart1[i];
+      const part2 = basePart2[i];
+
+      joint.push([
+        ...part1.map((index) => index + offset * tri1.triangleIndex),
+        ...part2.map((index) => index + offset * tri2.triangleIndex),
+      ]);
+    }
+  }
+
+  hexagonsPerTriangle.push(joint);
+
+  let startOffset = 0;
+
+  let triangleIndex = 0;
   for (const indexedTriagle of icoIndexedTriangs) {
     if (usePlain) {
       allVertices.push(vertices);
@@ -259,9 +732,37 @@ export function generateIcosphere(level: number): WireframeLoadedModel {
       );
     }
 
-    allEdges.push(edges);
+    hexagonsPerTriangle.push(
+      baseHexagons.map((vertices) =>
+        vertices.map((index) => index + startOffset),
+      ),
+    );
 
-    break;
+    console.log('offset =', vertices.length);
+
+    startOffset += vertices.length;
+
+    // allEdges.push(edges);
+
+    triangleIndex += 1;
+
+    // if (triangleIndex === 10) {
+    //   break;
+    // }
+  }
+
+  allEdges.length = 0;
+  for (const hexagons of hexagonsPerTriangle) {
+    for (const h of hexagons) {
+      allEdges.push([
+        [h[0], h[1]],
+        [h[1], h[2]],
+        [h[2], h[3]],
+        [h[3], h[4]],
+        [h[4], h[5]],
+        [h[5], h[0]],
+      ]);
+    }
   }
 
   const indexData = new Uint16Array(
@@ -299,7 +800,7 @@ export function generateIcosphere(level: number): WireframeLoadedModel {
   };
 }
 
-export function generateIcosphere2(level: number): WireframeLoadedModel {
+export function generateIcosphere2(): WireframeLoadedModel {
   const icoPoints = getIcosphereVerteces();
   const icoIndexedTriangs = getIcosphereIndexedTriangles();
 
