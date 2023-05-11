@@ -14,12 +14,21 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
   const uvBuffer: number[][] = [];
   const indecesBuffer: number[][] = [];
 
+  const totalHexagonCount = hexagonsPerTriangles.reduce(
+    (acc, triangle) => acc + triangle.length,
+    0,
+  );
+
   let triangleIndex = 0;
   let fragmentIndex = 0;
-  const totalHexagonCount =
-    hexagonsPerTriangles.length * hexagonsPerTriangles[0].length;
 
   for (const hexagons of hexagonsPerTriangles) {
+    // if (triangleIndex === 8 || triangleIndex === 21) {
+    // } else {
+    //   triangleIndex += 1;
+    //   continue;
+    // }
+
     for (const fragment of hexagons) {
       const offset = verticesBuffer.length;
 

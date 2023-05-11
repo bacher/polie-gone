@@ -212,8 +212,40 @@ const stitchMap: {
   }),
 );
 
-const tan = Math.tan(Math.PI / 6);
-const m2 = 1 / Math.sin(Math.PI / 3);
+type Side = 'T' | 'L' | 'R';
+
+const pentagonMap: [
+  number,
+  Side,
+  number,
+  Side,
+  number,
+  Side,
+  number,
+  Side,
+  number,
+  Side,
+][] = [
+  // ti - triangle index
+  // s - side (T|L|R) - top/left/right
+  // vi s vi s vi s vi s vi s
+  // TOP
+  [0, 'L', 4, 'L', 3, 'L', 2, 'L', 1, 'L'],
+  // UPPER HALF
+  [4, 'T', 0, 'R', 5, 'L', 10, 'L', 9, 'T'],
+  [0, 'T', 1, 'R', 6, 'L', 11, 'L', 5, 'T'],
+  [1, 'T', 2, 'R', 7, 'L', 12, 'L', 6, 'T'],
+  [2, 'T', 3, 'R', 8, 'L', 13, 'L', 7, 'T'],
+  [3, 'T', 4, 'R', 9, 'L', 14, 'L', 8, 'T'],
+  // LOWER HALF
+  [15, 'R', 12, 'T', 7, 'R', 13, 'R', 19, 'T'],
+  [19, 'R', 13, 'T', 8, 'R', 14, 'R', 18, 'T'],
+  [18, 'R', 14, 'T', 9, 'R', 10, 'R', 17, 'T'],
+  [17, 'R', 10, 'T', 5, 'R', 11, 'R', 16, 'T'],
+  [16, 'R', 11, 'T', 6, 'R', 12, 'R', 15, 'T'],
+  // BOTTOM
+  [15, 'L', 19, 'L', 18, 'L', 17, 'L', 16, 'L'],
+];
 
 export const enum FragmentType {
   PENTAGON = 'PENTAGON',
@@ -229,6 +261,9 @@ export type Fragment =
       type: FragmentType.HEXAGON;
       points: [number, number, number, number, number, number] | number[];
     };
+
+const tan = Math.tan(Math.PI / 6);
+const m2 = 1 / Math.sin(Math.PI / 3);
 
 export function generateIcoHexagonPolygons(maxLevel: number) {
   const cellWidth = 1 / (maxLevel + 1);
@@ -431,6 +466,29 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
 
     startOffset += vertices.length;
   }
+
+  const pentagons: Fragment[] = [];
+
+  const sideVertexOffset = {
+    T: 0,
+    L: maxLevel * (maxLevel + 1),
+    R: maxLevel * (maxLevel + 2),
+  };
+
+  for (const map of pentagonMap) {
+    pentagons.push({
+      type: FragmentType.PENTAGON,
+      points: [
+        offset * map[0] + sideVertexOffset[map[1]],
+        offset * map[2] + sideVertexOffset[map[3]],
+        offset * map[4] + sideVertexOffset[map[5]],
+        offset * map[6] + sideVertexOffset[map[7]],
+        offset * map[8] + sideVertexOffset[map[9]],
+      ],
+    });
+  }
+
+  hexagonsPerTriangles.push(pentagons);
 
   // TODO: edges is not using
 

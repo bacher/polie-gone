@@ -287,7 +287,7 @@ function addUnitSphere(scene: Scene, modelData: LoadedModel): void {
 }
 
 function addIcosphere(scene: Scene) {
-  addIcosphere1(scene);
+  // addIcosphere1(scene);
   addIcosphere2(scene);
   addIcosphere3(scene);
 }
@@ -306,7 +306,7 @@ function addIcosphere1(scene: Scene) {
     transforms: {
       translation: [0, 0, 0],
       scale: [2, 2, 2],
-      rotation: quat.fromEuler(quat.create(), 90, 0, 0),
+      rotation: quat.fromEuler(quat.create(), -90, 0, 0),
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
     // beforeDraw: (model, program) => {},
@@ -327,7 +327,7 @@ function addIcosphere2(scene: Scene) {
     transforms: {
       translation: [0, 0, 0],
       scale: [2, 2, 2],
-      rotation: quat.fromEuler(quat.create(), 90, 0, 0),
+      rotation: quat.fromEuler(quat.create(), -90, 0, 0),
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
     // beforeDraw: (model, program) => {},
@@ -348,7 +348,7 @@ function addIcosphere3(scene: Scene) {
     transforms: {
       translation: [0, 0, 0],
       scale: [2, 2, 2],
-      rotation: quat.fromEuler(quat.create(), 90, 0, 0),
+      rotation: quat.fromEuler(quat.create(), -90, 0, 0),
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
     // beforeDraw: (model, program) => {},
