@@ -261,6 +261,7 @@ export const enum FragmentPlace {
 export type Fragment = {
   fragmentType: FragmentType;
   points: number[];
+  neighbors: number[];
 } & (
   | {
       fragmentPlace: FragmentPlace.EDGE | FragmentPlace.PENTAGON;
@@ -450,6 +451,7 @@ export function generateIcoHexagonPolygons(
           ...part1.map((index) => index + offset * tri1.triangleIndex),
           ...part2.map((index) => index + offset * tri2.triangleIndex),
         ],
+        neighbors: [],
       });
     }
   }
@@ -481,6 +483,7 @@ export function generateIcoHexagonPolygons(
         triangleIndex,
         fragmentType: FragmentType.HEXAGON,
         points: vertices.map((index) => index + startOffset),
+        neighbors: [],
       })),
     );
 
@@ -507,6 +510,7 @@ export function generateIcoHexagonPolygons(
         offset * map[6] + sideVertexOffset[map[7]],
         offset * map[8] + sideVertexOffset[map[9]],
       ],
+      neighbors: [],
     });
   }
 
@@ -526,4 +530,34 @@ export function generateIcoHexagonPolygons(
   };
 }
 
-function addNeighborsInfo(fragments: Fragment[]) {}
+function addNeighborsInfo(fragments: Fragment[]) {
+  fragCycle: for (let i = 0; i < fragments.length; i += 1) {
+    const frag = fragments[i];
+    const neighborsCount = frag.fragmentType === FragmentType.HEXAGON ? 6 : 5;
+
+    if (frag.neighbors.length === neighborsCount) {
+      continue;
+    }
+
+    nextNeighbor: for (let j = i + 1; j < fragments.length; j += 1) {
+      if (!frag.neighbors.includes(j)) {
+        const iterFrag = fragments[j];
+
+        for (const p of iterFrag.points) {
+          if (frag.points.includes(p)) {
+            frag.neighbors.push(j);
+            iterFrag.neighbors.push(i);
+
+            if (frag.neighbors.length === neighborsCount) {
+              continue fragCycle;
+            }
+
+            continue nextNeighbor;
+          }
+        }
+      }
+    }
+
+    throw new Error('No all neighbors found');
+  }
+}
