@@ -3,7 +3,7 @@ import {
   BasicLoadedModel,
   HeightMapLoadedModel,
   ModelType,
-  RegularLoadedModel,
+  IndexedLoadedModel,
   WireframeLoadedModel,
 } from '../types/model';
 
@@ -13,7 +13,7 @@ export function generatePlain({
   dimension,
 }: {
   dimension: number;
-}): RegularLoadedModel {
+}): IndexedLoadedModel {
   const dim = dimension;
   const useUint16 = dim > 16;
 
@@ -47,7 +47,7 @@ export function generatePlain({
   }
 
   return {
-    type: ModelType.REGULAR,
+    type: ModelType.INDEXED,
     modelName: 'plain',
     dataBuffers: {
       indices: {
@@ -166,7 +166,7 @@ export function generateHeightMapInstanced({
 }
 
 // TODO: This is just an example, so it better to move to documentation page
-export function generateIndexedTriangle(): RegularLoadedModel {
+export function generateIndexedTriangle(): IndexedLoadedModel {
   const useUint16 = true;
   const indexData = new Uint16Array(3);
   const dataArray = new Float32Array(9);
@@ -176,7 +176,7 @@ export function generateIndexedTriangle(): RegularLoadedModel {
 
   return {
     modelName: 'indexed-triangle',
-    type: ModelType.REGULAR,
+    type: ModelType.INDEXED,
     dataBuffers: {
       indices: {
         bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,

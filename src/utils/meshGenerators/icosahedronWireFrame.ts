@@ -10,17 +10,17 @@ export function generateIcosahedronWireFrame(): WireframeLoadedModel {
   const icoPoints = getIcosphereVerteces();
   const icoIndexedTriangs = getIcosphereIndexedTriangles();
 
-  const verticesArray = icoPoints.flatMap((i) => i);
+  const verticesArray = icoPoints.flat();
 
   const edges = icoIndexedTriangs
     .map(([p1, p2, p3]) => [p1, p2, p1, p3, p2, p3])
-    .flatMap((i) => i);
+    .flat();
 
   const indexData = new Uint8Array(edges);
   const dataArray = new Float32Array(verticesArray);
 
   return {
-    modelName: 'icosphere',
+    modelName: 'icosahedron-wireframe',
     type: ModelType.WIREFRAME,
     dataBuffers: {
       indices: {

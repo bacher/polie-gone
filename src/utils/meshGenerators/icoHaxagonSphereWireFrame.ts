@@ -1,22 +1,54 @@
 import { ModelType, WireframeLoadedModel } from '../../types/model';
 import { BufferTarget, ComponentType } from '../../types/webgl';
+import { neverCall } from '../typeHelpers';
 
-import { generateIcoHexagonPolygons } from './icosphere';
+import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 
 export function generateIcoHaxagonSphereWireFrame(
   maxLevel: number,
 ): WireframeLoadedModel {
-  const { allEdges, allVertices } = generateIcoHexagonPolygons(maxLevel);
+  const { hexagonsPerTriangles, allVertices } =
+    generateIcoHexagonPolygons(maxLevel);
 
-  const indexData = new Uint16Array(
-    allEdges.flatMap((i) => i).flatMap((i) => i),
-  );
-  const dataArray = new Float32Array(
-    allVertices.flatMap((i) => i).flatMap((i) => i),
-  );
+  const allEdges: number[][][] = [];
+
+  for (const hexagons of hexagonsPerTriangles) {
+    for (const fragment of hexagons) {
+      switch (fragment.type) {
+        case FragmentType.HEXAGON: {
+          const h = fragment.points;
+          allEdges.push([
+            [h[0], h[1]],
+            [h[1], h[2]],
+            [h[2], h[3]],
+            [h[3], h[4]],
+            [h[4], h[5]],
+            [h[5], h[0]],
+          ]);
+          break;
+        }
+        case FragmentType.PENTAGON: {
+          const h = fragment.points;
+          allEdges.push([
+            [h[0], h[1]],
+            [h[1], h[2]],
+            [h[2], h[3]],
+            [h[3], h[4]],
+            [h[4], h[0]],
+          ]);
+          break;
+        }
+        default:
+          throw neverCall(fragment);
+      }
+    }
+  }
+
+  const indexData = new Uint16Array(allEdges.flat().flat());
+  const dataArray = new Float32Array(allVertices.flat().flat());
 
   return {
-    modelName: 'icosphere',
+    modelName: 'icosphere-wireframe',
     type: ModelType.WIREFRAME,
     dataBuffers: {
       indices: {

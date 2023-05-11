@@ -6,7 +6,7 @@ import type { BoundBox } from '../types/core';
 import {
   ModelType,
   DataBuffer,
-  RegularLoadedModel,
+  IndexedLoadedModel,
   SkinnedLoadedModel,
   LoadedModel,
 } from '../types/model';
@@ -114,7 +114,7 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
   modelUri: string,
   { loadSkin }: Partial<T> = {},
 ): Promise<
-  T['loadSkin'] extends true ? SkinnedLoadedModel : RegularLoadedModel
+  T['loadSkin'] extends true ? SkinnedLoadedModel : IndexedLoadedModel
 > {
   const loader = new GltfLoader();
   const asset = await loader.load(modelUri);
@@ -398,8 +398,8 @@ export async function loadGltf<T extends { loadSkin?: boolean }>(
 
     model = skinnedModel;
   } else {
-    const regularModel: RegularLoadedModel = {
-      type: ModelType.REGULAR,
+    const regularModel: IndexedLoadedModel = {
+      type: ModelType.INDEXED,
       modelName,
       dataBuffers: baseBuffers,
       bounds: modelBounds,

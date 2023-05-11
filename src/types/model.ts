@@ -3,7 +3,7 @@ import type { Animation, JointInfo } from './animation';
 import type { BufferTarget, ComponentType } from './webgl';
 
 export const enum ModelType {
-  REGULAR = 'REGULAR',
+  INDEXED = 'INDEXED',
   SKINNED = 'SKINNED',
   BASIC = 'BASIC',
   HEIGHT_MAP = 'HEIGHT_MAP',
@@ -25,8 +25,8 @@ type LoadedModelBase = {
   bounds: BoundBox;
 };
 
-export type RegularLoadedModel = LoadedModelBase & {
-  type: ModelType.REGULAR;
+export type IndexedLoadedModel = LoadedModelBase & {
+  type: ModelType.INDEXED;
   dataBuffers: {
     indices: DataBuffer;
     position: DataBuffer;
@@ -76,7 +76,7 @@ export type SkinnedLoadedModel = LoadedModelBase & {
 };
 
 export type LoadedModel =
-  | RegularLoadedModel
+  | IndexedLoadedModel
   | SkinnedLoadedModel
   | BasicLoadedModel
   | HeightMapLoadedModel

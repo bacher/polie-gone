@@ -28,14 +28,14 @@ export function initVertexBufferObjects(
   let offset: DataBuffer | undefined;
 
   if (
-    model.type === ModelType.REGULAR ||
+    model.type === ModelType.INDEXED ||
     model.type === ModelType.SKINNED ||
     model.type === ModelType.WIREFRAME
   ) {
     indices = model.dataBuffers.indices;
   }
 
-  if (model.type === ModelType.REGULAR || model.type === ModelType.SKINNED) {
+  if (model.type === ModelType.INDEXED || model.type === ModelType.SKINNED) {
     texcoord = model.dataBuffers.texcoord;
     normal = model.dataBuffers.normal;
   }
