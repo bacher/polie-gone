@@ -5,8 +5,7 @@ import { neverCall } from '../typeHelpers';
 import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 
 export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
-  const { hexagonsPerTriangles, allVertices } =
-    generateIcoHexagonPolygons(maxLevel);
+  const { fragments, allVertices } = generateIcoHexagonPolygons(maxLevel);
 
   const flatVertices = allVertices.flat();
 
@@ -14,53 +13,37 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
   const uvBuffer: number[][] = [];
   const indecesBuffer: number[][] = [];
 
-  const totalHexagonCount = hexagonsPerTriangles.reduce(
-    (acc, triangle) => acc + triangle.length,
-    0,
-  );
-
-  let triangleIndex = 0;
   let fragmentIndex = 0;
 
-  for (const hexagons of hexagonsPerTriangles) {
-    // if (triangleIndex === 8 || triangleIndex === 21) {
-    // } else {
-    //   triangleIndex += 1;
-    //   continue;
-    // }
+  for (const fragment of fragments) {
+    const offset = verticesBuffer.length;
 
-    for (const fragment of hexagons) {
-      const offset = verticesBuffer.length;
-
-      for (const point of fragment.points) {
-        verticesBuffer.push(flatVertices[point]);
-        uvBuffer.push([fragmentIndex / totalHexagonCount, 0]);
-      }
-
-      switch (fragment.type) {
-        case FragmentType.HEXAGON:
-          indecesBuffer.push(
-            [offset, offset + 5, offset + 4],
-            [offset, offset + 4, offset + 3],
-            [offset, offset + 3, offset + 1],
-            [offset + 1, offset + 3, offset + 2],
-          );
-          break;
-        case FragmentType.PENTAGON:
-          indecesBuffer.push(
-            [offset, offset + 2, offset + 1],
-            [offset, offset + 3, offset + 2],
-            [offset, offset + 4, offset + 3],
-          );
-          break;
-        default:
-          throw neverCall(fragment);
-      }
-
-      fragmentIndex += 1;
+    for (const point of fragment.points) {
+      verticesBuffer.push(flatVertices[point]);
+      uvBuffer.push([fragmentIndex / fragments.length, 0]);
     }
 
-    triangleIndex += 1;
+    switch (fragment.fragmentType) {
+      case FragmentType.HEXAGON:
+        indecesBuffer.push(
+          [offset, offset + 5, offset + 4],
+          [offset, offset + 4, offset + 3],
+          [offset, offset + 3, offset + 1],
+          [offset + 1, offset + 3, offset + 2],
+        );
+        break;
+      case FragmentType.PENTAGON:
+        indecesBuffer.push(
+          [offset, offset + 2, offset + 1],
+          [offset, offset + 3, offset + 2],
+          [offset, offset + 4, offset + 3],
+        );
+        break;
+      default:
+        throw neverCall(fragment.fragmentType);
+    }
+
+    fragmentIndex += 1;
   }
 
   const indexData = new Uint16Array(indecesBuffer.flat());

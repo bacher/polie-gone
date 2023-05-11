@@ -7,40 +7,37 @@ import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 export function generateIcoHaxagonSphereWireFrame(
   maxLevel: number,
 ): WireframeLoadedModel {
-  const { hexagonsPerTriangles, allVertices } =
-    generateIcoHexagonPolygons(maxLevel);
+  const { fragments, allVertices } = generateIcoHexagonPolygons(maxLevel);
 
   const allEdges: number[][][] = [];
 
-  for (const hexagons of hexagonsPerTriangles) {
-    for (const fragment of hexagons) {
-      switch (fragment.type) {
-        case FragmentType.HEXAGON: {
-          const h = fragment.points;
-          allEdges.push([
-            [h[0], h[1]],
-            [h[1], h[2]],
-            [h[2], h[3]],
-            [h[3], h[4]],
-            [h[4], h[5]],
-            [h[5], h[0]],
-          ]);
-          break;
-        }
-        case FragmentType.PENTAGON: {
-          const h = fragment.points;
-          allEdges.push([
-            [h[0], h[1]],
-            [h[1], h[2]],
-            [h[2], h[3]],
-            [h[3], h[4]],
-            [h[4], h[0]],
-          ]);
-          break;
-        }
-        default:
-          throw neverCall(fragment);
+  for (const fragment of fragments) {
+    switch (fragment.fragmentType) {
+      case FragmentType.HEXAGON: {
+        const h = fragment.points;
+        allEdges.push([
+          [h[0], h[1]],
+          [h[1], h[2]],
+          [h[2], h[3]],
+          [h[3], h[4]],
+          [h[4], h[5]],
+          [h[5], h[0]],
+        ]);
+        break;
       }
+      case FragmentType.PENTAGON: {
+        const h = fragment.points;
+        allEdges.push([
+          [h[0], h[1]],
+          [h[1], h[2]],
+          [h[2], h[3]],
+          [h[3], h[4]],
+          [h[4], h[0]],
+        ]);
+        break;
+      }
+      default:
+        throw neverCall(fragment.fragmentType);
     }
   }
 

@@ -252,15 +252,24 @@ export const enum FragmentType {
   HEXAGON = 'HEXAGON',
 }
 
-export type Fragment =
+export const enum FragmentPlace {
+  TRIANGLE = 'TRIANGLE',
+  PENTAGON = 'PENTAGON',
+  EDGE = 'EDGE',
+}
+
+export type Fragment = {
+  fragmentType: FragmentType;
+  points: number[];
+} & (
   | {
-      type: FragmentType.PENTAGON;
-      points: [number, number, number, number, number] | number[];
+      fragmentPlace: FragmentPlace.EDGE | FragmentPlace.PENTAGON;
     }
   | {
-      type: FragmentType.HEXAGON;
-      points: [number, number, number, number, number, number] | number[];
-    };
+      fragmentPlace: FragmentPlace.TRIANGLE;
+      triangleIndex: number;
+    }
+);
 
 const tan = Math.tan(Math.PI / 6);
 const m2 = 1 / Math.sin(Math.PI / 3);
@@ -351,7 +360,7 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
 
   const offset = maxLevel * (maxLevel + 2) + 1; // 121
 
-  const hexagonsPerTriangles: Fragment[][] = [];
+  const fragmentsChunks: Fragment[][] = [];
   const baseHexagons: number[][] = [];
 
   const baseEdgeHalfHexagons: Record<EdgeType, number[][]> = {
@@ -428,7 +437,8 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
       const part2 = basePart2[i];
 
       joint.push({
-        type: FragmentType.HEXAGON,
+        fragmentPlace: FragmentPlace.EDGE,
+        fragmentType: FragmentType.HEXAGON,
         points: [
           ...part1.map((index) => index + offset * tri1.triangleIndex),
           ...part2.map((index) => index + offset * tri2.triangleIndex),
@@ -437,10 +447,11 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
     }
   }
 
-  hexagonsPerTriangles.push(joint);
+  fragmentsChunks.push(joint);
 
   let startOffset = 0;
 
+  let triangleIndex = 0;
   for (const indexedTriagle of icoIndexedTriangs) {
     if (usePlain) {
       allVertices.push(vertices);
@@ -457,14 +468,17 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
       );
     }
 
-    hexagonsPerTriangles.push(
+    fragmentsChunks.push(
       baseHexagons.map((vertices) => ({
-        type: FragmentType.HEXAGON,
+        fragmentPlace: FragmentPlace.TRIANGLE,
+        triangleIndex,
+        fragmentType: FragmentType.HEXAGON,
         points: vertices.map((index) => index + startOffset),
       })),
     );
 
     startOffset += vertices.length;
+    triangleIndex += 1;
   }
 
   const pentagons: Fragment[] = [];
@@ -477,7 +491,8 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
 
   for (const map of pentagonMap) {
     pentagons.push({
-      type: FragmentType.PENTAGON,
+      fragmentPlace: FragmentPlace.PENTAGON,
+      fragmentType: FragmentType.PENTAGON,
       points: [
         offset * map[0] + sideVertexOffset[map[1]],
         offset * map[2] + sideVertexOffset[map[3]],
@@ -488,12 +503,12 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
     });
   }
 
-  hexagonsPerTriangles.push(pentagons);
+  fragmentsChunks.push(pentagons);
 
   // TODO: edges is not using
 
   return {
-    hexagonsPerTriangles,
+    fragments: fragmentsChunks.flat(),
     allVertices,
   };
 }
