@@ -1,7 +1,4 @@
-import { ModelType, WireframeLoadedModel } from '../../types/model';
-import { BufferTarget, ComponentType } from '../../types/webgl';
-
-function getIcosphereVerteces() {
+export function getIcosphereVerteces() {
   const s = 2 / Math.sqrt(5);
   const c = 1 / Math.sqrt(5);
 
@@ -19,18 +16,16 @@ function getIcosphereVerteces() {
   return [...topPoints, ...bottomPoints];
 }
 
-function getIcosphereIndexedTriangles() {
+export function getIcosphereIndexedTriangles() {
   const icoTriangs = [];
 
   for (let i = 0; i < 5; i += 1) {
     icoTriangs.push([0, i + 1, ((i + 1) % 5) + 1]);
   }
   for (let i = 0; i < 5; i += 1) {
-    // icoTriangs.push([i + 1, ((i + 1) % 5) + 1, ((7 - i) % 5) + 7]);
     icoTriangs.push([i + 1, ((7 - i) % 5) + 7, ((i + 1) % 5) + 1]);
   }
   for (let i = 0; i < 5; i += 1) {
-    // icoTriangs.push([i + 1, ((7 - i) % 5) + 7, ((8 - i) % 5) + 7]);
     icoTriangs.push([i + 1, ((8 - i) % 5) + 7, ((7 - i) % 5) + 7]);
   }
   for (let i = 0; i < 5; i += 1) {
@@ -38,23 +33,6 @@ function getIcosphereIndexedTriangles() {
   }
 
   return icoTriangs;
-}
-
-// const edges = [
-//   // TOP
-//   0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 1, 2, 2, 3, 3, 4, 4, 5, 5, 1,
-//   // MIDDLE
-//   1, 10, 1, 9, 2, 9, 2, 8, 3, 8, 3, 7, 4, 7, 4, 11, 5, 11, 5, 10,
-//   // BOTTOM
-//   6, 7, 6, 8, 6, 9, 6, 10, 6, 11, 7, 8, 8, 9, 9, 10, 10, 11, 11, 7,
-// ];
-
-function barycentricCoords(point: number[]): number[] {
-  const [x, y, z] = point;
-  const l3 = (y * 2) / Math.sqrt(3);
-  const l2 = x + 0.5 * (1 - l3);
-  const l1 = 1 - l2 - l3;
-  return [l1, l2, l3];
 }
 
 // # barycentric coords for triangle (-0.5,0),(0.5,0),(0,sqrt(3)/2)
@@ -67,7 +45,16 @@ function barycentricCoords(point: number[]): number[] {
 //   l2 = x + 0.5*(1 - l3)
 //   l1 = 1 - l2 - l3
 //   return l1,l2,l3
+function barycentricCoords(point: number[]): number[] {
+  const [x, y, z] = point;
+  const l3 = (y * 2) / Math.sqrt(3);
+  const l2 = x + 0.5 * (1 - l3);
+  const l1 = 1 - l2 - l3;
+  return [l1, l2, l3];
+}
 
+// def scalProd(p1,p2):
+//   return sum([p1[i]*p2[i] for i in range(len(p1))])
 function scalProd(p1: number[], p2: number[]): number {
   let sum = 0;
 
@@ -78,9 +65,16 @@ function scalProd(p1: number[], p2: number[]): number {
   return sum;
 }
 
-// def scalProd(p1,p2):
-//   return sum([p1[i]*p2[i] for i in range(len(p1))])
-
+// # uniform interpolation of arc defined by p0, p1 (around origin)
+// # t=0 -> p0, t=1 -> p1
+// def slerp(p0,p1,t):
+//   assert abs(scalProd(p0,p0) - scalProd(p1,p1)) < 1e-7
+//   ang0Cos = scalProd(p0,p1)/scalProd(p0,p0)
+//   ang0Sin = sqrt(1 - ang0Cos*ang0Cos)
+//   ang0 = atan2(ang0Sin,ang0Cos)
+//   l0 = sin((1-t)*ang0)
+//   l1 = sin(t    *ang0)
+//   return tuple([(l0*p0[i] + l1*p1[i])/ang0Sin for i in range(len(p0))])
 function slerp(p0: number[], p1: number[], t: number): number[] {
   if (Math.abs(scalProd(p0, p0) - scalProd(p1, p1)) >= 1e-7) {
     throw new Error();
@@ -101,17 +95,13 @@ function slerp(p0: number[], p1: number[], t: number): number[] {
   return point;
 }
 
-// # uniform interpolation of arc defined by p0, p1 (around origin)
-// # t=0 -> p0, t=1 -> p1
-// def slerp(p0,p1,t):
-//   assert abs(scalProd(p0,p0) - scalProd(p1,p1)) < 1e-7
-//   ang0Cos = scalProd(p0,p1)/scalProd(p0,p0)
-//   ang0Sin = sqrt(1 - ang0Cos*ang0Cos)
-//   ang0 = atan2(ang0Sin,ang0Cos)
-//   l0 = sin((1-t)*ang0)
-//   l1 = sin(t    *ang0)
-//   return tuple([(l0*p0[i] + l1*p1[i])/ang0Sin for i in range(len(p0))])
-
+// # map 2D point p to spherical triangle s1,s2,s3 (3D vectors of equal length)
+// def mapGridpoint2Sphere(p,s1,s2,s3):
+//   l1,l2,l3 = barycentricCoords(p)
+//   if abs(l3-1) < 1e-10: return s3
+//   l2s = l2/(l1+l2)
+//   p12 = slerp(s1,s2,l2s)
+//   return slerp(p12,s3,l3)
 function mapGridpoint2Sphere(
   p: number[],
   s1: number[],
@@ -130,25 +120,56 @@ function mapGridpoint2Sphere(
   return slerp(p12, s3, l3);
 }
 
-const mixFactor =
-  Number.parseFloat(
-    new URLSearchParams(window.location.search).get('f') ?? '0',
-  ) || 0;
-
-// setTimeout(() => {
-//   const sp = new URLSearchParams(window.location.search);
-
-//   sp.set('f', ((mixFactor + 0.1) % 1).toString());
-//   window.location.search = sp.toString();
-// }, 200);
-
-// # map 2D point p to spherical triangle s1,s2,s3 (3D vectors of equal length)
-// def mapGridpoint2Sphere(p,s1,s2,s3):
-//   l1,l2,l3 = barycentricCoords(p)
-//   if abs(l3-1) < 1e-10: return s3
-//   l2s = l2/(l1+l2)
-//   p12 = slerp(s1,s2,l2s)
-//   return slerp(p12,s3,l3)
+const stitchMapCompact: [
+  // Triangle 1 index
+  number,
+  // Triangle 1 edge type
+  'L' | 'R' | 'B',
+  // Triangle 1 reverse flag
+  boolean,
+  // Triangle 2 index
+  number,
+  // Triangle 2 edge type
+  'L' | 'R' | 'B',
+  // Triangle 2 reverse flag
+  boolean,
+][] = [
+  // TOP HALF-SPHERE
+  [0, 'L', false, 1, 'B', true],
+  [1, 'L', false, 2, 'B', true],
+  [2, 'L', false, 3, 'B', true],
+  [3, 'L', false, 4, 'B', true],
+  [4, 'L', false, 0, 'B', true],
+  // BOTTOM HALF-SPHERE
+  [15, 'L', false, 16, 'B', true],
+  [16, 'L', false, 17, 'B', true],
+  [17, 'L', false, 18, 'B', true],
+  [18, 'L', false, 19, 'B', true],
+  [19, 'L', false, 15, 'B', true],
+  // INNER
+  [10, 'L', false, 5, 'B', true],
+  [5, 'R', false, 11, 'B', false],
+  [11, 'L', false, 6, 'B', true],
+  [6, 'R', false, 12, 'B', false],
+  [12, 'L', false, 7, 'B', true],
+  [7, 'R', false, 13, 'B', false],
+  [13, 'L', false, 8, 'B', true],
+  [8, 'R', false, 14, 'B', false],
+  [14, 'L', false, 9, 'B', true],
+  [9, 'R', false, 10, 'B', false],
+  // TOP AND INNER
+  [0, 'R', false, 5, 'L', false],
+  [1, 'R', false, 6, 'L', false],
+  [2, 'R', false, 7, 'L', false],
+  [3, 'R', false, 8, 'L', false],
+  [4, 'R', false, 9, 'L', false],
+  // BOTTOM AND INNER
+  [15, 'R', false, 12, 'R', true],
+  [16, 'R', false, 11, 'R', true],
+  [17, 'R', false, 10, 'R', true],
+  [18, 'R', false, 14, 'R', true],
+  [19, 'R', false, 13, 'R', true],
+];
 
 const enum EdgeType {
   LEFT = 'LEFT',
@@ -162,383 +183,39 @@ type TriangleStitchDefinition = {
   reversed: boolean;
 };
 
+function lookupEdgeType(letter: 'R' | 'L' | 'B'): EdgeType {
+  switch (letter) {
+    case 'R':
+      return EdgeType.RIGHT;
+    case 'L':
+      return EdgeType.LEFT;
+    case 'B':
+      return EdgeType.BOTTOM;
+  }
+}
+
 const stitchMap: {
   tri1: TriangleStitchDefinition;
   tri2: TriangleStitchDefinition;
-}[] = [
-  {
+}[] = stitchMapCompact.map(
+  ([index1, edge1, reverse1, index2, edge2, reverse2]) => ({
     tri1: {
-      triangleIndex: 0,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
+      triangleIndex: index1,
+      edgeType: lookupEdgeType(edge1),
+      reversed: reverse1,
     },
     tri2: {
-      triangleIndex: 1,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
+      triangleIndex: index2,
+      edgeType: lookupEdgeType(edge2),
+      reversed: reverse2,
     },
-  },
-  {
-    tri1: {
-      triangleIndex: 1,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 2,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 2,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 3,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 3,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 4,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 4,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 0,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-
-  // BOTTOM HALF-SPHERE
-  {
-    tri1: {
-      triangleIndex: 15,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 16,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 16,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 17,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 17,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 18,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 18,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 19,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 19,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 15,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  // INNER
-  {
-    tri1: {
-      triangleIndex: 10,
-      edgeType: EdgeType.LEFT,
-      reversed: true,
-    },
-    tri2: {
-      triangleIndex: 5,
-      edgeType: EdgeType.BOTTOM,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 5,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 11,
-      edgeType: EdgeType.BOTTOM,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 11,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 6,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 6,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 12,
-      edgeType: EdgeType.BOTTOM,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 12,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 7,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 7,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 13,
-      edgeType: EdgeType.BOTTOM,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 13,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 8,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 8,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 14,
-      edgeType: EdgeType.BOTTOM,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 14,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 9,
-      edgeType: EdgeType.BOTTOM,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 9,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 10,
-      edgeType: EdgeType.BOTTOM,
-      reversed: false,
-    },
-  },
-  // TOP AND INNER
-  {
-    tri1: {
-      triangleIndex: 0,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 5,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 1,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 6,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 2,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 7,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 3,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 8,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 4,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 9,
-      edgeType: EdgeType.LEFT,
-      reversed: false,
-    },
-  },
-  // BOTTOM AND INNER
-  {
-    tri1: {
-      triangleIndex: 15,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 12,
-      edgeType: EdgeType.RIGHT,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 16,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 11,
-      edgeType: EdgeType.RIGHT,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 17,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 10,
-      edgeType: EdgeType.RIGHT,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 18,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 14,
-      edgeType: EdgeType.RIGHT,
-      reversed: true,
-    },
-  },
-  {
-    tri1: {
-      triangleIndex: 19,
-      edgeType: EdgeType.RIGHT,
-      reversed: false,
-    },
-    tri2: {
-      triangleIndex: 13,
-      edgeType: EdgeType.RIGHT,
-      reversed: true,
-    },
-  },
-];
+  }),
+);
 
 const tan = Math.tan(Math.PI / 6);
 const m2 = 1 / Math.sin(Math.PI / 3);
 
-export function generateIcosphere(maxLevel: number): WireframeLoadedModel {
-  const useUint16 = true;
-
+export function generateIcoHexagonPolygons(maxLevel: number) {
   const cellWidth = 1 / (maxLevel + 1);
   const halfWidth = cellWidth * 0.5;
   const side = halfWidth * m2;
@@ -765,80 +442,8 @@ export function generateIcosphere(maxLevel: number): WireframeLoadedModel {
     }
   }
 
-  const indexData = new Uint16Array(
-    allEdges.flatMap((i) => i).flatMap((i) => i),
-  );
-  const dataArray = new Float32Array(
-    allVertices.flatMap((i) => i).flatMap((i) => i),
-  );
-
   return {
-    modelName: 'icosphere',
-    type: ModelType.WIREFRAME,
-    dataBuffers: {
-      indices: {
-        bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
-        componentDimension: 1,
-        componentType: useUint16
-          ? ComponentType.UNSIGNED_SHORT
-          : ComponentType.UNSIGNED_BYTE,
-        elementsCount: indexData.length,
-        dataArray: indexData,
-      },
-      position: {
-        bufferTarget: BufferTarget.ARRAY_BUFFER,
-        componentDimension: 3,
-        componentType: ComponentType.FLOAT,
-        elementsCount: dataArray.length / 2,
-        dataArray: dataArray,
-      },
-    },
-    bounds: {
-      min: [-1, 0, 0],
-      max: [0, 1, 0],
-    },
-  };
-}
-
-export function generateIcosphere2(): WireframeLoadedModel {
-  const icoPoints = getIcosphereVerteces();
-  const icoIndexedTriangs = getIcosphereIndexedTriangles();
-
-  const verticesArray = icoPoints.flatMap((i) => i);
-
-  const edges = icoIndexedTriangs
-    .map(([p1, p2, p3]) => [p1, p2, p1, p3, p2, p3])
-    .flatMap((i) => i);
-
-  const indexData = new Uint16Array(edges);
-  const dataArray = new Float32Array(verticesArray);
-
-  const useUint16 = true;
-
-  return {
-    modelName: 'icosphere',
-    type: ModelType.WIREFRAME,
-    dataBuffers: {
-      indices: {
-        bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
-        componentDimension: 1,
-        componentType: useUint16
-          ? ComponentType.UNSIGNED_SHORT
-          : ComponentType.UNSIGNED_BYTE,
-        elementsCount: indexData.length,
-        dataArray: indexData,
-      },
-      position: {
-        bufferTarget: BufferTarget.ARRAY_BUFFER,
-        componentDimension: 3,
-        componentType: ComponentType.FLOAT,
-        elementsCount: dataArray.length / 2,
-        dataArray: dataArray,
-      },
-    },
-    bounds: {
-      min: [-1, 0, 0],
-      max: [0, 1, 0],
-    },
+    allEdges,
+    allVertices,
   };
 }

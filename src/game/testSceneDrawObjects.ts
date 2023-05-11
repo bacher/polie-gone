@@ -9,17 +9,15 @@ import {
 } from '../types/model';
 import { BufferTarget, ComponentType } from '../types/webgl';
 import type { Scene } from '../engine/sceneInterface';
-import {
-  generateHeightMapInstanced,
-  generateIcosphere,
-  generateIcosphere2,
-} from '../utils/meshGenerator';
+import { generateHeightMapInstanced } from '../utils/meshGenerator';
+import { generateIcosahedronWireFrame } from '../utils/meshGenerators/icosahedronWireFrame';
 import { initializeModel } from '../engine/initialize';
 import { ShaderProgramType } from '../shaderPrograms/types';
 import type { HeightMapInstancedProgram } from '../shaderPrograms/heightMapInstancedProgram';
 
 import { fromEuler } from './utils';
 import { applyAnimationFrame } from './animation';
+import { generateIcoHaxagonSphereWireFrame } from '../utils/meshGenerators/icoHaxagonSphereWireFrame';
 
 type Params = {
   models: Record<string, LoadedModel>;
@@ -288,14 +286,14 @@ function addUnitSphere(scene: Scene, modelData: LoadedModel): void {
 }
 
 function addIcosphere(scene: Scene) {
-  // addIcosphere1(scene);
+  addIcosphere1(scene);
   addIcosphere2(scene);
 }
 
 function addIcosphere1(scene: Scene) {
   const { glContext } = scene;
 
-  const icosphereModelData = generateIcosphere2();
+  const icosphereModelData = generateIcosahedronWireFrame();
 
   const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
     ShaderProgramType.DEFAULT,
@@ -304,9 +302,9 @@ function addIcosphere1(scene: Scene) {
   scene.addDrawObject({
     model: icosphereModel,
     transforms: {
-      translation: [0, 0, -0.5],
+      translation: [0, 0, 0],
       scale: [2, 2, 2],
-      // rotation: quat.fromEuler(quat.create(), 0, 180, 0),
+      rotation: quat.fromEuler(quat.create(), 90, 0, 0),
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
     // beforeDraw: (model, program) => {},
@@ -316,7 +314,7 @@ function addIcosphere1(scene: Scene) {
 function addIcosphere2(scene: Scene) {
   const { glContext } = scene;
 
-  const icosphereModelData = generateIcosphere(8);
+  const icosphereModelData = generateIcoHaxagonSphereWireFrame(14);
 
   const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
     ShaderProgramType.DEFAULT,
@@ -325,9 +323,9 @@ function addIcosphere2(scene: Scene) {
   scene.addDrawObject({
     model: icosphereModel,
     transforms: {
-      translation: [0, 0, -0.5],
+      translation: [0, 0, 0],
       scale: [2, 2, 2],
-      // rotation: quat.fromEuler(quat.create(), 0, 180, 0),
+      rotation: quat.fromEuler(quat.create(), 90, 0, 0),
     },
     defaultShaderProgramType: ShaderProgramType.DEFAULT,
     // beforeDraw: (model, program) => {},

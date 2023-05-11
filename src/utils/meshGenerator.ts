@@ -7,10 +7,7 @@ import {
   WireframeLoadedModel,
 } from '../types/model';
 
-export {
-  generateIcosphere,
-  generateIcosphere2,
-} from './meshGenerators/icosphere';
+export { generateIcoHexagonPolygons as generateIcosphere } from './meshGenerators/icosphere';
 
 export function generatePlain({
   dimension,
