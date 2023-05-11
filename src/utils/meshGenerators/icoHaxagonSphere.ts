@@ -5,9 +5,7 @@ import { neverCall } from '../typeHelpers';
 import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 
 export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
-  const { fragments, allVertices } = generateIcoHexagonPolygons(maxLevel);
-
-  const flatVertices = allVertices.flat();
+  const { fragments, vertices } = generateIcoHexagonPolygons(maxLevel);
 
   const verticesBuffer: number[][] = [];
   const uvBuffer: number[][] = [];
@@ -19,7 +17,7 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
     const offset = verticesBuffer.length;
 
     for (const point of fragment.points) {
-      verticesBuffer.push(flatVertices[point]);
+      verticesBuffer.push(vertices[point]);
       uvBuffer.push([fragmentIndex / fragments.length, 0]);
     }
 

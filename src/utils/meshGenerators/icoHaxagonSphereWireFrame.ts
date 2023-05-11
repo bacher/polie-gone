@@ -7,7 +7,7 @@ import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 export function generateIcoHaxagonSphereWireFrame(
   maxLevel: number,
 ): WireframeLoadedModel {
-  const { fragments, allVertices } = generateIcoHexagonPolygons(maxLevel);
+  const { fragments, vertices } = generateIcoHexagonPolygons(maxLevel);
 
   const allEdges: number[][][] = [];
 
@@ -42,7 +42,7 @@ export function generateIcoHaxagonSphereWireFrame(
   }
 
   const indexData = new Uint16Array(allEdges.flat().flat());
-  const dataArray = new Float32Array(allVertices.flat().flat());
+  const dataArray = new Float32Array(vertices.flat());
 
   return {
     modelName: 'icosphere-wireframe',

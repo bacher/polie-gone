@@ -274,7 +274,14 @@ export type Fragment = {
 const tan = Math.tan(Math.PI / 6);
 const m2 = 1 / Math.sin(Math.PI / 3);
 
-export function generateIcoHexagonPolygons(maxLevel: number) {
+type IcoHexagonPolygons = {
+  fragments: Fragment[];
+  vertices: number[][];
+};
+
+export function generateIcoHexagonPolygons(
+  maxLevel: number,
+): IcoHexagonPolygons {
   const cellWidth = 1 / (maxLevel + 1);
   const halfWidth = cellWidth * 0.5;
   const side = halfWidth * m2;
@@ -354,7 +361,7 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
   const icoPoints = getIcosphereVerteces();
   const icoIndexedTriangs = getIcosphereIndexedTriangles();
 
-  const allVertices = [];
+  const allVertices: number[][][] = [];
 
   const usePlain = false;
 
@@ -505,10 +512,18 @@ export function generateIcoHexagonPolygons(maxLevel: number) {
 
   fragmentsChunks.push(pentagons);
 
+  const fragments = fragmentsChunks.flat();
+
+  addNeighborsInfo(fragments);
+
+  console.log('fragments', fragments);
+
   // TODO: edges is not using
 
   return {
-    fragments: fragmentsChunks.flat(),
-    allVertices,
+    fragments,
+    vertices: allVertices.flat(),
   };
 }
+
+function addNeighborsInfo(fragments: Fragment[]) {}
