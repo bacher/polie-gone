@@ -32,8 +32,8 @@ export function addTestSceneDrawObjects(
     textureImages: { noiseTextureImage },
   }: Params,
 ) {
-  addMen(scene, manModelData);
-  addToilet(scene, toiletModelData);
+  // addMen(scene, manModelData);
+  // addToilet(scene, toiletModelData);
   addTerrain(scene, noiseTextureImage);
   // addUnitSphere(scene, unitSphereModelData);
 
@@ -316,7 +316,7 @@ function addIcosphere1(scene: Scene) {
 function addIcosphere2(scene: Scene) {
   const { glContext } = scene;
 
-  const icosphereModelData = generateIcoHaxagonSphereWireFrame(10);
+  const icosphereModelData = generateIcoHaxagonSphereWireFrame(12);
 
   const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
     ShaderProgramType.DEFAULT,
@@ -337,7 +337,7 @@ function addIcosphere2(scene: Scene) {
 function addIcosphere3(scene: Scene) {
   const { glContext } = scene;
 
-  const icosphereModelData = generateIcoHaxagonSphere(10);
+  const icosphereModelData = generateIcoHaxagonSphere(12);
 
   const icosphereModel = initializeModel(glContext, scene, icosphereModelData, [
     ShaderProgramType.DEFAULT,

@@ -520,8 +520,6 @@ export function generateIcoHexagonPolygons(
 
   addNeighborsInfo(fragments);
 
-  console.log('fragments', fragments);
-
   // TODO: edges is not using
 
   return {

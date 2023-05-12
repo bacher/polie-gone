@@ -1,6 +1,7 @@
 import { IndexedLoadedModel, ModelType } from '../../types/model';
 import { BufferTarget, ComponentType } from '../../types/webgl';
 import { neverCall } from '../typeHelpers';
+import { createAdaptiveIndexBuffer } from '../webgl';
 
 import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 
@@ -9,7 +10,7 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
 
   const verticesBuffer: number[][] = [];
   const uvBuffer: number[][] = [];
-  const indecesBuffer: number[][] = [];
+  const indicesBuffer: number[][] = [];
 
   let fragmentIndex = 0;
 
@@ -23,7 +24,7 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
 
     switch (fragment.fragmentType) {
       case FragmentType.HEXAGON:
-        indecesBuffer.push(
+        indicesBuffer.push(
           [offset, offset + 5, offset + 4],
           [offset, offset + 4, offset + 3],
           [offset, offset + 3, offset + 1],
@@ -31,7 +32,7 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
         );
         break;
       case FragmentType.PENTAGON:
-        indecesBuffer.push(
+        indicesBuffer.push(
           [offset, offset + 2, offset + 1],
           [offset, offset + 3, offset + 2],
           [offset, offset + 4, offset + 3],
@@ -44,9 +45,13 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
     fragmentIndex += 1;
   }
 
-  const indexData = new Uint16Array(indecesBuffer.flat());
   const dataArray = new Float32Array(verticesBuffer.flat());
   const texcoordArray = new Float32Array(uvBuffer.flat());
+
+  const indexBufferData = createAdaptiveIndexBuffer(
+    indicesBuffer.flat(),
+    dataArray.length,
+  );
 
   return {
     modelName: 'icosphere',
@@ -55,9 +60,9 @@ export function generateIcoHaxagonSphere(maxLevel: number): IndexedLoadedModel {
       indices: {
         bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
         componentDimension: 1,
-        componentType: ComponentType.UNSIGNED_SHORT,
-        elementsCount: indexData.length,
-        dataArray: indexData,
+        componentType: indexBufferData.componentType,
+        elementsCount: indexBufferData.indexData.length,
+        dataArray: indexBufferData.indexData,
       },
       position: {
         bufferTarget: BufferTarget.ARRAY_BUFFER,

@@ -15,7 +15,7 @@ export type DataBuffer = {
   componentType: ComponentType;
   componentDimension: number;
   elementsCount: number;
-  dataArray: Uint8Array | Uint16Array | Float32Array;
+  dataArray: Uint8Array | Uint16Array | Uint32Array | Float32Array;
   divisor?: number;
 };
 

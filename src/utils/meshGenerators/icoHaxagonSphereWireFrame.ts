@@ -1,6 +1,7 @@
 import { ModelType, WireframeLoadedModel } from '../../types/model';
 import { BufferTarget, ComponentType } from '../../types/webgl';
 import { neverCall } from '../typeHelpers';
+import { createAdaptiveIndexBuffer } from '../webgl';
 
 import { FragmentType, generateIcoHexagonPolygons } from './icosphere';
 
@@ -41,8 +42,12 @@ export function generateIcoHaxagonSphereWireFrame(
     }
   }
 
-  const indexData = new Uint16Array(allEdges.flat().flat());
   const dataArray = new Float32Array(vertices.flat());
+
+  const adaptiveIndexData = createAdaptiveIndexBuffer(
+    allEdges.flat().flat(),
+    dataArray.length,
+  );
 
   return {
     modelName: 'icosphere-wireframe',
@@ -51,9 +56,9 @@ export function generateIcoHaxagonSphereWireFrame(
       indices: {
         bufferTarget: BufferTarget.ELEMENT_ARRAY_BUFFER,
         componentDimension: 1,
-        componentType: ComponentType.UNSIGNED_SHORT,
-        elementsCount: indexData.length,
-        dataArray: indexData,
+        componentType: adaptiveIndexData.componentType,
+        elementsCount: adaptiveIndexData.indexData.length,
+        dataArray: adaptiveIndexData.indexData,
       },
       position: {
         bufferTarget: BufferTarget.ARRAY_BUFFER,
