@@ -12,10 +12,22 @@ import type { Position2d } from './types';
 const MOUSE_SENSITIVITY = 0.05;
 const ACCELERATION = 20;
 
+export type CameraDirection = {
+  pitch: number;
+  yaw: number;
+};
+
+export type CameraOrientation = {
+  position: vec3;
+  direction: CameraDirection;
+};
+
 export type CameraController = {
   tick: TickHandler;
   applyCameraState: () => void;
   setPosition: (pos: vec3) => void;
+  setDirection: (direction: CameraDirection) => void;
+  getState: () => CameraOrientation;
   dispose: () => void;
 };
 
@@ -173,6 +185,20 @@ export function createCameraController({
     setPosition: (pos: vec3) => {
       vec3.copy(position, pos);
       isDirty = true;
+    },
+    setDirection: ({ pitch, yaw }: { pitch: number; yaw: number }) => {
+      pitchAngle = pitch;
+      yawAngle = yaw;
+      isDirty = true;
+    },
+    getState: () => {
+      return {
+        position,
+        direction: {
+          pitch: pitchAngle,
+          yaw: yawAngle,
+        },
+      };
     },
     dispose: () => {},
   };

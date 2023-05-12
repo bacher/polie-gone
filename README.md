@@ -55,6 +55,10 @@ The main goals:
 
 ![v0.8](./screenshots/v0.8.png)
 
+- v0.8 (sphere)
+
+![v0.8 sphere](./screenshots/v0.8-sphere.png)
+
 ## Docs:
 
 - [Next and already done features](./TODO.md)

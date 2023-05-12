@@ -86,7 +86,13 @@ export async function setupGame({
     mouseController,
     movementSpeed: 2,
   });
-  cameraController.setPosition([0, 0, 2]);
+  cameraController.setPosition([
+    2.1513619422912598, 0.004043835215270519, 2.377631187438965,
+  ]);
+  cameraController.setDirection({
+    pitch: 0.005833099999999829,
+    yaw: 0.0841633000000014,
+  });
 
   const game: Game = {
     scene,

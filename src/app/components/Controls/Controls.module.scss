@@ -1,4 +1,7 @@
 .controls {
+  display: flex;
+  flex-direction: column;
+
   label {
     user-select: none;
   }

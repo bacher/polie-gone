@@ -32,8 +32,8 @@ export function addTestSceneDrawObjects(
     textureImages: { noiseTextureImage },
   }: Params,
 ) {
-  // addMen(scene, manModelData);
-  // addToilet(scene, toiletModelData);
+  addMen(scene, manModelData);
+  addToilet(scene, toiletModelData);
   addTerrain(scene, noiseTextureImage);
   // addUnitSphere(scene, unitSphereModelData);
 
